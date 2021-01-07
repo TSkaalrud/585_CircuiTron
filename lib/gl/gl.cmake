@@ -1,0 +1,17 @@
+add_library(gl INTERFACE)
+find_package(OpenGL REQUIRED)
+if(TARGET OpenGL::OpenGL)
+	target_link_libraries(gl INTERFACE OpenGL::OpenGL)
+	target_include_directories(gl INTERFACE ${CMAKE_SOURCE_DIR}/lib/gl/glvnd/)
+else()
+	FetchContent_Declare(GLEW
+		URL https://github.com/nigels-com/glew/archive/glew-2.1.0.zip
+	)
+	FetchContent_GetProperties(GLEW)
+	if(NOT glew_POPULATED)
+		FetchContent_Populate(GLEW)
+		add_subdirectory(${glew_SOURCE_DIR}/build/cmake/ EXCLUDE_FROM_ALL)
+	endif()
+	target_link_libraries(gl INTERFACE glew)
+	target_include_directories(gl INTERFACE ${CMAKE_SOURCE_DIR}/lib/gl/glew/)
+endif()

@@ -17,9 +17,10 @@ if(NOT TARGET glfw)
 		add_subdirectory(${glfw_SOURCE_DIR} EXCLUDE_FROM_ALL)
 	endif()
 endif()
+target_compile_definitions(libs INTERFACE GLFW_INCLUDE_NONE)
 target_link_libraries(libs INTERFACE glfw)
 
-# find_package(OpenGL REQUIRED)
-# target_link_libraries(libs INTERFACE OpenGL::OpenGL)
+include(lib/gl/gl.cmake)
+target_link_libraries(libs INTERFACE gl)
 
 include(lib/physx.cmake)

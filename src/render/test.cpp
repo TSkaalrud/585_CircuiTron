@@ -1,3 +1,4 @@
+#include "gl.hpp"
 #include <GLFW/glfw3.h>
 #include <cstdio>
 #include <cstdlib>
@@ -13,6 +14,11 @@ void render_test() {
 
 	GLFWwindow* window = glfwCreateWindow(1280, 720, "CircuiTron", NULL, NULL);
 	if (!window) {
+		glfwTerminate();
+		exit(EXIT_FAILURE);
+	}
+	if (loadGL(glfwGetProcAddress)) {
+		glfwDestroyWindow(window);
 		glfwTerminate();
 		exit(EXIT_FAILURE);
 	}
