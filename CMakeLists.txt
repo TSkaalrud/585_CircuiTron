@@ -10,7 +10,7 @@ set_property(TARGET circuitron PROPERTY CXX_STANDARD_REQUIRED ON)
 set_property(TARGET circuitron PROPERTY CXX_EXTENSIONS OFF)
 
 if (MSVC)
-	target_compile_options(circuitron PUBLIC /W4 /WX)
+	target_compile_options(circuitron PUBLIC /W4)
 else()
 	target_compile_options(circuitron PUBLIC -Wall -Wextra -pedantic)
 endif()
