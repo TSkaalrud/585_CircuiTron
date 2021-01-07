@@ -21,6 +21,6 @@ target_compile_definitions(libs INTERFACE GLFW_INCLUDE_NONE)
 target_link_libraries(libs INTERFACE glfw)
 
 include(lib/gl/gl.cmake)
-# target_link_libraries(libs INTERFACE gl)
+target_link_libraries(libs INTERFACE gl)
 
 # include(lib/physx.cmake)
