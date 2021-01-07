@@ -23,7 +23,7 @@ target_link_libraries(libs INTERFACE glfw)
 include(lib/gl/gl.cmake)
 target_link_libraries(libs INTERFACE gl)
 
-find_package(assimp 5.0.1 REQUIRED)
+find_package(assimp 5.0.1)
 if(assimp_FOUND)
 	target_link_libraries(libs INTERFACE ${assimp_LIBRARIES})
 	target_include_directories(libs INTERFACE ${assimp_INCLUDE_DIRS})
