@@ -22,4 +22,4 @@ target_link_libraries(libs INTERFACE glfw)
 # find_package(OpenGL REQUIRED)
 # target_link_libraries(libs INTERFACE OpenGL::OpenGL)
 
-# include(lib/physx.cmake)
+include(lib/physx.cmake)
