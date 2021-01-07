@@ -23,4 +23,4 @@ target_link_libraries(libs INTERFACE glfw)
 include(lib/gl/gl.cmake)
 target_link_libraries(libs INTERFACE gl)
 
-# include(lib/physx.cmake)
+include(lib/physx.cmake)
