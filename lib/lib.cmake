@@ -23,4 +23,21 @@ target_link_libraries(libs INTERFACE glfw)
 include(lib/gl/gl.cmake)
 target_link_libraries(libs INTERFACE gl)
 
-include(lib/physx.cmake)
+find_package(assimp 5.0.1 REQUIRED)
+if(assimp_FOUND)
+	target_link_libraries(libs INTERFACE ${assimp_LIBRARIES})
+	target_include_directories(libs INTERFACE ${assimp_INCLUDE_DIRS})
+else()
+	FetchContent_Declare(ASSIMP
+		URL https://github.com/assimp/assimp/archive/v5.0.1.zip
+	)
+	FetchContent_GetProperties(ASSIMP)
+	if(NOT assimp_POPULATED)
+		FetchContent_Populate(ASSIMP)
+		add_subdirectory(${assimp_SOURCE_DIR} EXCLUDE_FROM_ALL)
+	endif()
+
+	target_link_libraries(libs INTERFACE assimp)
+endif()
+
+# include(lib/physx.cmake)
