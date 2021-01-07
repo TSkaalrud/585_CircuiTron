@@ -3,8 +3,6 @@ if(UNIX)
 	set(CMAKE_LIBRARY_ARCHITECTURE "x86_64-linux-gnu")
 else()
 	set(TARGET_BUILD_PLATFORM "windows")
-	# SET(CMAKE_EXE_LINKER_FLAGS_PROFILE "")
-	# SET(CMAKE_EXE_LINKER_FLAGS_CHECKED "")
 endif()
 
 set(NV_USE_DEBUG_WINCRT ON CACHE BOOL "Use the debug version of the CRT")
@@ -20,6 +18,6 @@ else()
 	add_compile_options(-w)
 endif()
 
-add_subdirectory(${PHYSX_ROOT_DIR}/compiler/public externals/physx)
+add_subdirectory(${PHYSX_ROOT_DIR}/compiler/public externals/physx EXCLUDE_FROM_ALL)
 
 target_link_libraries(libs INTERFACE PhysX PhysXCommon PhysXExtensions PhysXCooking)
