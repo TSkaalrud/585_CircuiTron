@@ -17,11 +17,11 @@ void render_test() {
 		glfwTerminate();
 		exit(EXIT_FAILURE);
 	}
-	if (loadGL(glfwGetProcAddress)) {
-		glfwDestroyWindow(window);
-		glfwTerminate();
-		exit(EXIT_FAILURE);
-	}
+	// if (loadGL(glfwGetProcAddress)) {
+	// 	glfwDestroyWindow(window);
+	// 	glfwTerminate();
+	// 	exit(EXIT_FAILURE);
+	// }
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
 	}
