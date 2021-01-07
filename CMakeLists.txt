@@ -2,15 +2,19 @@ cmake_minimum_required(VERSION 3.17)
 
 project(circuitron LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
+file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_LIST_DIR}/src/*.cpp)
+add_executable(circuitron ${SOURCES})
+
+set_property(TARGET circuitron PROPERTY CXX_STANDARD 20)
+set_property(TARGET circuitron PROPERTY CXX_STANDARD_REQUIRED ON)
+set_property(TARGET circuitron PROPERTY CXX_EXTENSIONS OFF)
 
 if (MSVC)
-	add_compile_options(/W4 /WX)
+	target_compile_options(circuitron PUBLIC /W4 /WX)
 else()
-	add_compile_options(-Wall -Wextra -pedantic)
+	target_compile_options(circuitron PUBLIC -Wall -Wextra -pedantic)
 endif()
 
-file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_LIST_DIR}/src/*.cpp)
-add_executable(${PROJECT_NAME} ${SOURCES})
+include(lib/lib.cmake)
+
+target_link_libraries(circuitron libs)

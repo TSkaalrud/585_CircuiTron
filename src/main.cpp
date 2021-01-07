@@ -1,6 +1,7 @@
-#include <cstdio>
+#include "render/render.hpp"
+#include <cstring>
 
 int main() {
-	printf("Hello World!\n");
+	render_test();
 	return 0;
 }
