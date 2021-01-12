@@ -8,8 +8,8 @@
 namespace Render {
 
 // Debug code from https://learnopengl.com/In-Practice/Debugging
-void APIENTRY glDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum severity, GLsizei, const char* message,
-                            const void*) {
+void glDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum severity, GLsizei, const char* message,
+                   const void*) {
 	// ignore non-significant error/warning codes
 	if (id == 1 || id == 131169 || id == 131185 || id == 131218 || id == 131204)
 		return;
