@@ -40,6 +40,19 @@ else()
 	target_link_libraries(libs INTERFACE assimp)
 endif()
 
+find_package(glm 0.9.9.8 QUIET)
+if(NOT TARGET glm)
+	FetchContent_Declare(GLM
+		URL https://github.com/g-truc/glm/releases/download/0.9.9.8/glm-0.9.9.8.zip
+	)
+	FetchContent_GetProperties(GLM)
+	if(NOT glm_POPULATED)
+		FetchContent_Populate(GLM)
+		add_subdirectory(${glm_SOURCE_DIR} EXCLUDE_FROM_ALL)
+	endif()
+endif()
+target_link_libraries(libs INTERFACE glm)
+
 # add_subdirectory(lib/PhysX/physx EXCLUDE_FROM_ALL)
 # target_link_libraries(libs INTERFACE PhysX PhysXCommon PhysXExtensions PhysXCooking)
 # if(CMAKE_BUILD_TYPE STREQUAL "Debug")
