@@ -2,6 +2,6 @@
 #include <cstring>
 
 int main() {
-	render_test();
+	Render::render_test();
 	return 0;
 }
