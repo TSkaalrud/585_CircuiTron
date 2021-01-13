@@ -41,6 +41,7 @@ class Render {
 
 	struct Material {
 		uint shader;
+		MaterialPBR pbr;
 	};
 	std::vector<Material> materials;
 

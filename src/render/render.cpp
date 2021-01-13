@@ -2,6 +2,7 @@
 
 #include "gl.hpp"
 #include <fstream>
+#include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 #include <sstream>
 
@@ -158,14 +159,14 @@ GLuint load_shader_program(std::vector<ShaderStage> stages) {
 	return program;
 }
 
-uint Render::create_pbr_material(MaterialPBR) {
+uint Render::create_pbr_material(MaterialPBR pbr) {
 	GLuint shader =
 	    load_shader_program({{"shaders/test.vert", GL_VERTEX_SHADER}, {"shaders/test.frag", GL_FRAGMENT_SHADER}});
 	uint shaderHandle = shaders.size();
 	shaders.push_back({shader});
 
 	uint handle = materials.size();
-	materials.push_back(Material{.shader = shaderHandle});
+	materials.push_back(Material{.shader = shaderHandle, .pbr = pbr});
 	return handle;
 }
 
@@ -178,6 +179,8 @@ uint Render::create_instance() {
 void Render::instance_set_mesh(InstanceHandle instance, MeshHandle mesh) { instances[instance].model = mesh; }
 void Render::instance_set_material(InstanceHandle instance, MaterialHandle mat) { instances[instance].mat = mat; }
 
+void configure_pbr_material(MaterialPBR pbr) { glUniform4fv(0, 1, glm::value_ptr(pbr.albedo)); }
+
 void Render::run() {
 	glViewport(0, 0, width, height);
 	glClearColor(0, 0.5, 0.8, 1.0);
@@ -186,6 +189,7 @@ void Render::run() {
 	for (auto& i : instances) {
 		glUseProgram(shaders[materials[i.mat].shader].shader);
 		glBindVertexArray(meshes[i.model].vao);
+		configure_pbr_material(materials[i.mat].pbr);
 		glDrawElements(GL_TRIANGLES, meshes[i.model].count, GL_UNSIGNED_INT, 0);
 	}
 }

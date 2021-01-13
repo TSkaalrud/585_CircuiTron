@@ -22,4 +22,9 @@ add_custom_target(shaders
 )
 add_dependencies(circuitron shaders)
 
+add_custom_target(assets
+	COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/assets ${CMAKE_CURRENT_BINARY_DIR}/assets
+)
+add_dependencies(circuitron assets)
+
 target_link_libraries(circuitron libs)

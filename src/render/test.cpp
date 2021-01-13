@@ -1,3 +1,4 @@
+#include "model_import.hpp"
 #include "render.hpp"
 #include <GLFW/glfw3.h>
 #include <cstdio>
@@ -41,11 +42,13 @@ void render_test() {
 	};
 	glfwSetFramebufferSizeCallback(window, resizeCallback);
 
-	auto i = render.create_instance();
-	auto mesh = render.create_mesh({.verticies = {{{1, -1, 0}}, {{-1, -1, 0}}, {{0, 1, 0}}}, .indicies = {0, 1, 2}});
-	render.instance_set_mesh(i, mesh);
-	auto mat = render.create_pbr_material({.albedo = {1, 0, 0, 0}});
-	render.instance_set_material(i, mat);
+	// auto i = render.create_instance();
+	// auto mesh = render.create_mesh({.verticies = {{{1, -1, 0}}, {{-1, -1, 0}}, {{0, 1, 0}}}, .indicies = {0, 1, 2}});
+	// render.instance_set_mesh(i, mesh);
+	// auto mat = render.create_pbr_material({.albedo = {1, 0, 0, 0}});
+	// render.instance_set_material(i, mat);
+
+	import_scene("assets/horse.obj", render);
 
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();

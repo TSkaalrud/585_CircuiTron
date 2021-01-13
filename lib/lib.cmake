@@ -24,9 +24,8 @@ include(lib/gl/gl.cmake)
 target_link_libraries(libs INTERFACE gl)
 
 find_package(assimp 5.0.1 QUIET)
-if(assimp_FOUND)
-	target_link_libraries(libs INTERFACE ${assimp_LIBRARIES})
-	target_include_directories(libs INTERFACE ${assimp_INCLUDE_DIRS})
+if(TARGET assimp::assimp)
+	target_link_libraries(libs INTERFACE ${ASSIMP_LIBRARIES})
 else()
 	FetchContent_Declare(ASSIMP
 		URL https://github.com/assimp/assimp/archive/v5.0.1.zip
