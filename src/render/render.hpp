@@ -5,6 +5,8 @@
 
 namespace Render {
 
+typedef uint_fast32_t uint;
+
 using namespace glm;
 
 struct MeshDef {
