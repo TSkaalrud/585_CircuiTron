@@ -14,7 +14,7 @@ struct MeshDef {
 		vec3 pos;
 	};
 	std::vector<Vertex> verticies;
-	std::vector<uint> indicies;
+	std::vector<uint32_t> indicies;
 };
 struct MaterialPBR {
 	vec4 albedo;
