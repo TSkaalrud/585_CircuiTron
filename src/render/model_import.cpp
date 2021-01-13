@@ -19,7 +19,7 @@ void process_node(const aiScene* scene, const aiNode* node, Render::Render& rend
 
 void import_scene(std::string filename, Render::Render& render) {
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(filename, aiProcess_Triangulate);
+	const aiScene* scene = importer.ReadFile(filename, aiProcess_Triangulate | aiProcess_OptimizeMeshes);
 	assert(scene && !(scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE) && scene->mRootNode);
 
 	for (uint m = 0; m < scene->mNumMeshes; m++) {

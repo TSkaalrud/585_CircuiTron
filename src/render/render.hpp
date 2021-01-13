@@ -5,8 +5,6 @@
 
 namespace Render {
 
-typedef uint_fast32_t uint;
-
 using namespace glm;
 
 struct MeshDef {
@@ -27,6 +25,10 @@ typedef uint MaterialHandle;
 class Render {
   private:
 	int width, height;
+
+	uint cameraBuffer;
+	float fov = 70, near = 0.1, far = 100;
+	mat4 cameraPos;
 
 	struct Instance {
 		uint model;

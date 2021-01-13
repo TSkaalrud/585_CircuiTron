@@ -1,7 +1,11 @@
 #include "render.hpp"
 
 #include "gl.hpp"
+#include <chrono>
+#include <ctime>
 #include <fstream>
+#include <glm/ext/matrix_clip_space.hpp>
+#include <glm/ext/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 #include <sstream>
@@ -89,6 +93,11 @@ void glDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum severity,
 	std::cout << std::endl;
 }
 
+struct Camera {
+	mat4 view;
+	mat4 proj;
+};
+
 Render::Render(void (*glGetProcAddr(const char*))()) {
 	loadGL(glGetProcAddr);
 
@@ -102,6 +111,11 @@ Render::Render(void (*glGetProcAddr(const char*))()) {
 		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
 	}
 #endif
+
+	glCreateBuffers(1, &cameraBuffer);
+	glNamedBufferStorage(cameraBuffer, sizeof(Camera), nullptr, GL_DYNAMIC_STORAGE_BIT);
+
+	cameraPos = lookAt(vec3{2, 1, 2}, vec3{0, 1, 0}, vec3{0, 1, 0});
 }
 
 void Render::resize(int width, int height) {
@@ -172,7 +186,7 @@ uint Render::create_pbr_material(MaterialPBR pbr) {
 
 uint Render::create_instance() {
 	uint handle = instances.size();
-	instances.push_back(Instance());
+	instances.push_back(Instance{});
 	return handle;
 }
 
@@ -184,6 +198,22 @@ void configure_pbr_material(MaterialPBR pbr) { glUniform4fv(0, 1, glm::value_ptr
 void Render::run() {
 	glViewport(0, 0, width, height);
 	glClearColor(0, 0.5, 0.8, 1.0);
+
+	static auto start_time = std::chrono::high_resolution_clock::now();
+	auto current_time = std::chrono::high_resolution_clock::now();
+	auto seconds = std::chrono::duration_cast<std::chrono::duration<float>>(current_time - start_time).count();
+	const float dist = 2;
+
+	mat4 cameraPos = lookAt(vec3{sin(seconds) * dist, 1, cos(seconds) * dist}, vec3{0, 0.5, 0}, vec3{0, 1, 0});
+
+	Camera cam = {.view = cameraPos,
+	              .proj =
+	                  perspectiveFov(radians(fov), static_cast<float>(width), static_cast<float>(height), near, far)};
+	glNamedBufferSubData(cameraBuffer, 0, sizeof(Camera), &cam);
+	glBindBufferBase(GL_UNIFORM_BUFFER, 0, cameraBuffer);
+
+	glEnable(GL_DEPTH_TEST);
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	for (auto& i : instances) {
