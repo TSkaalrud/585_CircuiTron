@@ -4,6 +4,8 @@
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 
+typedef unsigned int uint;
+
 void process_node(const aiScene* scene, const aiNode* node, Render::Render& render) {
 	for (uint m = 0; m < node->mNumMeshes; m++) {
 		Render::InstanceHandle instance = render.create_instance();
