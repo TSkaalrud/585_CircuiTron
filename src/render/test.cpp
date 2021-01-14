@@ -44,11 +44,7 @@ void render_test() {
 	};
 	glfwSetFramebufferSizeCallback(window, resizeCallback);
 
-	// auto i = render.create_instance();
-	// auto mesh = render.create_mesh({.verticies = {{{1, -1, 0}}, {{-1, -1, 0}}, {{0, 1, 0}}}, .indicies = {0, 1, 2}});
-	// render.instance_set_mesh(i, mesh);
-	// auto mat = render.create_pbr_material({.albedo = {1, 0, 0, 0}});
-	// render.instance_set_material(i, mat);
+	render.camera_set_fov(70);
 
 	import_scene("assets/horse.obj", render);
 
@@ -60,7 +56,8 @@ void render_test() {
 		auto seconds = std::chrono::duration_cast<std::chrono::duration<float>>(current_time - start_time).count();
 		const float dist = 2;
 
-		mat4 cameraPos = lookAt(vec3{sin(seconds) * dist, 1, cos(seconds) * dist}, vec3{0, 0.5, 0}, vec3{0, 1, 0});
+		vec3 camera = {sin(seconds) * dist, 1, cos(seconds) * dist};
+		mat4 cameraPos = lookAt(camera, vec3{0, 0.5, 0}, vec3{0, 1, 0});
 
 		render.camera_set_pos(cameraPos);
 

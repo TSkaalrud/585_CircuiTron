@@ -4,6 +4,7 @@ layout(location = 0) in vec3 pos;
 layout(std140, binding = 0) uniform Camera {
 	mat4 view;
 	mat4 proj;
+	vec3 camPos;
 };
 
 void main() {
