@@ -1,8 +1,10 @@
 #include "model_import.hpp"
 #include "render.hpp"
 #include <GLFW/glfw3.h>
+#include <chrono>
 #include <cstdio>
 #include <cstdlib>
+#include <glm/ext/matrix_transform.hpp>
 
 namespace Render {
 
@@ -52,6 +54,16 @@ void render_test() {
 
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
+
+		static auto start_time = std::chrono::high_resolution_clock::now();
+		auto current_time = std::chrono::high_resolution_clock::now();
+		auto seconds = std::chrono::duration_cast<std::chrono::duration<float>>(current_time - start_time).count();
+		const float dist = 2;
+
+		mat4 cameraPos = lookAt(vec3{sin(seconds) * dist, 1, cos(seconds) * dist}, vec3{0, 0.5, 0}, vec3{0, 1, 0});
+
+		render.camera_set_pos(cameraPos);
+
 		render.run();
 		glfwSwapBuffers(window);
 	}

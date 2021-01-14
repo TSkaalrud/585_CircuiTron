@@ -66,6 +66,8 @@ class Render {
 	void instance_set_mesh(InstanceHandle, MeshHandle);
 	void instance_set_material(InstanceHandle, MaterialHandle);
 
+	void camera_set_pos(mat4 pos) { cameraPos = pos; }
+
 	void run();
 };
 
