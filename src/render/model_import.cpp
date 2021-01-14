@@ -27,7 +27,8 @@ void import_scene(std::string filename, Render::Render& render) {
 		Render::MeshDef mesh;
 		for (uint v = 0; v < importMesh->mNumVertices; v++) {
 			aiVector3D pos = importMesh->mVertices[v];
-			Render::MeshDef::Vertex vertex{.pos = {pos.x, pos.y, pos.z}};
+			aiVector3D normal = importMesh->mNormals[v];
+			Render::MeshDef::Vertex vertex{.pos = {pos.x, pos.y, pos.z}, .normal = {normal.x, normal.y, normal.z}};
 			mesh.verticies.push_back(vertex);
 		}
 		for (uint f = 0; f < importMesh->mNumFaces; f++) {

@@ -11,6 +11,7 @@ using namespace glm;
 struct MeshDef {
 	struct Vertex {
 		vec3 pos;
+		vec3 normal;
 	};
 	std::vector<Vertex> verticies;
 	std::vector<uint32_t> indicies;
