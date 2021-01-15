@@ -1,8 +1,12 @@
 #include "model_import.hpp"
 
 #include <assimp/Importer.hpp>
+#include <assimp/pbrmaterial.h>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
 namespace Render {
 
 typedef unsigned int uint;
@@ -17,16 +21,22 @@ glm::mat4 convert(const aiMatrix4x4& mat) {
 	};
 	// clang-format on
 }
+glm::vec4 convert(const aiColor4D& col) { return glm::vec4{col.r, col.g, col.b, col.a}; }
 
-void process_node(const aiScene* scene, const aiNode* node, Render& render) {
+// clang-format off
+void process_node(
+	const aiScene* scene, const aiNode* node, Render& render,
+	std::vector<MeshHandle>& meshes, std::vector<MaterialHandle>& materials) {
+	// clang-format on
+
 	for (uint m = 0; m < node->mNumMeshes; m++) {
 		InstanceHandle instance = render.create_instance();
-		render.instance_set_mesh(instance, node->mMeshes[m]);
+		render.instance_set_mesh(instance, meshes[node->mMeshes[m]]);
 		render.instance_set_material(instance, scene->mMeshes[node->mMeshes[m]]->mMaterialIndex);
 		render.instance_set_trans(instance, convert(node->mTransformation));
 	}
 	for (uint c = 0; c < node->mNumChildren; c++) {
-		process_node(scene, node->mChildren[c], render);
+		process_node(scene, node->mChildren[c], render, meshes, materials);
 	}
 }
 
@@ -35,6 +45,8 @@ void import_scene(std::string filename, Render& render) {
 	const aiScene* scene = importer.ReadFile(filename, aiProcess_Triangulate | aiProcess_OptimizeMeshes);
 	assert(scene && !(scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE) && scene->mRootNode);
 
+	std::vector<MeshHandle> meshes;
+	meshes.resize(scene->mNumMeshes);
 	for (uint m = 0; m < scene->mNumMeshes; m++) {
 		aiMesh* importMesh = scene->mMeshes[m];
 		MeshDef mesh;
@@ -51,17 +63,27 @@ void import_scene(std::string filename, Render& render) {
 			mesh.indicies.push_back(face.mIndices[1]);
 			mesh.indicies.push_back(face.mIndices[2]);
 		}
-		render.create_mesh(mesh);
+		meshes[m] = render.create_mesh(mesh);
 	}
 
+	std::vector<MaterialHandle> materials;
+	materials.resize(scene->mNumMaterials);
 	for (uint m = 0; m < scene->mNumMaterials; m++) {
 		aiMaterial* importMaterial = scene->mMaterials[m];
-		aiColor3D colour;
-		importMaterial->Get(AI_MATKEY_COLOR_DIFFUSE, colour);
-		render.create_pbr_material(MaterialPBR{.albedo = {colour.r, colour.g, colour.b, 1}});
+		aiColor4D albedoColour;
+		importMaterial->Get(AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_BASE_COLOR_FACTOR, albedoColour);
+		aiString albedoTexturePath;
+		importMaterial->GetTexture(AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_BASE_COLOR_TEXTURE, &albedoTexturePath);
+		const aiTexture* albedoTexture = scene->GetEmbeddedTexture(albedoTexturePath.data);
+		int x, y, channels;
+		auto data = stbi_load_from_memory(
+		    reinterpret_cast<stbi_uc*>(albedoTexture->pcData), albedoTexture->mWidth, &x, &y, &channels, 4);
+		auto albedoTex = render.create_texture(x, y, data);
+		materials[m] =
+		    render.create_pbr_material(MaterialPBR{.albedo = convert(albedoColour), .albedoTexture = albedoTex});
 	}
 
-	process_node(scene, scene->mRootNode, render);
+	process_node(scene, scene->mRootNode, render, meshes, materials);
 }
 
 } // namespace Render

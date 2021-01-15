@@ -20,12 +20,14 @@ struct MeshDef {
 };
 struct MaterialPBR {
 	vec4 albedo;
+	TextureHandle albedoTexture;
 };
 
 typedef uint MeshHandle;
 typedef uint InstanceHandle;
 typedef uint MaterialHandle;
 typedef uint DirLightHandle;
+typedef uint TextureHandle;
 
 class Core {
   private:
@@ -99,7 +101,9 @@ class Core {
 		return handle;
 	}
 	void dir_light_set_colour(DirLightHandle handle, vec3 colour) { dirLights[handle].colour = colour; }
-	void dir_light_set_dir(DirLightHandle handle, vec3 dir) { dirLights[handle].dir = dir; }
+	void dir_light_set_dir(DirLightHandle handle, vec3 dir) { dirLights[handle].dir = normalize(dir); }
+
+	TextureHandle create_texture(int width, int height, void* data);
 
 	void run();
 };

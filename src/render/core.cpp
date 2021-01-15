@@ -82,13 +82,21 @@ GLuint load_shader_program(std::vector<ShaderStage> stages) {
 
 uint Core::create_pbr_material(MaterialPBR pbr) {
 	GLuint shader =
-	    load_shader_program({{"shaders/test.vert", GL_VERTEX_SHADER}, {"shaders/test.frag", GL_FRAGMENT_SHADER}});
+	    load_shader_program({{"shaders/default.vert", GL_VERTEX_SHADER}, {"shaders/pbr.frag", GL_FRAGMENT_SHADER}});
 	uint shaderHandle = shaders.size();
 	shaders.push_back({shader});
 
 	uint handle = materials.size();
 	materials.push_back(Material{.shader = shaderHandle, .pbr = pbr});
 	return handle;
+}
+
+uint Core::create_texture(int width, int height, void* data) {
+	GLuint texture;
+	glCreateTextures(GL_TEXTURE_2D, 1, &texture);
+	glTextureStorage2D(texture, 1, GL_RGBA8, width, height);
+	glTextureSubImage2D(texture, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data);
+	return texture;
 }
 
 void configure_pbr_material(MaterialPBR pbr) { glUniform4fv(1, 1, value_ptr(pbr.albedo)); }
