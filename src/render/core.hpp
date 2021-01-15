@@ -18,16 +18,17 @@ struct MeshDef {
 	std::vector<Vertex> verticies;
 	std::vector<uint32_t> indicies;
 };
-struct MaterialPBR {
-	vec4 albedo;
-	TextureHandle albedoTexture;
-};
 
 typedef uint MeshHandle;
 typedef uint InstanceHandle;
 typedef uint MaterialHandle;
 typedef uint DirLightHandle;
 typedef uint TextureHandle;
+
+struct MaterialPBR {
+	vec4 albedo;
+	TextureHandle albedoTexture;
+};
 
 class Core {
   private:

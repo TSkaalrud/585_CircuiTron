@@ -53,7 +53,7 @@ endif()
 target_link_libraries(libs INTERFACE glm)
 
 add_subdirectory(lib/PhysX/physx EXCLUDE_FROM_ALL)
-target_link_libraries(libs INTERFACE PhysX PhysXCommon PhysXExtensions PhysXCooking)
+target_link_libraries(libs INTERFACE PhysX PhysXCommon PhysXExtensions PhysXCooking PhysXFoundation PhysXTask)
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 	target_link_libraries(libs INTERFACE PhysXPvdSDK)
 endif()
