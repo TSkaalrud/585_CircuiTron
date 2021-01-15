@@ -52,6 +52,21 @@ if(NOT TARGET glm)
 endif()
 target_link_libraries(libs INTERFACE glm)
 
+
+# Fuck it
+if(NOT DEFINED CMAKE_EXE_LINKER_FLAGS_CHECKED)
+	set(CMAKE_EXE_LINKER_FLAGS_CHECKED "")
+endif()
+if(NOT DEFINED CMAKE_EXE_LINKER_FLAGS_PROFILE)
+	set(CMAKE_EXE_LINKER_FLAGS_PROFILE "")
+endif()
+if(NOT DEFINED CMAKE_SHARED_LINKER_FLAGS_CHECKED)
+	set(CMAKE_SHARED_LINKER_FLAGS_CHECKED "")
+endif()
+if(NOT DEFINED CMAKE_SHARED_LINKER_FLAGS_PROFILE)
+	set(CMAKE_SHARED_LINKER_FLAGS_PROFILE "")
+endif()
+
 add_subdirectory(lib/PhysX/physx EXCLUDE_FROM_ALL)
 target_link_libraries(libs INTERFACE PhysX PhysXCommon PhysXExtensions PhysXCooking PhysXFoundation PhysXTask)
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
