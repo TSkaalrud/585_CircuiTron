@@ -2,10 +2,6 @@ name: CMake
 
 on: [push]
 
-env:
-  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
-  BUILD_TYPE: Release
-
 jobs:
   build:
     # The CMake configure and build commands are platform agnostic and should work equally
@@ -19,6 +15,10 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-20.04, windows-latest]
+        build_type: [Release, Debug]
+    env:
+      # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+      BUILD_TYPE: ${{ matrix.build_type }}
 
     steps:
     - uses: actions/checkout@v2
