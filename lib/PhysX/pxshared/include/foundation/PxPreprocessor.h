@@ -440,7 +440,8 @@ General defines
 	(reinterpret_cast<size_t>(&reinterpret_cast<Class*>(PX_OFFSETOF_BASE)->Member) - size_t(PX_OFFSETOF_BASE))
 
 // Fuck it
-#if !defined(NDEBUG) && !defined(_DEBUG)
+#if !defined(NDEBUG) ^ defined(_DEBUG)
+#undef NDEBUG
 #define _DEBUG
 #endif
 
