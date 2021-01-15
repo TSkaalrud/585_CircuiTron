@@ -3,4 +3,8 @@
 #include "render.hpp"
 #include <string>
 
-void import_scene(std::string filename, Render::Render&);
+namespace Render {
+
+void import_scene(std::string filename, Render&);
+
+}

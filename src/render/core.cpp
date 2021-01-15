@@ -21,6 +21,10 @@ Core::Core(void (*glGetProcAddr(const char*))()) {
 
 	glCreateBuffers(1, &cameraBuffer);
 	glNamedBufferStorage(cameraBuffer, sizeof(Camera), nullptr, GL_DYNAMIC_STORAGE_BIT);
+	glBindBufferBase(GL_UNIFORM_BUFFER, 0, cameraBuffer);
+
+	glCreateBuffers(1, &dirLightBuffer);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, dirLightBuffer);
 }
 
 template <class T> size_t vector_size(const std::vector<T>& vec) { return sizeof(T) * vec.size(); }
@@ -87,25 +91,19 @@ uint Core::create_pbr_material(MaterialPBR pbr) {
 	return handle;
 }
 
-uint Core::create_instance() {
-	uint handle = instances.size();
-	instances.push_back(Instance{});
-	return handle;
-}
-
-void configure_pbr_material(MaterialPBR pbr) { glUniform4fv(0, 1, glm::value_ptr(pbr.albedo)); }
+void configure_pbr_material(MaterialPBR pbr) { glUniform4fv(1, 1, value_ptr(pbr.albedo)); }
 
 void Core::run() {
 	glViewport(0, 0, width, height);
 	glClearColor(0, 0.5, 0.8, 1.0);
 
-	vec3 cameraDeduce = vec3(inverse(cameraPos) * vec4{0, 0, 0, 1});
 	Camera cam = {
 	    .view = cameraPos,
 	    .proj = infinitePerspective(fov, static_cast<float>(width) / static_cast<float>(height), 0.1f),
-	    .cameraPos = cameraDeduce};
+	    .cameraPos = vec3(inverse(cameraPos) * vec4{0, 0, 0, 1})};
 	glNamedBufferSubData(cameraBuffer, 0, sizeof(Camera), &cam);
-	glBindBufferBase(GL_UNIFORM_BUFFER, 0, cameraBuffer);
+
+	glNamedBufferData(dirLightBuffer, vector_size(dirLights), dirLights.data(), GL_DYNAMIC_DRAW);
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_DEPTH_CLAMP);
@@ -116,6 +114,9 @@ void Core::run() {
 		glUseProgram(shaders[materials[i.mat].shader].shader);
 		glBindVertexArray(meshes[i.model].vao);
 		configure_pbr_material(materials[i.mat].pbr);
+
+		glUniformMatrix4fv(0, 1, false, value_ptr(i.trans));
+
 		glDrawElements(GL_TRIANGLES, meshes[i.model].count, GL_UNSIGNED_INT, 0);
 	}
 }

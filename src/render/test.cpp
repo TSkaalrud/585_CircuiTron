@@ -46,7 +46,9 @@ void render_test() {
 
 	render.camera_set_fov(50);
 
-	import_scene("assets/horse.obj", render);
+	import_scene("assets/DamagedHelmet.glb", render);
+
+	render.create_dir_light({1, 1, 1}, {0, 1, 0});
 
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
@@ -54,10 +56,10 @@ void render_test() {
 		static auto start_time = std::chrono::high_resolution_clock::now();
 		auto current_time = std::chrono::high_resolution_clock::now();
 		auto seconds = std::chrono::duration_cast<std::chrono::duration<float>>(current_time - start_time).count();
-		const float dist = 2;
+		const float dist = 3;
 
-		vec3 camera = {sin(seconds) * dist, 1.5, cos(seconds) * dist};
-		mat4 cameraPos = lookAt(camera, vec3{0, 0.6, 0}, vec3{0, 1, 0});
+		vec3 camera = {sin(seconds) * dist, 0, cos(seconds) * dist};
+		mat4 cameraPos = lookAt(camera, vec3{0, 0, 0}, vec3{0, 1, 0});
 
 		render.camera_set_pos(cameraPos);
 
