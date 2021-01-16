@@ -66,6 +66,7 @@ if(NOT TARGET glm)
 endif()
 target_link_libraries(libs INTERFACE glm)
 
+set(PX_GENERATE_STATIC_LIBRARIES TRUE)
 add_subdirectory(lib/PhysX/physx EXCLUDE_FROM_ALL)
 target_link_libraries(libs INTERFACE PhysX PhysXCommon PhysXExtensions PhysXCooking PhysXFoundation PhysXTask)
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
