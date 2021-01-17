@@ -48,8 +48,9 @@ void render_test() {
 
 	import_scene("assets/DamagedHelmet.glb", render);
 
-	render.create_dir_light({1, 1, 1}, {1, 1, 1});
-	render.create_dir_light({0.2, 0.2, 0.2}, {-1, -1, -1});
+	render.create_dir_light({1, 1, 0.8}, {-1, 1, -1});
+	render.create_dir_light({0.8, 0.8, 1}, {1, 1, 1});
+	render.create_dir_light({0.5, 0.5, 0.5}, {0, -1, 0});
 	// render.create_dir_light({1, 1, 1}, {0, 1, 0});
 	// render.create_dir_light({1, 0, 0}, {1, -1, 0});
 	// render.create_dir_light({1, 1, 0}, {0, -1, -1});

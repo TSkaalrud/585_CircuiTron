@@ -26,13 +26,8 @@ typedef uint MaterialHandle;
 typedef uint DirLightHandle;
 typedef uint TextureHandle;
 
-struct MaterialPBR {
-	vec4 albedo;
-	TextureHandle albedoTexture;
-};
-
 class Core {
-  private:
+  protected:
 	int width, height;
 
 	GLuint cameraBuffer;
@@ -54,7 +49,8 @@ class Core {
 
 	struct Material {
 		uint shader;
-		MaterialPBR pbr;
+		GLuint uniform;
+		std::vector<TextureHandle> textures;
 	};
 	std::vector<Material> materials;
 
@@ -82,7 +78,6 @@ class Core {
 	}
 
 	MeshHandle create_mesh(MeshDef);
-	uint create_pbr_material(MaterialPBR);
 	InstanceHandle create_instance() {
 		uint handle = instances.size();
 		instances.push_back(Instance{});

@@ -2,10 +2,8 @@
 
 #include "debug.hpp"
 #include "gl.hpp"
-#include <fstream>
 #include <glm/gtc/integer.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <sstream>
 
 namespace Render {
 
@@ -57,44 +55,6 @@ uint Core::create_mesh(MeshDef def) {
 	return handle;
 }
 
-struct ShaderStage {
-	std::string filename;
-	GLenum shaderType;
-};
-GLuint load_shader_program(std::vector<ShaderStage> stages) {
-	auto program = glCreateProgram();
-
-	for (auto stage : stages) {
-		std::string shaderCode;
-		std::ifstream shaderFile;
-		shaderFile.open(stage.filename);
-		std::stringstream shaderStream;
-		shaderStream << shaderFile.rdbuf();
-		shaderFile.close();
-		shaderCode = shaderStream.str();
-		const char* cShaderCode = shaderCode.c_str();
-		auto shader = glCreateShader(stage.shaderType);
-		glShaderSource(shader, 1, &cShaderCode, 0);
-		glCompileShader(shader);
-		glAttachShader(program, shader);
-	}
-
-	glLinkProgram(program);
-
-	return program;
-}
-
-uint Core::create_pbr_material(MaterialPBR pbr) {
-	GLuint shader =
-		load_shader_program({{"shaders/default.vert", GL_VERTEX_SHADER}, {"shaders/pbr.frag", GL_FRAGMENT_SHADER}});
-	uint shaderHandle = shaders.size();
-	shaders.push_back({shader});
-
-	uint handle = materials.size();
-	materials.push_back(Material{.shader = shaderHandle, .pbr = pbr});
-	return handle;
-}
-
 uint Core::create_texture(int width, int height, void* data) {
 	GLuint texture;
 	glCreateTextures(GL_TEXTURE_2D, 1, &texture);
@@ -102,11 +62,6 @@ uint Core::create_texture(int width, int height, void* data) {
 	glTextureSubImage2D(texture, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data);
 	glGenerateTextureMipmap(texture);
 	return texture;
-}
-
-void configure_pbr_material(MaterialPBR pbr) {
-	glUniform4fv(1, 1, value_ptr(pbr.albedo));
-	glBindTextures(1, 1, &pbr.albedoTexture);
 }
 
 void Core::run() {
@@ -129,7 +84,11 @@ void Core::run() {
 	for (auto& i : instances) {
 		glUseProgram(shaders[materials[i.mat].shader].shader);
 		glBindVertexArray(meshes[i.model].vao);
-		configure_pbr_material(materials[i.mat].pbr);
+
+		auto material = materials[i.mat];
+		// glUniform4fv(1, 1, value_ptr(material.pbr.albedo));
+		glBindBufferBase(GL_UNIFORM_BUFFER, 1, material.uniform);
+		glBindTextures(4, material.textures.size(), material.textures.data());
 
 		glUniformMatrix4fv(0, 1, false, value_ptr(i.trans));
 

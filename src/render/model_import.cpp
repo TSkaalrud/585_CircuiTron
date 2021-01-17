@@ -40,6 +40,17 @@ void process_node(
 	}
 }
 
+TextureHandle
+loadTexture(aiMaterial* material, aiTextureType type, unsigned index, const aiScene* scene, Render& render) {
+	aiString texturePath;
+	material->GetTexture(type, index, &texturePath);
+	const aiTexture* texture = scene->GetEmbeddedTexture(texturePath.data);
+	int x, y, channels;
+	auto data =
+		stbi_load_from_memory(reinterpret_cast<stbi_uc*>(texture->pcData), texture->mWidth, &x, &y, &channels, 4);
+	return render.create_texture(x, y, data);
+}
+
 void import_scene(std::string filename, Render& render) {
 	Assimp::Importer importer;
 	const aiScene* scene =
@@ -75,13 +86,9 @@ void import_scene(std::string filename, Render& render) {
 		aiMaterial* importMaterial = scene->mMaterials[m];
 		aiColor4D albedoColour;
 		importMaterial->Get(AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_BASE_COLOR_FACTOR, albedoColour);
-		aiString albedoTexturePath;
-		importMaterial->GetTexture(AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_BASE_COLOR_TEXTURE, &albedoTexturePath);
-		const aiTexture* albedoTexture = scene->GetEmbeddedTexture(albedoTexturePath.data);
-		int x, y, channels;
-		auto data = stbi_load_from_memory(
-			reinterpret_cast<stbi_uc*>(albedoTexture->pcData), albedoTexture->mWidth, &x, &y, &channels, 4);
-		auto albedoTex = render.create_texture(x, y, data);
+		TextureHandle albedoTex =
+			loadTexture(importMaterial, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_BASE_COLOR_TEXTURE, scene, render);
+
 		materials[m] =
 			render.create_pbr_material(MaterialPBR{.albedo = convert(albedoColour), .albedoTexture = albedoTex});
 	}
