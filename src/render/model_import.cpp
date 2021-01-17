@@ -42,7 +42,8 @@ void process_node(
 
 void import_scene(std::string filename, Render& render) {
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(filename, aiProcess_Triangulate | aiProcess_OptimizeMeshes);
+	const aiScene* scene =
+		importer.ReadFile(filename, aiProcess_Triangulate | aiProcess_OptimizeMeshes | aiProcess_FlipUVs);
 	assert(scene && !(scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE) && scene->mRootNode);
 
 	std::vector<MeshHandle> meshes;
@@ -53,7 +54,9 @@ void import_scene(std::string filename, Render& render) {
 		for (uint v = 0; v < importMesh->mNumVertices; v++) {
 			aiVector3D pos = importMesh->mVertices[v];
 			aiVector3D normal = importMesh->mNormals[v];
-			MeshDef::Vertex vertex{.pos = {pos.x, pos.y, pos.z}, .normal = {normal.x, normal.y, normal.z}};
+			aiVector3D uv = importMesh->mTextureCoords[0][v];
+			MeshDef::Vertex vertex{
+				.pos = {pos.x, pos.y, pos.z}, .normal = {normal.x, normal.y, normal.z}, .uv = {uv.x, uv.y}};
 			mesh.verticies.push_back(vertex);
 		}
 		for (uint f = 0; f < importMesh->mNumFaces; f++) {
@@ -77,10 +80,10 @@ void import_scene(std::string filename, Render& render) {
 		const aiTexture* albedoTexture = scene->GetEmbeddedTexture(albedoTexturePath.data);
 		int x, y, channels;
 		auto data = stbi_load_from_memory(
-		    reinterpret_cast<stbi_uc*>(albedoTexture->pcData), albedoTexture->mWidth, &x, &y, &channels, 4);
+			reinterpret_cast<stbi_uc*>(albedoTexture->pcData), albedoTexture->mWidth, &x, &y, &channels, 4);
 		auto albedoTex = render.create_texture(x, y, data);
 		materials[m] =
-		    render.create_pbr_material(MaterialPBR{.albedo = convert(albedoColour), .albedoTexture = albedoTex});
+			render.create_pbr_material(MaterialPBR{.albedo = convert(albedoColour), .albedoTexture = albedoTex});
 	}
 
 	process_node(scene, scene->mRootNode, render, meshes, materials);

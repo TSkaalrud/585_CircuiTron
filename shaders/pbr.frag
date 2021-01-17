@@ -1,8 +1,10 @@
 #version 450 core
 layout(location = 0) in vec3 pos;
 layout(location = 1) in vec3 norm;
+layout(location = 2) in vec2 uv;
 
-layout(location = 1) uniform vec4 albedo;
+layout(location = 1) uniform vec4 albedoCol;
+layout(binding = 1) uniform sampler2D albedoTex;
 
 layout(std140, binding = 0) uniform Camera {
 	mat4 view;
@@ -25,6 +27,7 @@ vec3 normal = normalize(norm);
 vec3 colour = vec3(0, 0, 0);
 
 vec3 light(Light light) {
+	vec4 albedo = albedoCol * texture(albedoTex, uv);
 	return albedo.rgb * light.colour * max(dot(light.dir, normal),0.0);
 }
 void main() {

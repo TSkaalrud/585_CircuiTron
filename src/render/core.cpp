@@ -45,6 +45,9 @@ uint Core::create_mesh(MeshDef def) {
 	glVertexArrayVertexBuffer(vao, 1, vertex_buffer, 0, sizeof(MeshDef::Vertex));
 	glEnableVertexArrayAttrib(vao, 1);
 	glVertexArrayAttribFormat(vao, 1, 3, GL_FLOAT, false, offsetof(MeshDef::Vertex, normal));
+	glVertexArrayVertexBuffer(vao, 2, vertex_buffer, 0, sizeof(MeshDef::Vertex));
+	glEnableVertexArrayAttrib(vao, 2);
+	glVertexArrayAttribFormat(vao, 2, 2, GL_FLOAT, false, offsetof(MeshDef::Vertex, uv));
 
 	glVertexArrayElementBuffer(vao, index_buffer);
 
@@ -82,7 +85,7 @@ GLuint load_shader_program(std::vector<ShaderStage> stages) {
 
 uint Core::create_pbr_material(MaterialPBR pbr) {
 	GLuint shader =
-	    load_shader_program({{"shaders/default.vert", GL_VERTEX_SHADER}, {"shaders/pbr.frag", GL_FRAGMENT_SHADER}});
+		load_shader_program({{"shaders/default.vert", GL_VERTEX_SHADER}, {"shaders/pbr.frag", GL_FRAGMENT_SHADER}});
 	uint shaderHandle = shaders.size();
 	shaders.push_back({shader});
 
@@ -99,16 +102,19 @@ uint Core::create_texture(int width, int height, void* data) {
 	return texture;
 }
 
-void configure_pbr_material(MaterialPBR pbr) { glUniform4fv(1, 1, value_ptr(pbr.albedo)); }
+void configure_pbr_material(MaterialPBR pbr) {
+	glUniform4fv(1, 1, value_ptr(pbr.albedo));
+	glBindTextures(1, 1, &pbr.albedoTexture);
+}
 
 void Core::run() {
 	glViewport(0, 0, width, height);
 	glClearColor(0, 0.5, 0.8, 1.0);
 
 	Camera cam = {
-	    .view = cameraPos,
-	    .proj = infinitePerspective(fov, static_cast<float>(width) / static_cast<float>(height), 0.1f),
-	    .cameraPos = vec3(inverse(cameraPos) * vec4{0, 0, 0, 1})};
+		.view = cameraPos,
+		.proj = infinitePerspective(fov, static_cast<float>(width) / static_cast<float>(height), 0.1f),
+		.cameraPos = vec3(inverse(cameraPos) * vec4{0, 0, 0, 1})};
 	glNamedBufferSubData(cameraBuffer, 0, sizeof(Camera), &cam);
 
 	glNamedBufferData(dirLightBuffer, vector_size(dirLights), dirLights.data(), GL_DYNAMIC_DRAW);

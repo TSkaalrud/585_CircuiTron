@@ -14,6 +14,7 @@ struct MeshDef {
 	struct Vertex {
 		vec3 pos;
 		vec3 normal;
+		vec2 uv;
 	};
 	std::vector<Vertex> verticies;
 	std::vector<uint32_t> indicies;
