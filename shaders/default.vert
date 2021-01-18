@@ -11,16 +11,15 @@ layout(std140, binding = 0) uniform Camera {
 	vec3 camPos;
 };
 
+vec4 worldPos = model * vec4(pos, 1);
+
 layout(location = 0) out vec3 outWorldPos;
 layout(location = 1) out vec3 outNormal;
 layout(location = 2) out vec2 outuv;
 
 void main() {
-	vec4 worldPos = model * vec4(pos, 1);
-	outWorldPos = vec3(worldPos);
 	gl_Position = proj * view * worldPos;
-
+	outWorldPos = vec3(worldPos);
 	outNormal = mat3(transpose(inverse(model))) * normal;
-
 	outuv = uv;
 }

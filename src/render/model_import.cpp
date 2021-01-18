@@ -86,11 +86,21 @@ void import_scene(std::string filename, Render& render) {
 		aiMaterial* importMaterial = scene->mMaterials[m];
 		aiColor4D albedoColour;
 		importMaterial->Get(AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_BASE_COLOR_FACTOR, albedoColour);
+		float metal;
+		importMaterial->Get(AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLIC_FACTOR, metal);
+		float rough;
+		importMaterial->Get(AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_ROUGHNESS_FACTOR, rough);
 		TextureHandle albedoTex =
 			loadTexture(importMaterial, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_BASE_COLOR_TEXTURE, scene, render);
+		TextureHandle metalRoughTex =
+			loadTexture(importMaterial, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLICROUGHNESS_TEXTURE, scene, render);
 
-		materials[m] =
-			render.create_pbr_material(MaterialPBR{.albedo = convert(albedoColour), .albedoTexture = albedoTex});
+		materials[m] = render.create_pbr_material(MaterialPBR{
+			.albedo = convert(albedoColour),
+			.metal = metal,
+			.rough = rough,
+			.albedoTexture = albedoTex,
+			.metalRoughTexture = metalRoughTex});
 	}
 
 	process_node(scene, scene->mRootNode, render, meshes, materials);

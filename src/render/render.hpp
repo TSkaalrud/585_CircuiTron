@@ -6,10 +6,13 @@ namespace Render {
 
 struct MaterialPBR {
 	vec4 albedo;
+	float metal;
+	float rough;
 	// No textures above here
 	// Only textures below here
 	// albedo must be first
 	TextureHandle albedoTexture;
+	TextureHandle metalRoughTexture;
 };
 
 class Render : public Core {
