@@ -5,9 +5,9 @@
 namespace Render {
 
 struct MaterialPBR {
-	vec4 albedo;
-	float metal;
-	float rough;
+	vec4 albedoFactor;
+	float metalFactor;
+	float roughFactor;
 	// No textures above here
 	// Only textures below here
 	// albedo must be first

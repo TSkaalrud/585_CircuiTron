@@ -58,7 +58,7 @@ uint Core::create_mesh(MeshDef def) {
 uint Core::create_texture(int width, int height, void* data) {
 	GLuint texture;
 	glCreateTextures(GL_TEXTURE_2D, 1, &texture);
-	glTextureStorage2D(texture, log2(min(width, height)), GL_RGBA8, width, height);
+	glTextureStorage2D(texture, log2<int>(min(width, height)), GL_RGBA8, width, height);
 	glTextureSubImage2D(texture, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data);
 	glGenerateTextureMipmap(texture);
 	return texture;
@@ -86,7 +86,6 @@ void Core::run() {
 		glBindVertexArray(meshes[i.model].vao);
 
 		auto material = materials[i.mat];
-		// glUniform4fv(1, 1, value_ptr(material.pbr.albedo));
 		glBindBufferBase(GL_UNIFORM_BUFFER, 1, material.uniform);
 		glBindTextures(4, material.textures.size(), material.textures.data());
 

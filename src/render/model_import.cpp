@@ -84,21 +84,21 @@ void import_scene(std::string filename, Render& render) {
 	materials.resize(scene->mNumMaterials);
 	for (uint m = 0; m < scene->mNumMaterials; m++) {
 		aiMaterial* importMaterial = scene->mMaterials[m];
-		aiColor4D albedoColour;
-		importMaterial->Get(AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_BASE_COLOR_FACTOR, albedoColour);
-		float metal;
-		importMaterial->Get(AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLIC_FACTOR, metal);
-		float rough;
-		importMaterial->Get(AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_ROUGHNESS_FACTOR, rough);
+		aiColor4D albedoFactor;
+		importMaterial->Get(AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_BASE_COLOR_FACTOR, albedoFactor);
+		float metalFactor;
+		importMaterial->Get(AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLIC_FACTOR, metalFactor);
+		float roughFactor;
+		importMaterial->Get(AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_ROUGHNESS_FACTOR, roughFactor);
 		TextureHandle albedoTex =
 			loadTexture(importMaterial, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_BASE_COLOR_TEXTURE, scene, render);
 		TextureHandle metalRoughTex =
 			loadTexture(importMaterial, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLICROUGHNESS_TEXTURE, scene, render);
 
 		materials[m] = render.create_pbr_material(MaterialPBR{
-			.albedo = convert(albedoColour),
-			.metal = metal,
-			.rough = rough,
+			.albedoFactor = convert(albedoFactor),
+			.metalFactor = metalFactor,
+			.roughFactor = roughFactor,
 			.albedoTexture = albedoTex,
 			.metalRoughTexture = metalRoughTex});
 	}
