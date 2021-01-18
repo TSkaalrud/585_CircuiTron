@@ -58,7 +58,7 @@ uint Core::create_mesh(MeshDef def) {
 uint Core::create_texture(int width, int height, void* data) {
 	GLuint texture;
 	glCreateTextures(GL_TEXTURE_2D, 1, &texture);
-	glTextureStorage2D(texture, log2<int>(min(width, height)), GL_RGBA8, width, height);
+	glTextureStorage2D(texture, glm::log2(min(width, height)), GL_RGBA8, width, height);
 	glTextureSubImage2D(texture, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data);
 	glGenerateTextureMipmap(texture);
 	return texture;
