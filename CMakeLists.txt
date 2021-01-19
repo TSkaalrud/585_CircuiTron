@@ -4,6 +4,7 @@ project(circuitron LANGUAGES CXX)
 
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_LIST_DIR}/src/*.cpp)
 add_executable(circuitron ${SOURCES})
+target_include_directories(circuitron PRIVATE ${CMAKE_CURRENT_LIST_DIR}/src/)
 install(TARGETS circuitron DESTINATION .)
 
 set_property(TARGET circuitron PROPERTY CXX_STANDARD 20)

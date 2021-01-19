@@ -1,4 +1,5 @@
 #include "model_import.hpp"
+#include "profiler/profiler.hpp"
 #include "render.hpp"
 #include <GLFW/glfw3.h>
 #include <chrono>
@@ -33,6 +34,7 @@ void render_test() {
 		exit(EXIT_FAILURE);
 	}
 	glfwMakeContextCurrent(window);
+	// glfwSwapInterval(0);
 
 	Render render(glfwGetProcAddress);
 	glfwSetWindowUserPointer(window, &render);
@@ -62,7 +64,10 @@ void render_test() {
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init(NULL);
 
+	Profiler profiler;
+
 	while (!glfwWindowShouldClose(window)) {
+		profiler.newFrame("Setup");
 		glfwPollEvents();
 
 		ImGui_ImplOpenGL3_NewFrame();
@@ -74,18 +79,23 @@ void render_test() {
 			auto current_time = std::chrono::high_resolution_clock::now();
 			auto seconds = std::chrono::duration_cast<std::chrono::duration<float>>(current_time - start_time).count();
 			const float dist = 3;
+			const float speed = 1;
 
-			vec3 camera = {sin(seconds) * dist, 0, cos(seconds) * dist};
+			vec3 camera = {sin(seconds * speed) * dist, 0, cos(seconds * speed) * dist};
 			mat4 cameraPos = lookAt(camera, vec3{0, 0, 0}, vec3{0, 1, 0});
 
 			render.camera_set_pos(cameraPos);
 		}
 
+		profiler.section("Rendering");
 		render.run();
 
+		profiler.section("imgui");
+		profiler.draw();
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
+		profiler.section("Present");
 		glfwSwapBuffers(window);
 	}
 	glfwDestroyWindow(window);
