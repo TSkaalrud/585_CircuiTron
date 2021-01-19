@@ -5,6 +5,9 @@
 #include <cstdio>
 #include <cstdlib>
 #include <glm/ext/matrix_transform.hpp>
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
 
 namespace Render {
 
@@ -53,20 +56,36 @@ void render_test() {
 	render.create_dir_light({2, 2, 2}, {-1, 0, 1});
 	render.create_dir_light({1, 1, 1}, {0, 0, -1});
 
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGui::StyleColorsDark();
+	ImGui_ImplGlfw_InitForOpenGL(window, true);
+	ImGui_ImplOpenGL3_Init(NULL);
+
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
 
-		static auto start_time = std::chrono::high_resolution_clock::now();
-		auto current_time = std::chrono::high_resolution_clock::now();
-		auto seconds = std::chrono::duration_cast<std::chrono::duration<float>>(current_time - start_time).count();
-		const float dist = 3;
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
 
-		vec3 camera = {sin(seconds) * dist, 0, cos(seconds) * dist};
-		mat4 cameraPos = lookAt(camera, vec3{0, 0, 0}, vec3{0, 1, 0});
+		{
+			static auto start_time = std::chrono::high_resolution_clock::now();
+			auto current_time = std::chrono::high_resolution_clock::now();
+			auto seconds = std::chrono::duration_cast<std::chrono::duration<float>>(current_time - start_time).count();
+			const float dist = 3;
 
-		render.camera_set_pos(cameraPos);
+			vec3 camera = {sin(seconds) * dist, 0, cos(seconds) * dist};
+			mat4 cameraPos = lookAt(camera, vec3{0, 0, 0}, vec3{0, 1, 0});
+
+			render.camera_set_pos(cameraPos);
+		}
 
 		render.run();
+
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
 		glfwSwapBuffers(window);
 	}
 	glfwDestroyWindow(window);
