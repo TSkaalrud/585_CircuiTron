@@ -72,3 +72,7 @@ target_link_libraries(libs INTERFACE PhysX PhysXCommon PhysXExtensions PhysXCook
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 	target_link_libraries(libs INTERFACE PhysXPvdSDK)
 endif()
+
+add_library(stb INTERFACE)
+target_include_directories(stb INTERFACE lib/stb/)
+target_link_libraries(libs INTERFACE stb)
