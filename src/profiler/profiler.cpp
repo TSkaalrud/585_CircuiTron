@@ -1,5 +1,5 @@
 #include "profiler.hpp"
-#include <imgui.h>
+#include "imgui.h"
 
 Profiler::Profiler() {}
 
@@ -22,6 +22,6 @@ void Profiler::draw() {
 		ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_AlwaysAutoResize |
 			ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoSavedSettings);
 
-	ImGui::Text("%.1f fps", fps);
+	ImGui::Text("%.1f fps", ImGui::GetIO().Framerate);
 	ImGui::End();
 }
