@@ -5,7 +5,7 @@
 
 class Profiler {
   private:
-	std::chrono::system_clock::time_point frameStart;
+	std::chrono::high_resolution_clock::time_point frameStart;
 	float fps;
 
   public:
