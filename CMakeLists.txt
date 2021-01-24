@@ -11,7 +11,7 @@ set_property(TARGET circuitron PROPERTY CXX_STANDARD 20)
 set_property(TARGET circuitron PROPERTY CXX_STANDARD_REQUIRED ON)
 set_property(TARGET circuitron PROPERTY CXX_EXTENSIONS OFF)
 
-set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
 if (MSVC)
 	target_compile_options(circuitron PUBLIC /W4)
