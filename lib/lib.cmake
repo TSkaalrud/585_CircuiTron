@@ -83,6 +83,9 @@ target_link_libraries(physx INTERFACE
 	PhysXExtensions_static_64
 	PhysXFoundation_64
 )
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+	target_link_libraries(libs INTERFACE PhysXPvdSDK_static_64)
+endif()
 target_link_libraries(libs INTERFACE physx)
 
 add_library(stb INTERFACE)
