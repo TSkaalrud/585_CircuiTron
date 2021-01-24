@@ -1,6 +1,9 @@
 #include "render/render.hpp"
 
+extern int snippetMain();
+
 int main() {
-	Render::render_test();
-	return 0;
+
+	//Render::render_test();
+	return snippetMain();
 }
