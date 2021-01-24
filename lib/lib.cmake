@@ -66,12 +66,24 @@ if(NOT TARGET glm)
 endif()
 target_link_libraries(libs INTERFACE glm)
 
-set(PX_GENERATE_STATIC_LIBRARIES TRUE)
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/PhysX/physx EXCLUDE_FROM_ALL)
-target_link_libraries(libs INTERFACE PhysX PhysXCommon PhysXExtensions PhysXCooking PhysXFoundation PhysXTask)
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-	target_link_libraries(libs INTERFACE PhysXPvdSDK)
-endif()
+# set(PX_GENERATE_STATIC_LIBRARIES TRUE)
+# add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/PhysX/physx EXCLUDE_FROM_ALL)
+# target_link_libraries(libs INTERFACE PhysX PhysXCommon PhysXExtensions PhysXCooking PhysXFoundation PhysXTask)
+# if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+# 	target_link_libraries(libs INTERFACE PhysXPvdSDK)
+# endif()
+
+add_library(physx INTERFACE)
+target_include_directories(physx INTERFACE ${CMAKE_CURRENT_LIST_DIR}/physx/include/)
+target_link_directories(physx INTERFACE ${CMAKE_CURRENT_LIST_DIR}/physx/${CMAKE_SYSTEM_NAME}/${CMAKE_BUILD_TYPE}/)
+target_link_libraries(physx INTERFACE 
+	PhysX_64
+	PhysXCommon_64
+	PhysXCooking_64
+	PhysXExtensions_static_64
+	PhysXFoundation_64
+)
+target_link_libraries(libs INTERFACE physx)
 
 add_library(stb INTERFACE)
 target_include_directories(stb INTERFACE ${CMAKE_CURRENT_LIST_DIR}/stb/)
