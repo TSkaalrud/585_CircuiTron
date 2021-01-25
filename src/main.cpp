@@ -1,4 +1,6 @@
 #include "render/render.hpp"
+#include "entities/entity.cpp"
+#include "entities/entity_manager.cpp"
 #include <GLFW/glfw3.h>
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
@@ -67,6 +69,15 @@ int main(int argc, char* argv[]) {
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init(NULL);
 
+
+	//Create entitity manager
+	EntityManager e_manager;	
+
+	//Setting up fixed timestep, change to variable later!
+	float timestep = 1;
+	float time = 0;
+
+
 	// Loop will continue until "X" on window is clicked.
 	// We may want more complex closing behaviour
 	while (!glfwWindowShouldClose(window)) {
@@ -93,6 +104,14 @@ int main(int argc, char* argv[]) {
 		// 5. (Optional) Add lights
 		// Future API to simplify some of these steps?
 		// Probably done by various entities once that system is functional?
+
+		//Fixed timestep for now
+		time += timestep;
+		
+		//Calls the update function all of the entities added to the manager
+		//Maybe not needed for now
+		e_manager.update(time);
+
 
 		// Draw the framerate counter
 		// This is replaced by Profiler if I get it working better
