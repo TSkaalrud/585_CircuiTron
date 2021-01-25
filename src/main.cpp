@@ -1,9 +1,15 @@
 #include "render/render.hpp"
-
-extern int snippetMain();
+#include "physics/physics.h"
 
 int main() {
 
 	//Render::render_test();
-	return snippetMain();
+	initPhysics(true);
+
+	while (1) {
+		stepPhysics(true);
+	}
+	cleanupPhysics(true);
+
+	return 0;
 }

@@ -12,6 +12,7 @@
 	}
 
 
+
 using namespace physx;
 
 PxDefaultAllocator gAllocator;
@@ -27,7 +28,7 @@ PxMaterial* gMaterial = NULL;
 
 PxPvd* gPvd = NULL;
 
-PxReal stackZ = 10.0f;
+//PxReal stackZ = 10.0f;
 
 void initPhysics(bool interactive) {
 	gFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, gAllocator, gErrorCallback);
@@ -55,6 +56,7 @@ void initPhysics(bool interactive) {
 
 	PxRigidStatic* groundPlane = PxCreatePlane(*gPhysics, PxPlane(0, 1, 0, 0), *gMaterial);
 	gScene->addActor(*groundPlane);
+	printf("Physics initialized.");
 }
 
 void stepPhysics(bool /*interactive*/) {
@@ -75,20 +77,5 @@ void cleanupPhysics(bool /*interactive*/) {
 	}
 	PX_RELEASE(gFoundation);
 
-	printf("SnippetHelloWorld done.\n");
-}
-
-int snippetMain() {
-#ifdef RENDER_SNIPPET
-	extern void renderLoop();
-	renderLoop();
-#else
-	static const PxU32 frameCount = 100;
-	initPhysics(false);
-	for (PxU32 i = 0; i < frameCount; i++)
-		stepPhysics(false);
-	cleanupPhysics(false);
-#endif
-
-	return 0;
+	printf("Physics cleaned up.\n");
 }
