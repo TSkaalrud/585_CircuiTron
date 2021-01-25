@@ -62,9 +62,7 @@ target_link_libraries(physx INTERFACE
 	PhysXExtensions_static_64
 	PhysXFoundation_64
 )
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-	target_link_libraries(libs INTERFACE PhysXPvdSDK_static_64)
-endif()
+target_link_libraries(physx INTERFACE PhysXPvdSDK_static_64)
 target_link_libraries(libs INTERFACE physx)
 if(UNIX)
 file(GLOB_RECURSE SOS CONFIGURE_DEPENDS ${CMAKE_CURRENT_LIST_DIR}/physx/${CMAKE_SYSTEM_NAME}/${CMAKE_BUILD_TYPE}/*.dll)
