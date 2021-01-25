@@ -2,6 +2,7 @@
 #include "entities/entity_manager.hpp"
 #include "render/render.hpp"
 #include "render/render_test.hpp"
+#include "physics/physics.h"
 #include <GLFW/glfw3.h>
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
@@ -78,6 +79,9 @@ int main(int argc, char* argv[]) {
 	e_manager.addEntity(render_test);
 	// }
 
+	//initialize physics
+	initPhysics(true);
+
 	// Loop will continue until "X" on window is clicked.
 	// We may want more complex closing behaviour
 	while (!glfwWindowShouldClose(window)) {
@@ -92,6 +96,8 @@ int main(int argc, char* argv[]) {
 		// input();
 
 		// simulate();
+		stepPhysics(true);
+
 		// Fixed timestep for now
 		time += timestep;
 
