@@ -5,6 +5,7 @@
 #include "render.hpp"
 #include <chrono>
 #include <glm/ext/matrix_transform.hpp>
+#include <imgui.h>
 
 namespace Render {
 
@@ -36,6 +37,11 @@ class RenderTest : public Entity {
 		mat4 cameraPos = lookAt(camera, vec3{0, 0, 0}, vec3{0, 1, 0});
 
 		render.camera_set_pos(cameraPos);
+
+		ImGui::Begin("Note", nullptr, 0);
+		ImGui::Text("Helmet model credit to: https://github.com/KhronosGroup/glTF-Sample-Models\nOnly for testing "
+					"purposes. Will not be used in the final game.");
+		ImGui::End();
 	}
 };
 } // namespace Render
