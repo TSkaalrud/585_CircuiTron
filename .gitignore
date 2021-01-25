@@ -12,3 +12,5 @@ _deps
 /.vscode/
 /build/
 /.vs/
+/out/
+CMakeSettings.json

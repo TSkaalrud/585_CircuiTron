@@ -1,19 +1,5 @@
 include(FetchContent)
 
-# Fuck it
-if(NOT DEFINED CMAKE_EXE_LINKER_FLAGS_CHECKED)
-	set(CMAKE_EXE_LINKER_FLAGS_CHECKED "")
-endif()
-if(NOT DEFINED CMAKE_EXE_LINKER_FLAGS_PROFILE)
-	set(CMAKE_EXE_LINKER_FLAGS_PROFILE "")
-endif()
-if(NOT DEFINED CMAKE_SHARED_LINKER_FLAGS_CHECKED)
-	set(CMAKE_SHARED_LINKER_FLAGS_CHECKED "")
-endif()
-if(NOT DEFINED CMAKE_SHARED_LINKER_FLAGS_PROFILE)
-	set(CMAKE_SHARED_LINKER_FLAGS_PROFILE "")
-endif()
-
 add_library(libs INTERFACE)
 
 find_package(glfw3 3.3.2 QUIET)
@@ -66,11 +52,25 @@ if(NOT TARGET glm)
 endif()
 target_link_libraries(libs INTERFACE glm)
 
-set(PX_GENERATE_STATIC_LIBRARIES TRUE)
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/PhysX/physx EXCLUDE_FROM_ALL)
-target_link_libraries(libs INTERFACE PhysX PhysXCommon PhysXExtensions PhysXCooking PhysXFoundation PhysXTask)
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-	target_link_libraries(libs INTERFACE PhysXPvdSDK)
+add_library(physx INTERFACE)
+target_include_directories(physx INTERFACE ${CMAKE_CURRENT_LIST_DIR}/physx/include/)
+target_link_directories(physx INTERFACE ${CMAKE_CURRENT_LIST_DIR}/physx/${CMAKE_SYSTEM_NAME}/${CMAKE_BUILD_TYPE}/)
+target_link_libraries(physx INTERFACE 
+	PhysX_64
+	PhysXCommon_64
+	PhysXCooking_64
+	PhysXExtensions_static_64
+	PhysXFoundation_64
+)
+target_link_libraries(physx INTERFACE PhysXPvdSDK_static_64)
+target_link_libraries(libs INTERFACE physx)
+if(UNIX)
+file(GLOB_RECURSE SOS CONFIGURE_DEPENDS ${CMAKE_CURRENT_LIST_DIR}/physx/${CMAKE_SYSTEM_NAME}/${CMAKE_BUILD_TYPE}/*.dll)
+install(FILES ${SOS} DESTINATION .)
+else()
+file(GLOB_RECURSE DLLS CONFIGURE_DEPENDS ${CMAKE_CURRENT_LIST_DIR}/physx/${CMAKE_SYSTEM_NAME}/${CMAKE_BUILD_TYPE}/*.dll)
+file(COPY ${DLLS} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+install(FILES ${DLLS} DESTINATION .)
 endif()
 
 add_library(stb INTERFACE)
