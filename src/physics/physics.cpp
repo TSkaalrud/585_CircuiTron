@@ -56,7 +56,7 @@ void initPhysics(bool interactive) {
 
 	PxRigidStatic* groundPlane = PxCreatePlane(*gPhysics, PxPlane(0, 1, 0, 0), *gMaterial);
 	gScene->addActor(*groundPlane);
-	printf("Physics initialized.");
+	printf("Physics initialized.\n");
 }
 
 void stepPhysics(bool /*interactive*/) {
