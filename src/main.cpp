@@ -74,7 +74,7 @@ int main(int argc, char* argv[]) {
 	EntityManager e_manager;	
 
 	//Setting up fixed timestep, change to variable later!
-	float timestep = 1;
+	float timestep = 1/60;
 	float time = 0;
 
 

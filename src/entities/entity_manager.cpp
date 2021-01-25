@@ -3,7 +3,10 @@
 
 EntityManager::EntityManager() {}
 
-void EntityManager::addEntity(Entity* e) { entities.push_back(e); }
+void EntityManager::addEntity(Entity* e) { 
+	entities.push_back(e);
+	e->enter();
+}
 
 void EntityManager::update(float dTime) {
 	for (int i = 0; i < entities.size(); i++) {
