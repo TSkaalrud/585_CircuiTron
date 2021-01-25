@@ -1,6 +1,7 @@
-#include "render/render.hpp"
 #include "entities/entity.hpp"
 #include "entities/entity_manager.hpp"
+#include "render/render.hpp"
+#include "render/render_test.hpp"
 #include <GLFW/glfw3.h>
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
@@ -11,10 +12,6 @@ int main(int argc, char* argv[]) {
 	// Read in the command line args
 	std::vector<std::string> args;
 	args.assign(argv, argv + argc);
-	// I still want the render test for now.
-	if (args.size() > 1 && args.at(1) == "view") {
-		Render::render_test();
-	}
 
 	// GLFW Init
 	// Print GLFW errors
@@ -69,14 +66,17 @@ int main(int argc, char* argv[]) {
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init(NULL);
 
+	// Create entitity manager
+	EntityManager e_manager;
 
-	//Create entitity manager
-	EntityManager e_manager;	
-
-	//Setting up fixed timestep, change to variable later!
-	float timestep = 1/60;
+	// Setting up fixed timestep, change to variable later!
+	float timestep = 1 / 60;
 	float time = 0;
 
+	// if (args.size() > 1 && args.at(1) == "view") {
+	Render::RenderTest* render_test = new Render::RenderTest(render);
+	e_manager.addEntity(render_test);
+	// }
 
 	// Loop will continue until "X" on window is clicked.
 	// We may want more complex closing behaviour
@@ -99,7 +99,6 @@ int main(int argc, char* argv[]) {
 		// Maybe not needed for now
 		e_manager.update(time);
 
-
 		// sound();
 
 		// Probably want to combine all this into a render()
@@ -112,7 +111,6 @@ int main(int argc, char* argv[]) {
 		// 5. (Optional) Add lights
 		// Future API to simplify some of these steps?
 		// Probably done by various entities once that system is functional?
-
 
 		// Draw the framerate counter
 		// This is replaced by Profiler if I get it working better
