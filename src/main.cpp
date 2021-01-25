@@ -92,6 +92,14 @@ int main(int argc, char* argv[]) {
 		// input();
 
 		// simulate();
+		// Fixed timestep for now
+		time += timestep;
+
+		// Calls the update function all of the entities added to the manager
+		// Maybe not needed for now
+		e_manager.update(time);
+
+
 		// sound();
 
 		// Probably want to combine all this into a render()
@@ -104,13 +112,6 @@ int main(int argc, char* argv[]) {
 		// 5. (Optional) Add lights
 		// Future API to simplify some of these steps?
 		// Probably done by various entities once that system is functional?
-
-		//Fixed timestep for now
-		time += timestep;
-		
-		//Calls the update function all of the entities added to the manager
-		//Maybe not needed for now
-		e_manager.update(time);
 
 
 		// Draw the framerate counter
