@@ -1,7 +1,8 @@
-#pragma once
+#include "entity.hpp"
 
-class Entity {
-  public:
-	virtual void draw() = 0;
-	virtual void update(float dTime) = 0;
-};
+Entity::Entity() {}
+
+void Entity::draw() {}
+
+void Entity::update(float dTime) {}
+

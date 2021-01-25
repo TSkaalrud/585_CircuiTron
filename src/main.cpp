@@ -1,6 +1,6 @@
 #include "render/render.hpp"
-#include "entities/entity.cpp"
-#include "entities/entity_manager.cpp"
+#include "entities/entity.hpp"
+#include "entities/entity_manager.hpp"
 #include <GLFW/glfw3.h>
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
