@@ -22,8 +22,8 @@ class RenderTest : public Entity {
 
 		float pi = glm::pi<float>();
 		render.create_dir_light({pi, pi, pi}, {1, 1, 1});
-		render.create_dir_light({2, 2, 2}, {-1, 0, 1});
-		render.create_dir_light({1, 1, 1}, {0, 0, -1});
+		render.create_dir_light({1, 1, 1}, {-1, 0, 1});
+		render.create_dir_light({0.5, 0.5, 0.5}, {0, 0, -1});
 	}
 
 	void update(float deltaTime) override {
@@ -37,11 +37,6 @@ class RenderTest : public Entity {
 		mat4 cameraPos = lookAt(camera, vec3{0, 0, 0}, vec3{0, 1, 0});
 
 		render.camera_set_pos(cameraPos);
-
-		ImGui::Begin("Note", nullptr, 0);
-		ImGui::Text("Helmet model credit to: https://github.com/KhronosGroup/glTF-Sample-Models\nOnly for testing "
-					"purposes. Will not be used in the final game.");
-		ImGui::End();
 	}
 };
 } // namespace Render

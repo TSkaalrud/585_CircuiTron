@@ -47,8 +47,8 @@ loadTexture(aiMaterial* material, aiTextureType type, unsigned index, const aiSc
 	const aiTexture* texture = scene->GetEmbeddedTexture(texturePath.data);
 	int x, y, channels;
 	auto data =
-		stbi_load_from_memory(reinterpret_cast<stbi_uc*>(texture->pcData), texture->mWidth, &x, &y, &channels, 4);
-	return render.create_texture(x, y, data);
+		stbi_load_from_memory(reinterpret_cast<stbi_uc*>(texture->pcData), texture->mWidth, &x, &y, &channels, 0);
+	return render.create_texture(x, y, channels, type == aiTextureType_DIFFUSE, data);
 }
 
 void import_scene(std::string filename, Render& render) {

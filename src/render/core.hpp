@@ -100,7 +100,7 @@ class Core {
 	void dir_light_set_colour(DirLightHandle handle, vec3 colour) { dirLights[handle].colour = colour; }
 	void dir_light_set_dir(DirLightHandle handle, vec3 dir) { dirLights[handle].dir = normalize(dir); }
 
-	TextureHandle create_texture(int width, int height, void* data);
+	TextureHandle create_texture(int width, int height, int channels, bool srgb, void* data);
 
 	void run();
 };

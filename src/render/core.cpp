@@ -18,6 +18,8 @@ Core::Core(void (*glGetProcAddr(const char*))()) {
 
 	loadDebugger();
 
+	glEnable(GL_FRAMEBUFFER_SRGB);
+
 	glCreateBuffers(1, &cameraBuffer);
 	glNamedBufferStorage(cameraBuffer, sizeof(Camera), nullptr, GL_DYNAMIC_STORAGE_BIT);
 	glBindBufferBase(GL_UNIFORM_BUFFER, 0, cameraBuffer);
@@ -55,18 +57,39 @@ uint Core::create_mesh(MeshDef def) {
 	return handle;
 }
 
-uint Core::create_texture(int width, int height, void* data) {
+uint Core::create_texture(int width, int height, int channels, bool srgb, void* data) {
 	GLuint texture;
+	GLenum format, internalformat;
+	switch (channels) {
+	case 1:
+		format = GL_RED;
+		internalformat = GL_R8;
+		break;
+	case 2:
+		format = GL_RG;
+		internalformat = GL_RG8;
+		break;
+	case 3:
+		format = GL_RGB;
+		internalformat = srgb ? GL_SRGB8 : GL_RGB8;
+		break;
+	case 4:
+		format = GL_RGBA;
+		internalformat = srgb ? GL_SRGB8_ALPHA8 : GL_RGBA8;
+		break;
+	}
+	if (srgb) {
+	}
 	glCreateTextures(GL_TEXTURE_2D, 1, &texture);
-	glTextureStorage2D(texture, glm::log2(min(width, height)), GL_RGBA8, width, height);
-	glTextureSubImage2D(texture, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data);
+	glTextureStorage2D(texture, glm::log2(min(width, height)), internalformat, width, height);
+	glTextureSubImage2D(texture, 0, 0, 0, width, height, format, GL_UNSIGNED_BYTE, data);
 	glGenerateTextureMipmap(texture);
 	return texture;
 }
 
 void Core::run() {
 	glViewport(0, 0, width, height);
-	glClearColor(0, 0.5, 0.8, 1.0);
+	glClearColor(0, 0.2, 0.5, 1.0);
 
 	Camera cam = {
 		.view = cameraPos,
