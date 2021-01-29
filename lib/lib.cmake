@@ -55,14 +55,14 @@ target_link_libraries(libs INTERFACE glm)
 add_library(physx INTERFACE)
 target_include_directories(physx INTERFACE ${CMAKE_CURRENT_LIST_DIR}/physx/include/)
 target_link_directories(physx INTERFACE ${CMAKE_CURRENT_LIST_DIR}/physx/${CMAKE_SYSTEM_NAME}/${CMAKE_BUILD_TYPE}/)
+target_link_libraries(physx INTERFACE PhysXPvdSDK_static_64)
 target_link_libraries(physx INTERFACE 
+	PhysXExtensions_static_64
 	PhysX_64
 	PhysXCommon_64
 	PhysXCooking_64
-	PhysXExtensions_static_64
 	PhysXFoundation_64
 )
-target_link_libraries(physx INTERFACE PhysXPvdSDK_static_64)
 target_link_libraries(libs INTERFACE physx)
 if(UNIX)
 file(GLOB_RECURSE SOS CONFIGURE_DEPENDS ${CMAKE_CURRENT_LIST_DIR}/physx/${CMAKE_SYSTEM_NAME}/${CMAKE_BUILD_TYPE}/*.dll)
