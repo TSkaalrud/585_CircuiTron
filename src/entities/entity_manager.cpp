@@ -3,9 +3,9 @@
 
 EntityManager::EntityManager() {}
 
-void EntityManager::addEntity(Entity* e) { 
-	entities.push_back(e);
-	e->enter();
+void EntityManager::addEntity(std::unique_ptr<Entity> e) {
+	entities.push_back(std::move(e));
+	entities.back()->enter();
 }
 
 void EntityManager::update(float dTime) {

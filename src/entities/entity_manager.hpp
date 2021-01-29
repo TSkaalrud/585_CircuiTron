@@ -1,14 +1,15 @@
 #include "entity.hpp"
+#include <memory>
 #include <vector>
 
 class EntityManager {
   private:
-	std::vector<Entity*> entities;
+	std::vector<std::unique_ptr<Entity>> entities;
 
   public:
 	EntityManager();
 
-	void addEntity(Entity* e);
+	void addEntity(std::unique_ptr<Entity> e);
 
 	void update(float dTime);
 };

@@ -1,8 +1,8 @@
 #include "entities/entity.hpp"
 #include "entities/entity_manager.hpp"
+#include "physics/physics.h"
 #include "render/render.hpp"
 #include "render/render_test.hpp"
-#include "physics/physics.h"
 #include <GLFW/glfw3.h>
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
@@ -75,11 +75,10 @@ int main(int argc, char* argv[]) {
 	float time = 0;
 
 	// if (args.size() > 1 && args.at(1) == "view") {
-	Render::RenderTest* render_test = new Render::RenderTest(render);
-	e_manager.addEntity(render_test);
+	e_manager.addEntity(std::make_unique<Render::RenderTest>(render));
 	// }
 
-	//initialize physics
+	// initialize physics
 	initPhysics(true);
 
 	// Loop will continue until "X" on window is clicked.
