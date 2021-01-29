@@ -33,6 +33,7 @@ else()
 	FetchContent_GetProperties(ASSIMP)
 	if(NOT assimp_POPULATED)
 		FetchContent_Populate(ASSIMP)
+		set(ASSIMP_NO_EXPORT ON CACHE BOOL "" FORCE)
 		add_subdirectory(${assimp_SOURCE_DIR} EXCLUDE_FROM_ALL)
 	endif()
 
