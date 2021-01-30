@@ -21,6 +21,7 @@ glm::mat4 convert(const aiMatrix4x4& mat) {
 	};
 	// clang-format on
 }
+glm::vec3 convert(const aiColor3D& col) { return glm::vec3{col.r, col.g, col.b}; }
 glm::vec4 convert(const aiColor4D& col) { return glm::vec4{col.r, col.g, col.b, col.a}; }
 
 // clang-format off
@@ -86,21 +87,26 @@ void import_scene(std::string filename, Render& render) {
 		aiMaterial* importMaterial = scene->mMaterials[m];
 		aiColor4D albedoFactor;
 		importMaterial->Get(AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_BASE_COLOR_FACTOR, albedoFactor);
+		TextureHandle albedoTex =
+			loadTexture(importMaterial, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_BASE_COLOR_TEXTURE, scene, render);
 		float metalFactor;
 		importMaterial->Get(AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLIC_FACTOR, metalFactor);
 		float roughFactor;
 		importMaterial->Get(AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_ROUGHNESS_FACTOR, roughFactor);
-		TextureHandle albedoTex =
-			loadTexture(importMaterial, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_BASE_COLOR_TEXTURE, scene, render);
 		TextureHandle metalRoughTex =
 			loadTexture(importMaterial, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLICROUGHNESS_TEXTURE, scene, render);
+		aiColor3D emissiveFactor;
+		importMaterial->Get(AI_MATKEY_COLOR_EMISSIVE, emissiveFactor);
+		TextureHandle emissiveTexture = loadTexture(importMaterial, aiTextureType_EMISSIVE, 0, scene, render);
 
 		materials[m] = render.create_pbr_material(MaterialPBR{
 			.albedoFactor = convert(albedoFactor),
+			.albedoTexture = albedoTex,
 			.metalFactor = metalFactor,
 			.roughFactor = roughFactor,
-			.albedoTexture = albedoTex,
-			.metalRoughTexture = metalRoughTex});
+			.metalRoughTexture = metalRoughTex,
+			.emissiveFactor = convert(emissiveFactor),
+			.emissiveTexture = emissiveTexture});
 	}
 
 	process_node(scene, scene->mRootNode, render, meshes, materials);

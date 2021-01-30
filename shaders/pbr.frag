@@ -5,6 +5,7 @@ layout(location = 2) in vec2 uv;
 
 layout(binding = 4) uniform sampler2D albedoTex;
 layout(binding = 5) uniform sampler2D metalRoughTex;
+layout(binding = 6) uniform sampler2D emissiveTexture;
 
 layout(std140, binding = 0) uniform Camera {
 	mat4 view;
@@ -13,7 +14,8 @@ layout(std140, binding = 0) uniform Camera {
 };
 
 layout(std140, binding = 1) uniform Material {
-	vec4 albedoCol;
+	vec4 albedoFactor;
+	vec3 emissiveFactor;
 	float metalFactor;
 	float roughFactor;
 };
@@ -28,14 +30,15 @@ layout(std430, binding = 1) readonly buffer DirLights {
 
 out vec4 outColour;
 
-vec3 wo = normalize(camPos - pos);
-vec3 normal = normalize(norm);
-vec3 colour = vec3(0, 0, 0);
-
-vec4 albedo = albedoCol * texture(albedoTex, uv);
+vec4 albedo = albedoFactor * texture(albedoTex, uv);
 vec4 metalRough = texture(metalRoughTex, uv);
 float metallic = metalFactor * metalRough.b;
 float roughness = roughFactor * metalRough.g;
+vec3 emissive = emissiveFactor * texture(emissiveTexture, uv).rgb;
+
+vec3 wo = normalize(camPos - pos);
+vec3 normal = normalize(norm);
+vec3 colour = emissive;
 
 const float pi = 3.1415927;
 

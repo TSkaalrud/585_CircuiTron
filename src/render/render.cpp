@@ -35,7 +35,12 @@ GLuint load_shader_program(std::vector<ShaderStage> stages) {
 
 	return program;
 }
-
+struct _PBR {
+	vec4 albedoFactor;
+	vec3 emissiveFactor;
+	float metalFactor;
+	float roughFactor;
+};
 MaterialHandle Render::create_pbr_material(MaterialPBR pbr) {
 	GLuint shader =
 		load_shader_program({{"shaders/default.vert", GL_VERTEX_SHADER}, {"shaders/pbr.frag", GL_FRAGMENT_SHADER}});
@@ -44,15 +49,15 @@ MaterialHandle Render::create_pbr_material(MaterialPBR pbr) {
 
 	GLuint uniform;
 	glCreateBuffers(1, &uniform);
-	glNamedBufferStorage(uniform, offsetof(MaterialPBR, albedoTexture), &pbr, 0);
+	_PBR _pbr = {
+		.albedoFactor = pbr.albedoFactor,
+		.emissiveFactor = pbr.emissiveFactor,
+		.metalFactor = pbr.metalFactor,
+		.roughFactor = pbr.roughFactor,
+	};
+	glNamedBufferStorage(uniform, sizeof(_PBR), &_pbr, 0);
 
-	// Scary memcpy stuff
-	// It's probably fine
-	// I will regret doing this
-	const int textureSize = sizeof(MaterialPBR) - offsetof(MaterialPBR, albedoTexture);
-	std::vector<TextureHandle> textures;
-	textures.resize(textureSize / sizeof(TextureHandle));
-	memcpy(textures.data(), &pbr.albedoTexture, textureSize);
+	std::vector<TextureHandle> textures = {pbr.albedoTexture, pbr.metalRoughTexture, pbr.emissiveTexture};
 
 	uint handle = materials.size();
 	materials.push_back(Material{.shader = shaderHandle, .uniform = uniform, .textures = textures});

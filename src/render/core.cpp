@@ -78,10 +78,9 @@ uint Core::create_texture(int width, int height, int channels, bool srgb, void* 
 		internalformat = srgb ? GL_SRGB8_ALPHA8 : GL_RGBA8;
 		break;
 	}
-	if (srgb) {
-	}
 	glCreateTextures(GL_TEXTURE_2D, 1, &texture);
 	glTextureStorage2D(texture, glm::log2(min(width, height)), internalformat, width, height);
+	glTextureParameterf(texture, GL_TEXTURE_MAX_ANISOTROPY, INFINITY);
 	glTextureSubImage2D(texture, 0, 0, 0, width, height, format, GL_UNSIGNED_BYTE, data);
 	glGenerateTextureMipmap(texture);
 	return texture;
@@ -101,6 +100,7 @@ void Core::run() {
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_DEPTH_CLAMP);
+	glEnable(GL_CULL_FACE);
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
