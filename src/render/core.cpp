@@ -25,7 +25,9 @@ Core::Core(void (*glGetProcAddr(const char*))()) {
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, dirLightBuffer);
 
 	glCreateTextures(GL_TEXTURE_2D_ARRAY, 1, &dirLightShadow);
-	glTextureStorage3D(dirLightShadow, 1, GL_DEPTH_COMPONENT32, lightmapSize, lightmapSize, 8);
+	glTextureStorage3D(dirLightShadow, 1, GL_DEPTH_COMPONENT32F, lightmapSize, lightmapSize, 8);
+	glTextureParameteri(dirLightShadow, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
+	glTextureParameteri(dirLightShadow, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
 }
 
 template <class T> size_t vector_size(const std::vector<T>& vec) { return sizeof(T) * vec.size(); }
@@ -110,7 +112,7 @@ void Core::run() {
 	glEnable(GL_DEPTH_CLAMP);
 	glEnable(GL_CULL_FACE);
 
-	for (int i = 0; i < dirLights.size(); i++) {
+	for (size_t i = 0; i < dirLights.size(); i++) {
 		GLuint framebuffer;
 		glCreateFramebuffers(1, &framebuffer);
 		glNamedFramebufferTextureLayer(framebuffer, GL_DEPTH_ATTACHMENT, dirLightShadow, 0, i);

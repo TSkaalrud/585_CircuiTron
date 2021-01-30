@@ -21,7 +21,7 @@ class RenderTest : public Entity {
 		import_scene("assets/Sponza.glb", render);
 
 		float pi = glm::pi<float>();
-		render.create_dir_light({pi, pi, pi}, {1, 1, 0});
+		render.create_dir_light({pi, pi, pi}, {1, 1, 0.1});
 		// render.create_dir_light({1, 1, 1}, {-1, 0, 1});
 		// render.create_dir_light({0.5, 0.5, 0.5}, {0, 0, -1});
 	}
@@ -31,7 +31,7 @@ class RenderTest : public Entity {
 		auto current_time = std::chrono::high_resolution_clock::now();
 		auto seconds = std::chrono::duration_cast<std::chrono::duration<float>>(current_time - start_time).count();
 		const float dist = 7;
-		const float speed = 0.1;
+		const float speed = 1;
 
 		vec3 camera = {sin(seconds * speed) * dist, 15, cos(seconds * speed) * dist};
 		mat4 cameraPos = lookAt(camera, vec3{0, 5, 0}, vec3{0, 1, 0});

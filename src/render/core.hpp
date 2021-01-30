@@ -111,7 +111,7 @@ class Core {
 		dirLights[handle].shadowMapTrans = ortho(
 											   -lightmapCoverage, lightmapCoverage, -lightmapCoverage, lightmapCoverage,
 											   -lightmapCoverage, lightmapCoverage) *
-										   lookAt(vec3{0, 0, 0}, -dirLights[handle].dir, vec3{0, 1, 0});
+			lookAt(vec3{0, 0, 0}, -dirLights[handle].dir, vec3{0, 1, 0});
 	}
 
 	TextureHandle create_texture(int width, int height, int channels, bool srgb, void* data);

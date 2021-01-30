@@ -3,7 +3,7 @@ layout(location = 0) in vec3 pos;
 layout(location = 1) in vec3 norm;
 layout(location = 2) in vec2 uv;
 
-layout(binding = 0) uniform sampler2DArray dirLightShadowMaps;
+layout(binding = 0) uniform sampler2DArrayShadow dirLightShadowMaps;
 
 layout(binding = 4) uniform sampler2D albedoTex;
 layout(binding = 5) uniform sampler2D metalRoughTex;
@@ -105,9 +105,8 @@ void main() {
 		vec4 shadowSample = (dirLights[i].shadowMapTrans * vec4(pos, 1));
 		vec3 projCoords = shadowSample.xyz / shadowSample.w;
 		projCoords = projCoords * 0.5 + 0.5; 
-		float shadowDepth = texelFetch(dirLightShadowMaps, ivec3(projCoords.xy * 8192, i), 0).r;
-		if (shadowDepth >= projCoords.z)
-			colour += light(dirLights[i]);
+		float shadowDepth = texture(dirLightShadowMaps, vec4(projCoords.xy, i / 8.0f, projCoords.z)).r;
+		colour += light(dirLights[i]) * shadowDepth;
 	}
 	outColour = vec4(colour, 1);
 }

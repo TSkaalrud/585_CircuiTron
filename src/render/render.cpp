@@ -41,11 +41,16 @@ struct _PBR {
 	float metalFactor;
 	float roughFactor;
 };
+
+uint shaderHandle = -1;
+
 MaterialHandle Render::create_pbr_material(MaterialPBR pbr) {
-	GLuint shader =
-		load_shader_program({{"shaders/default.vert", GL_VERTEX_SHADER}, {"shaders/pbr.frag", GL_FRAGMENT_SHADER}});
-	uint shaderHandle = shaders.size();
-	shaders.push_back({shader});
+	if (shaderHandle == -1) {
+		GLuint shader =
+			load_shader_program({{"shaders/default.vert", GL_VERTEX_SHADER}, {"shaders/pbr.frag", GL_FRAGMENT_SHADER}});
+		shaderHandle = shaders.size();
+		shaders.push_back({shader});
+	}
 
 	GLuint uniform;
 	glCreateBuffers(1, &uniform);
