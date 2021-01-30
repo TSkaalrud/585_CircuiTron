@@ -3,13 +3,14 @@ layout(location = 0) in vec3 pos;
 layout(location = 1) in vec3 norm;
 layout(location = 2) in vec2 uv;
 
+layout(binding = 0) uniform sampler2DArray dirLightShadowMaps;
+
 layout(binding = 4) uniform sampler2D albedoTex;
 layout(binding = 5) uniform sampler2D metalRoughTex;
 layout(binding = 6) uniform sampler2D emissiveTexture;
 
 layout(std140, binding = 0) uniform Camera {
-	mat4 view;
-	mat4 proj;
+	mat4 camMat;
 	vec3 camPos;
 };
 
@@ -23,6 +24,7 @@ layout(std140, binding = 1) uniform Material {
 struct Light {
 	vec3 dir;
 	vec3 colour;
+	mat4 shadowMapTrans;
 };
 layout(std430, binding = 1) readonly buffer DirLights {
 	Light dirLights[];
@@ -46,7 +48,7 @@ vec3 diffuse_brdf(vec3 wi) { // Lambert
 	return albedo.rgb / pi;
 }
 
-float alpha2 = pow(roughness, 4); // * roughness * roughness * roughness;
+float alpha2 = pow(roughness, 4);
 float normal_dist(vec3 wi) { // GGX / Trowbridge-Reitz
 	vec3 h = normalize(wi + wo);
 	float ndoth = dot(normal, h);
@@ -97,9 +99,15 @@ vec3 light(Light light) {
 	return pbr_brdf(light.dir) * light.colour * max(dot(light.dir, normal), 0.0);
 }
 
+
 void main() {
 	for (int i = 0; i < dirLights.length(); ++i) {
-		colour += light(dirLights[i]);
+		vec4 shadowSample = (dirLights[i].shadowMapTrans * vec4(pos, 1));
+		vec3 projCoords = shadowSample.xyz / shadowSample.w;
+		projCoords = projCoords * 0.5 + 0.5; 
+		float shadowDepth = texelFetch(dirLightShadowMaps, ivec3(projCoords.xy * 8192, i), 0).r;
+		if (shadowDepth >= projCoords.z)
+			colour += light(dirLights[i]);
 	}
 	outColour = vec4(colour, 1);
 }

@@ -46,6 +46,7 @@ loadTexture(aiMaterial* material, aiTextureType type, unsigned index, const aiSc
 	aiString texturePath;
 	material->GetTexture(type, index, &texturePath);
 	const aiTexture* texture = scene->GetEmbeddedTexture(texturePath.data);
+	assert(texture);
 	int x, y, channels;
 	auto data =
 		stbi_load_from_memory(reinterpret_cast<stbi_uc*>(texture->pcData), texture->mWidth, &x, &y, &channels, 0);

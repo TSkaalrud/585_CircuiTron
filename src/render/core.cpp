@@ -2,15 +2,12 @@
 
 #include "debug.hpp"
 #include "gl.hpp"
-#include <glm/gtc/integer.hpp>
-#include <glm/gtc/type_ptr.hpp>
 
 namespace Render {
 
 struct Camera {
-	mat4 view;
-	mat4 proj;
-	vec3 cameraPos;
+	mat4 camMat;
+	vec3 camPos;
 };
 
 Core::Core(void (*glGetProcAddr(const char*))()) {
@@ -26,6 +23,9 @@ Core::Core(void (*glGetProcAddr(const char*))()) {
 
 	glCreateBuffers(1, &dirLightBuffer);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, dirLightBuffer);
+
+	glCreateTextures(GL_TEXTURE_2D_ARRAY, 1, &dirLightShadow);
+	glTextureStorage3D(dirLightShadow, 1, GL_DEPTH_COMPONENT32, lightmapSize, lightmapSize, 8);
 }
 
 template <class T> size_t vector_size(const std::vector<T>& vec) { return sizeof(T) * vec.size(); }
@@ -86,24 +86,7 @@ uint Core::create_texture(int width, int height, int channels, bool srgb, void* 
 	return texture;
 }
 
-void Core::run() {
-	glViewport(0, 0, width, height);
-	glClearColor(0, 0.2, 0.5, 1.0);
-
-	Camera cam = {
-		.view = cameraPos,
-		.proj = infinitePerspective(fov, static_cast<float>(width) / static_cast<float>(height), 0.1f),
-		.cameraPos = vec3(inverse(cameraPos) * vec4{0, 0, 0, 1})};
-	glNamedBufferSubData(cameraBuffer, 0, sizeof(Camera), &cam);
-
-	glNamedBufferData(dirLightBuffer, vector_size(dirLights), dirLights.data(), GL_DYNAMIC_DRAW);
-
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_DEPTH_CLAMP);
-	glEnable(GL_CULL_FACE);
-
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+void Core::renderScene() {
 	for (auto& i : instances) {
 		glUseProgram(shaders[materials[i.mat].shader].shader);
 		glBindVertexArray(meshes[i.model].vao);
@@ -116,6 +99,47 @@ void Core::run() {
 
 		glDrawElements(GL_TRIANGLES, meshes[i.model].count, GL_UNSIGNED_INT, 0);
 	}
+}
+
+void Core::run() {
+	glClearColor(0, 0.2, 0.5, 1.0);
+
+	glNamedBufferData(dirLightBuffer, vector_size(dirLights), dirLights.data(), GL_DYNAMIC_DRAW);
+
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_DEPTH_CLAMP);
+	glEnable(GL_CULL_FACE);
+
+	for (int i = 0; i < dirLights.size(); i++) {
+		GLuint framebuffer;
+		glCreateFramebuffers(1, &framebuffer);
+		glNamedFramebufferTextureLayer(framebuffer, GL_DEPTH_ATTACHMENT, dirLightShadow, 0, i);
+		glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+
+		Camera cam = {.camMat = dirLights[i].shadowMapTrans, .camPos = dirLights[i].dir};
+		glNamedBufferSubData(cameraBuffer, 0, sizeof(Camera), &cam);
+
+		glViewport(0, 0, lightmapSize, lightmapSize);
+		glClear(GL_DEPTH_BUFFER_BIT);
+		glCullFace(GL_FRONT);
+		renderScene();
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glDeleteFramebuffers(1, &framebuffer);
+	}
+
+	Camera cam = {
+		.camMat = infinitePerspective(fov, static_cast<float>(width) / static_cast<float>(height), 0.1f) * cameraPos,
+		.camPos = vec3(inverse(cameraPos) * vec4{0, 0, 0, 1})};
+	glNamedBufferSubData(cameraBuffer, 0, sizeof(Camera), &cam);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glViewport(0, 0, width, height);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glBindTextures(0, 1, &dirLightShadow);
+	glCullFace(GL_BACK);
+	renderScene();
 }
 
 } // namespace Render
