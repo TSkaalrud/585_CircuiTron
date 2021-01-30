@@ -95,18 +95,17 @@ vec3 pbr_brdf(vec3 wi) {
 	return mix(dielectric_brdf(wi), metal_brdf(wi), metallic);
 }
 
-vec3 light(Light light) {
-	return pbr_brdf(light.dir) * light.colour * max(dot(light.dir, normal), 0.0);
+vec3 light(vec3 dir, vec3 colour) {
+	return pbr_brdf(dir) * colour * max(dot(dir, normal), 0.0);
 }
-
 
 void main() {
 	for (int i = 0; i < dirLights.length(); ++i) {
 		vec4 shadowSample = (dirLights[i].shadowMapTrans * vec4(pos, 1));
 		vec3 projCoords = shadowSample.xyz / shadowSample.w;
 		projCoords = projCoords * 0.5 + 0.5; 
-		float shadowDepth = texture(dirLightShadowMaps, vec4(projCoords.xy, i / 8.0f, projCoords.z)).r;
-		colour += light(dirLights[i]) * shadowDepth;
+		float shadowDepth = texture(dirLightShadowMaps, vec4(projCoords.xy, i / 8.0f, projCoords.z));
+		colour += light(dirLights[i].dir, dirLights[i].colour * shadowDepth);
 	}
 	outColour = vec4(colour, 1);
 }
