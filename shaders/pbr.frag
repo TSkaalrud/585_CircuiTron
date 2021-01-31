@@ -104,7 +104,7 @@ void main() {
 		vec4 shadowSample = (dirLights[i].shadowMapTrans * vec4(pos, 1));
 		vec3 projCoords = shadowSample.xyz / shadowSample.w;
 		projCoords = projCoords * 0.5 + 0.5; 
-		float shadowDepth = texture(dirLightShadowMaps, vec4(projCoords.xy, i / 8.0f, projCoords.z));
+		float shadowDepth = texture(dirLightShadowMaps, vec4(projCoords.xy, i, projCoords.z));
 		colour += light(dirLights[i].dir, dirLights[i].colour * shadowDepth);
 	}
 	outColour = vec4(colour, 1);

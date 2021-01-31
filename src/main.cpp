@@ -89,14 +89,14 @@ int main(int argc, char* argv[]) {
 	// We may want more complex closing behaviour
 	while (!glfwWindowShouldClose(window)) {
 
+		// This is probably part of input()
+		glfwPollEvents(); // This has to happen before ImGui::NewFrame()
+		// input();
+
 		// All imgui commands must happen after here
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
-
-		// This is probably part of input()
-		glfwPollEvents();
-		// input();
 
 		// simulate();
 		stepPhysics(true);
