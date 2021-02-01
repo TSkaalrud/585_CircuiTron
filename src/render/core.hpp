@@ -62,7 +62,7 @@ class Core {
 	std::vector<Shader> shaders;
 
 	const int lightmapSize = 8192;
-	const float lightmapCoverage = 20;
+	const float lightmapCoverage = 5;
 
 	struct DirLight {
 		vec3 dir;

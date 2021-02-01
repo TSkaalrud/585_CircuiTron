@@ -45,12 +45,19 @@ TextureHandle
 loadTexture(aiMaterial* material, aiTextureType type, unsigned index, const aiScene* scene, Render& render) {
 	aiString texturePath;
 	material->GetTexture(type, index, &texturePath);
+	if (texturePath.length == 0) {
+		uint8_t white[3] = {255, 255, 255};
+		static auto whiteTexture = render.create_texture(1, 1, 3, false, &white);
+		return whiteTexture;
+	}
 	const aiTexture* texture = scene->GetEmbeddedTexture(texturePath.data);
 	assert(texture);
 	int x, y, channels;
 	auto data =
 		stbi_load_from_memory(reinterpret_cast<stbi_uc*>(texture->pcData), texture->mWidth, &x, &y, &channels, 0);
-	return render.create_texture(x, y, channels, type == aiTextureType_DIFFUSE, data);
+	auto tex = render.create_texture(x, y, channels, type == aiTextureType_DIFFUSE, data);
+	stbi_image_free(data);
+	return tex;
 }
 
 void import_scene(std::string filename, Render& render) {

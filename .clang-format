@@ -4,4 +4,4 @@ TabWidth: 4
 ColumnLimit: 120
 PointerAlignment: Left
 AlignAfterOpenBracket: AlwaysBreak
-AlignOperands: DontAlign
+AlignOperands: false

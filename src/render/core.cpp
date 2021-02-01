@@ -81,7 +81,7 @@ uint Core::create_texture(int width, int height, int channels, bool srgb, void* 
 		break;
 	}
 	glCreateTextures(GL_TEXTURE_2D, 1, &texture);
-	glTextureStorage2D(texture, glm::log2(min(width, height)), internalformat, width, height);
+	glTextureStorage2D(texture, glm::max(glm::log2(min(width, height)), 1), internalformat, width, height);
 	glTextureParameterf(texture, GL_TEXTURE_MAX_ANISOTROPY, INFINITY);
 	glTextureSubImage2D(texture, 0, 0, 0, width, height, format, GL_UNSIGNED_BYTE, data);
 	glGenerateTextureMipmap(texture);
@@ -106,11 +106,12 @@ void Core::renderScene() {
 void Core::run() {
 	glClearColor(0, 0.2, 0.5, 1.0);
 
-	glNamedBufferData(dirLightBuffer, vector_size(dirLights), dirLights.data(), GL_DYNAMIC_DRAW);
-
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_DEPTH_CLAMP);
 	glEnable(GL_CULL_FACE);
+	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+
+	glNamedBufferData(dirLightBuffer, vector_size(dirLights), dirLights.data(), GL_DYNAMIC_DRAW);
 
 	for (size_t i = 0; i < dirLights.size(); i++) {
 		GLuint framebuffer;
