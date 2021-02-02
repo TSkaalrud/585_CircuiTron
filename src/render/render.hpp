@@ -7,12 +7,12 @@ namespace Render {
 
 struct MaterialPBR {
 	vec4 albedoFactor;
-	TextureHandle albedoTexture;
+	std::optional<TextureHandle> albedoTexture;
 	float metalFactor;
 	float roughFactor;
-	TextureHandle metalRoughTexture;
+	std::optional<TextureHandle> metalRoughTexture;
 	vec3 emissiveFactor;
-	TextureHandle emissiveTexture;
+	std::optional<TextureHandle> emissiveTexture;
 };
 
 class Render : public Core {

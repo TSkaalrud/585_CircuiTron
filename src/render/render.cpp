@@ -62,7 +62,12 @@ MaterialHandle Render::create_pbr_material(MaterialPBR pbr) {
 	};
 	glNamedBufferStorage(uniform, sizeof(_PBR), &_pbr, 0);
 
-	std::vector<TextureHandle> textures = {pbr.albedoTexture, pbr.metalRoughTexture, pbr.emissiveTexture};
+	static uint8_t white[3] = {255, 255, 255};
+	static auto whiteTexture = create_texture(1, 1, 3, false, &white);
+
+	std::vector<TextureHandle> textures = {
+		pbr.albedoTexture.value_or(whiteTexture), pbr.metalRoughTexture.value_or(whiteTexture),
+		pbr.emissiveTexture.value_or(whiteTexture)};
 
 	uint handle = materials.size();
 	materials.push_back(Material{.shader = shaderHandle, .uniform = uniform, .textures = textures});

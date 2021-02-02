@@ -5,7 +5,7 @@
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 #define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
+#include <stb_image.h>
 
 namespace Render {
 
@@ -41,21 +41,20 @@ void process_node(
 	}
 }
 
-TextureHandle
-loadTexture(aiMaterial* material, aiTextureType type, unsigned index, const aiScene* scene, Render& render) {
+std::optional<TextureHandle>
+loadTexture(aiMaterial* material, aiTextureType type, unsigned int index, const aiScene* scene, Render& render) {
 	aiString texturePath;
 	material->GetTexture(type, index, &texturePath);
 	if (texturePath.length == 0) {
-		uint8_t white[3] = {255, 255, 255};
-		static auto whiteTexture = render.create_texture(1, 1, 3, false, &white);
-		return whiteTexture;
+		return std::optional<TextureHandle>();
 	}
 	const aiTexture* texture = scene->GetEmbeddedTexture(texturePath.data);
 	assert(texture);
 	int x, y, channels;
 	auto data =
 		stbi_load_from_memory(reinterpret_cast<stbi_uc*>(texture->pcData), texture->mWidth, &x, &y, &channels, 0);
-	auto tex = render.create_texture(x, y, channels, type == aiTextureType_DIFFUSE, data);
+	auto tex =
+		render.create_texture(x, y, channels, type == aiTextureType_DIFFUSE || type == aiTextureType_EMISSIVE, data);
 	stbi_image_free(data);
 	return tex;
 }
@@ -95,17 +94,18 @@ void import_scene(std::string filename, Render& render) {
 		aiMaterial* importMaterial = scene->mMaterials[m];
 		aiColor4D albedoFactor;
 		importMaterial->Get(AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_BASE_COLOR_FACTOR, albedoFactor);
-		TextureHandle albedoTex =
+		std::optional<TextureHandle> albedoTex =
 			loadTexture(importMaterial, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_BASE_COLOR_TEXTURE, scene, render);
 		float metalFactor;
 		importMaterial->Get(AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLIC_FACTOR, metalFactor);
 		float roughFactor;
 		importMaterial->Get(AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_ROUGHNESS_FACTOR, roughFactor);
-		TextureHandle metalRoughTex =
+		std::optional<TextureHandle> metalRoughTex =
 			loadTexture(importMaterial, AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLICROUGHNESS_TEXTURE, scene, render);
 		aiColor3D emissiveFactor;
 		importMaterial->Get(AI_MATKEY_COLOR_EMISSIVE, emissiveFactor);
-		TextureHandle emissiveTexture = loadTexture(importMaterial, aiTextureType_EMISSIVE, 0, scene, render);
+		std::optional<TextureHandle> emissiveTexture =
+			loadTexture(importMaterial, aiTextureType_EMISSIVE, 0, scene, render);
 
 		materials[m] = render.create_pbr_material(MaterialPBR{
 			.albedoFactor = convert(albedoFactor),
