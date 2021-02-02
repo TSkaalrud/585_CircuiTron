@@ -1,10 +1,11 @@
 #pragma once
 
+#include "group.hpp"
 #include "render.hpp"
 #include <string>
 
 namespace Render {
 
-void import_scene(std::string filename, Render&);
+Group importModel(std::string filename, Render&);
 
 }

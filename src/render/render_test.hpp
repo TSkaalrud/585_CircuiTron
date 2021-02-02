@@ -18,7 +18,9 @@ class RenderTest : public Entity {
 	void enter() override {
 		render.camera_set_fov(50);
 
-		import_scene("assets/test.glb", render);
+		Group group = importModel("assets/test.glb", render);
+
+		GroupInstance model(group);
 
 		float pi = glm::pi<float>();
 		render.create_dir_light({pi, pi, pi}, {1, 1, 1});

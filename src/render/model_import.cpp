@@ -26,18 +26,20 @@ glm::vec4 convert(const aiColor4D& col) { return glm::vec4{col.r, col.g, col.b, 
 
 // clang-format off
 void process_node(
-	const aiScene* scene, const aiNode* node, Render& render,
+	const aiScene* scene, const aiNode* node, Group& group, mat4 parentTransform,
 	std::vector<MeshHandle>& meshes, std::vector<MaterialHandle>& materials) {
 	// clang-format on
 
+	mat4 transform = parentTransform * convert(node->mTransformation);
+
 	for (uint m = 0; m < node->mNumMeshes; m++) {
-		InstanceHandle instance = render.create_instance();
-		render.instance_set_mesh(instance, meshes[node->mMeshes[m]]);
-		render.instance_set_material(instance, scene->mMeshes[node->mMeshes[m]]->mMaterialIndex);
-		render.instance_set_trans(instance, convert(node->mTransformation));
+		group.surfaces.push_back(Group::Surface{
+			.mesh = meshes[node->mMeshes[m]],
+			.material = scene->mMeshes[node->mMeshes[m]]->mMaterialIndex,
+			.transform = transform * convert(node->mTransformation)});
 	}
 	for (uint c = 0; c < node->mNumChildren; c++) {
-		process_node(scene, node->mChildren[c], render, meshes, materials);
+		process_node(scene, node->mChildren[c], group, transform, meshes, materials);
 	}
 }
 
@@ -59,7 +61,7 @@ loadTexture(aiMaterial* material, aiTextureType type, unsigned int index, const 
 	return tex;
 }
 
-void import_scene(std::string filename, Render& render) {
+Group importModel(std::string filename, Render& render) {
 	Assimp::Importer importer;
 	const aiScene* scene =
 		importer.ReadFile(filename, aiProcess_Triangulate | aiProcess_OptimizeMeshes | aiProcess_FlipUVs);
@@ -117,7 +119,11 @@ void import_scene(std::string filename, Render& render) {
 			.emissiveTexture = emissiveTexture});
 	}
 
-	process_node(scene, scene->mRootNode, render, meshes, materials);
+	Group group{.render = render};
+
+	process_node(scene, scene->mRootNode, group, mat4(1.0f), meshes, materials);
+
+	return group;
 }
 
 } // namespace Render
