@@ -28,6 +28,8 @@ class GroupInstance {
 	GroupInstance(Group group) : GroupInstance(group, mat4(1.0f)) {}
 	GroupInstance(Group group, mat4 transform);
 
+	GroupInstance(GroupInstance&) = delete;
+
 	void setTransform(mat4);
 };
 } // namespace Render

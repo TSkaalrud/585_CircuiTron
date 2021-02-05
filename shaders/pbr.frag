@@ -5,10 +5,6 @@ layout(location = 2) in vec2 uv;
 
 layout(binding = 0) uniform sampler2DArrayShadow dirLightShadowMaps;
 
-layout(binding = 4) uniform sampler2D albedoTex;
-layout(binding = 5) uniform sampler2D metalRoughTex;
-layout(binding = 6) uniform sampler2D emissiveTexture;
-
 layout(std140, binding = 0) uniform Camera {
 	mat4 camMat;
 	vec3 camPos;
@@ -20,14 +16,17 @@ layout(std140, binding = 1) uniform Material {
 	float metalFactor;
 	float roughFactor;
 };
+layout(binding = 4) uniform sampler2D albedoTex;
+layout(binding = 5) uniform sampler2D metalRoughTex;
+layout(binding = 6) uniform sampler2D emissiveTexture;
 
-struct Light {
+struct DirLight {
 	vec3 dir;
 	vec3 colour;
 	mat4 shadowMapTrans;
 };
 layout(std430, binding = 1) readonly buffer DirLights {
-	Light dirLights[];
+	DirLight dirLights[];
 };
 
 out vec4 outColour;
