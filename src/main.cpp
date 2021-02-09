@@ -21,10 +21,14 @@ int main(int argc, char* argv[]) {
 	if (!glfwInit())
 		exit(EXIT_FAILURE);
 
-	// I need OpenGL 4.5 Core
+	// I need OpenGL 4.6 Core
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+	// This supposedly enables sRGB, but sRGB is enabled without it?
+	glfwWindowHint(GLFW_SRGB_CAPABLE, true);
+
 	// MSAA x8 (If I implement post-processing, I'll do AA there, so this could be removed in the future)
 	glfwWindowHint(GLFW_SAMPLES, 64);
 
@@ -85,14 +89,14 @@ int main(int argc, char* argv[]) {
 	// We may want more complex closing behaviour
 	while (!glfwWindowShouldClose(window)) {
 
+		// This is probably part of input()
+		glfwPollEvents(); // This has to happen before ImGui::NewFrame()
+		// input();
+
 		// All imgui commands must happen after here
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
-
-		// This is probably part of input()
-		glfwPollEvents();
-		// input();
 
 		// simulate();
 		stepPhysics(true);

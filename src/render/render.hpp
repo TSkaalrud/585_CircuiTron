@@ -1,18 +1,18 @@
 #pragma once
 
 #include "core.hpp"
+#include <optional>
 
 namespace Render {
 
 struct MaterialPBR {
 	vec4 albedoFactor;
+	std::optional<TextureHandle> albedoTexture;
 	float metalFactor;
 	float roughFactor;
-	// No textures above here
-	// Only textures below here
-	// albedo must be first
-	TextureHandle albedoTexture;
-	TextureHandle metalRoughTexture;
+	std::optional<TextureHandle> metalRoughTexture;
+	vec3 emissiveFactor;
+	std::optional<TextureHandle> emissiveTexture;
 };
 
 class Render : public Core {

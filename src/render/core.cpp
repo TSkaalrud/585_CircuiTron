@@ -2,15 +2,12 @@
 
 #include "debug.hpp"
 #include "gl.hpp"
-#include <glm/gtc/integer.hpp>
-#include <glm/gtc/type_ptr.hpp>
 
 namespace Render {
 
 struct Camera {
-	mat4 view;
-	mat4 proj;
-	vec3 cameraPos;
+	mat4 camMat;
+	vec3 camPos;
 };
 
 Core::Core(void (*glGetProcAddr(const char*))()) {
@@ -18,12 +15,19 @@ Core::Core(void (*glGetProcAddr(const char*))()) {
 
 	loadDebugger();
 
+	glEnable(GL_FRAMEBUFFER_SRGB);
+
 	glCreateBuffers(1, &cameraBuffer);
 	glNamedBufferStorage(cameraBuffer, sizeof(Camera), nullptr, GL_DYNAMIC_STORAGE_BIT);
 	glBindBufferBase(GL_UNIFORM_BUFFER, 0, cameraBuffer);
 
 	glCreateBuffers(1, &dirLightBuffer);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, dirLightBuffer);
+
+	glCreateTextures(GL_TEXTURE_2D_ARRAY, 1, &dirLightShadow);
+	glTextureStorage3D(dirLightShadow, 1, GL_DEPTH_COMPONENT32F, lightmapSize, lightmapSize, 8);
+	glTextureParameteri(dirLightShadow, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
+	glTextureParameteri(dirLightShadow, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
 }
 
 template <class T> size_t vector_size(const std::vector<T>& vec) { return sizeof(T) * vec.size(); }
@@ -55,32 +59,36 @@ uint Core::create_mesh(MeshDef def) {
 	return handle;
 }
 
-uint Core::create_texture(int width, int height, void* data) {
+uint Core::create_texture(int width, int height, int channels, bool srgb, void* data) {
 	GLuint texture;
+	GLenum format, internalformat;
+	switch (channels) {
+	case 1:
+		format = GL_RED;
+		internalformat = GL_R8;
+		break;
+	case 2:
+		format = GL_RG;
+		internalformat = GL_RG8;
+		break;
+	case 3:
+		format = GL_RGB;
+		internalformat = srgb ? GL_SRGB8 : GL_RGB8;
+		break;
+	case 4:
+		format = GL_RGBA;
+		internalformat = srgb ? GL_SRGB8_ALPHA8 : GL_RGBA8;
+		break;
+	}
 	glCreateTextures(GL_TEXTURE_2D, 1, &texture);
-	glTextureStorage2D(texture, glm::log2(min(width, height)), GL_RGBA8, width, height);
-	glTextureSubImage2D(texture, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data);
+	glTextureStorage2D(texture, glm::max(glm::log2(min(width, height)), 1), internalformat, width, height);
+	glTextureParameterf(texture, GL_TEXTURE_MAX_ANISOTROPY, INFINITY);
+	glTextureSubImage2D(texture, 0, 0, 0, width, height, format, GL_UNSIGNED_BYTE, data);
 	glGenerateTextureMipmap(texture);
 	return texture;
 }
 
-void Core::run() {
-	glViewport(0, 0, width, height);
-	glClearColor(0, 0.5, 0.8, 1.0);
-
-	Camera cam = {
-		.view = cameraPos,
-		.proj = infinitePerspective(fov, static_cast<float>(width) / static_cast<float>(height), 0.1f),
-		.cameraPos = vec3(inverse(cameraPos) * vec4{0, 0, 0, 1})};
-	glNamedBufferSubData(cameraBuffer, 0, sizeof(Camera), &cam);
-
-	glNamedBufferData(dirLightBuffer, vector_size(dirLights), dirLights.data(), GL_DYNAMIC_DRAW);
-
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_DEPTH_CLAMP);
-
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+void Core::renderScene() {
 	for (auto& i : instances) {
 		glUseProgram(shaders[materials[i.mat].shader].shader);
 		glBindVertexArray(meshes[i.model].vao);
@@ -93,6 +101,48 @@ void Core::run() {
 
 		glDrawElements(GL_TRIANGLES, meshes[i.model].count, GL_UNSIGNED_INT, 0);
 	}
+}
+
+void Core::run() {
+	glClearColor(0, 0.2, 0.5, 1.0);
+
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_DEPTH_CLAMP);
+	glEnable(GL_CULL_FACE);
+	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+
+	glNamedBufferData(dirLightBuffer, vector_size(dirLights), dirLights.data(), GL_DYNAMIC_DRAW);
+
+	for (size_t i = 0; i < dirLights.size(); i++) {
+		GLuint framebuffer;
+		glCreateFramebuffers(1, &framebuffer);
+		glNamedFramebufferTextureLayer(framebuffer, GL_DEPTH_ATTACHMENT, dirLightShadow, 0, i);
+		glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+
+		Camera cam = {.camMat = dirLights[i].shadowMapTrans, .camPos = dirLights[i].dir};
+		glNamedBufferSubData(cameraBuffer, 0, sizeof(Camera), &cam);
+
+		glViewport(0, 0, lightmapSize, lightmapSize);
+		glClear(GL_DEPTH_BUFFER_BIT);
+		glCullFace(GL_FRONT);
+		renderScene();
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glDeleteFramebuffers(1, &framebuffer);
+	}
+
+	Camera cam = {
+		.camMat = infinitePerspective(fov, static_cast<float>(width) / static_cast<float>(height), 0.1f) * cameraPos,
+		.camPos = vec3(inverse(cameraPos) * vec4{0, 0, 0, 1})};
+	glNamedBufferSubData(cameraBuffer, 0, sizeof(Camera), &cam);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glViewport(0, 0, width, height);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glBindTextures(0, 1, &dirLightShadow);
+	glCullFace(GL_BACK);
+	renderScene();
 }
 
 } // namespace Render

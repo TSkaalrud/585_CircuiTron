@@ -3,39 +3,43 @@ layout(location = 0) in vec3 pos;
 layout(location = 1) in vec3 norm;
 layout(location = 2) in vec2 uv;
 
-layout(binding = 4) uniform sampler2D albedoTex;
-layout(binding = 5) uniform sampler2D metalRoughTex;
+layout(binding = 0) uniform sampler2DArrayShadow dirLightShadowMaps;
 
 layout(std140, binding = 0) uniform Camera {
-	mat4 view;
-	mat4 proj;
+	mat4 camMat;
 	vec3 camPos;
 };
 
 layout(std140, binding = 1) uniform Material {
-	vec4 albedoCol;
+	vec4 albedoFactor;
+	vec3 emissiveFactor;
 	float metalFactor;
 	float roughFactor;
 };
+layout(binding = 4) uniform sampler2D albedoTex;
+layout(binding = 5) uniform sampler2D metalRoughTex;
+layout(binding = 6) uniform sampler2D emissiveTexture;
 
-struct Light {
+struct DirLight {
 	vec3 dir;
 	vec3 colour;
+	mat4 shadowMapTrans;
 };
 layout(std430, binding = 1) readonly buffer DirLights {
-	Light dirLights[];
+	DirLight dirLights[];
 };
 
 out vec4 outColour;
 
-vec3 wo = normalize(camPos - pos);
-vec3 normal = normalize(norm);
-vec3 colour = vec3(0, 0, 0);
-
-vec4 albedo = albedoCol * texture(albedoTex, uv);
+vec4 albedo = albedoFactor * texture(albedoTex, uv);
 vec4 metalRough = texture(metalRoughTex, uv);
 float metallic = metalFactor * metalRough.b;
 float roughness = roughFactor * metalRough.g;
+vec3 emissive = emissiveFactor * texture(emissiveTexture, uv).rgb;
+
+vec3 wo = normalize(camPos - pos);
+vec3 normal = normalize(norm);
+vec3 colour = emissive;
 
 const float pi = 3.1415927;
 
@@ -43,7 +47,7 @@ vec3 diffuse_brdf(vec3 wi) { // Lambert
 	return albedo.rgb / pi;
 }
 
-float alpha2 = pow(roughness, 4); // * roughness * roughness * roughness;
+float alpha2 = pow(roughness, 4);
 float normal_dist(vec3 wi) { // GGX / Trowbridge-Reitz
 	vec3 h = normalize(wi + wo);
 	float ndoth = dot(normal, h);
@@ -90,13 +94,17 @@ vec3 pbr_brdf(vec3 wi) {
 	return mix(dielectric_brdf(wi), metal_brdf(wi), metallic);
 }
 
-vec3 light(Light light) {
-	return pbr_brdf(light.dir) * light.colour * max(dot(light.dir, normal), 0.0);
+vec3 light(vec3 dir, vec3 colour) {
+	return pbr_brdf(dir) * colour * max(dot(dir, normal), 0.0);
 }
 
 void main() {
 	for (int i = 0; i < dirLights.length(); ++i) {
-		colour += light(dirLights[i]);
+		vec4 shadowSample = (dirLights[i].shadowMapTrans * vec4(pos, 1));
+		vec3 projCoords = shadowSample.xyz / shadowSample.w;
+		projCoords = projCoords * 0.5 + 0.5; 
+		float shadowDepth = texture(dirLightShadowMaps, vec4(projCoords.xy, i, projCoords.z));
+		colour += light(dirLights[i].dir, dirLights[i].colour * shadowDepth);
 	}
 	outColour = vec4(colour, 1);
 }

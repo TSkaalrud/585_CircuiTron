@@ -1,5 +1,7 @@
 #pragma once
 
+#include <glm/gtc/integer.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <glm/mat4x4.hpp>
 #include <glm/trigonometric.hpp>
 #include <vector>
@@ -59,14 +61,20 @@ class Core {
 	};
 	std::vector<Shader> shaders;
 
+	const int lightmapSize = 8192;
+	const float lightmapCoverage = 5;
+
 	struct DirLight {
 		vec3 dir;
 		float _pad0;
 		vec3 colour;
 		float _pad1;
+		mat4 shadowMapTrans;
 	};
 	std::vector<DirLight> dirLights;
-	GLuint dirLightBuffer;
+	GLuint dirLightBuffer, dirLightShadow;
+
+	void renderScene();
 
   public:
 	Core(void (*(const char*))());
@@ -98,9 +106,15 @@ class Core {
 		return handle;
 	}
 	void dir_light_set_colour(DirLightHandle handle, vec3 colour) { dirLights[handle].colour = colour; }
-	void dir_light_set_dir(DirLightHandle handle, vec3 dir) { dirLights[handle].dir = normalize(dir); }
+	void dir_light_set_dir(DirLightHandle handle, vec3 dir) {
+		dirLights[handle].dir = normalize(dir);
+		dirLights[handle].shadowMapTrans = ortho(
+											   -lightmapCoverage, lightmapCoverage, -lightmapCoverage, lightmapCoverage,
+											   -lightmapCoverage, lightmapCoverage) *
+			lookAt(vec3{0, 0, 0}, -dirLights[handle].dir, vec3{0, 1, 0});
+	}
 
-	TextureHandle create_texture(int width, int height, void* data);
+	TextureHandle create_texture(int width, int height, int channels, bool srgb, void* data);
 
 	void run();
 };

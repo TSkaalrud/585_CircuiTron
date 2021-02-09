@@ -18,7 +18,9 @@ class RenderTest : public Entity {
 	void enter() override {
 		render.camera_set_fov(50);
 
-		import_scene("assets/DamagedHelmet.glb", render);
+		Group group = importModel("assets/test.glb", render);
+
+		GroupInstance model(group);
 
 		float pi = glm::pi<float>();
 		render.create_dir_light({pi, pi, pi}, {1, 1, 1});
@@ -30,18 +32,13 @@ class RenderTest : public Entity {
 		static auto start_time = std::chrono::high_resolution_clock::now();
 		auto current_time = std::chrono::high_resolution_clock::now();
 		auto seconds = std::chrono::duration_cast<std::chrono::duration<float>>(current_time - start_time).count();
-		const float dist = 3;
+		const float dist = 250;
 		const float speed = 1;
 
 		vec3 camera = {sin(seconds * speed) * dist, 0, cos(seconds * speed) * dist};
 		mat4 cameraPos = lookAt(camera, vec3{0, 0, 0}, vec3{0, 1, 0});
 
 		render.camera_set_pos(cameraPos);
-
-		ImGui::Begin("Note", nullptr, 0);
-		ImGui::Text("Helmet model credit to: https://github.com/KhronosGroup/glTF-Sample-Models\nOnly for testing "
-					"purposes. Will not be used in the final game.");
-		ImGui::End();
 	}
 };
 } // namespace Render
