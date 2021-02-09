@@ -71,7 +71,7 @@ int main(int argc, char* argv[]) {
 	EntityManager e_manager;
 
 	// Setting up fixed timestep, change to variable later!
-	float timestep = 1 / 60;
+	float timestep = 1.f / 60.f;
 	float time = 0;
 
 	// if (args.size() > 1 && args.at(1) == "view") {
@@ -98,7 +98,7 @@ int main(int argc, char* argv[]) {
 		stepPhysics(true);
 
 		// Fixed timestep for now
-		time += timestep;
+		time += timestep;	
 
 		// Calls the update function all of the entities added to the manager
 		// Maybe not needed for now
@@ -116,6 +116,8 @@ int main(int argc, char* argv[]) {
 		// 5. (Optional) Add lights
 		// Future API to simplify some of these steps?
 		// Probably done by various entities once that system is functional?
+
+		e_manager.addEntitiesAfterFrame();		//not sure if this belong after the ImGUI stuff
 
 		// Draw the framerate counter
 		// This is replaced by Profiler if I get it working better

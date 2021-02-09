@@ -4,8 +4,16 @@
 EntityManager::EntityManager() {}
 
 void EntityManager::addEntity(std::unique_ptr<Entity> e) {
-	entities.push_back(std::move(e));
-	entities.back()->enter();
+	entities_to_add.push_back(std::move(e));
+}
+
+void EntityManager::addEntitiesAfterFrame() {
+	for (int i = 0; i < entities_to_add.size(); i++) {
+		entities.push_back(std::move(entities_to_add.at(i)));
+		entities.back()->enter();
+	}
+
+	entities_to_add.clear();
 }
 
 void EntityManager::update(float dTime) {
