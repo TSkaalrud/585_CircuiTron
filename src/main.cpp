@@ -83,7 +83,7 @@ int main(int argc, char* argv[]) {
 	// }
 
 	// initialize physics
-	initPhysics(true);
+	initPhysics();
 
 	// Loop will continue until "X" on window is clicked.
 	// We may want more complex closing behaviour
@@ -99,7 +99,7 @@ int main(int argc, char* argv[]) {
 		ImGui::NewFrame();
 
 		// simulate();
-		stepPhysics(true);
+		stepPhysics();
 
 		// Fixed timestep for now
 		time += timestep;

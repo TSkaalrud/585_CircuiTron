@@ -1,7 +1,7 @@
 #pragma once
 
-void initPhysics(bool interactive);
+void initPhysics();
 
-void stepPhysics(bool /*interactive*/);
+void stepPhysics();
 
-void cleanupPhysics(bool /*interactive*/);
+void cleanupPhysics();

@@ -59,6 +59,7 @@ target_link_directories(physx INTERFACE ${CMAKE_CURRENT_LIST_DIR}/physx/${CMAKE_
 target_link_libraries(physx INTERFACE PhysXPvdSDK_static_64)
 target_link_libraries(physx INTERFACE 
 	PhysXExtensions_static_64
+	PhysXVehicle_static_64
 	PhysX_64
 	PhysXCommon_64
 	PhysXCooking_64
