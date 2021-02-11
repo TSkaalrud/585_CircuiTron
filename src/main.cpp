@@ -99,7 +99,7 @@ int main(int argc, char* argv[]) {
 		ImGui::NewFrame();
 
 		// simulate();
-		stepPhysics();
+		stepPhysics(window);
 
 		// Fixed timestep for now
 		time += timestep;

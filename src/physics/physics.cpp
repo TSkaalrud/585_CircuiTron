@@ -49,6 +49,9 @@
 #include "CTPVD.h"
 #include "CTPrint.h"
 #include "CTUtils.h"
+#include <GLFW\glfw3.h>
+
+#include <iostream>
 
 using namespace physx;
 using namespace snippetvehicle;
@@ -153,13 +156,13 @@ VehicleDesc initVehicleDesc() {
 	// Set up the chassis mass, dimensions, moment of inertia, and center of mass offset.
 	// The moment of inertia is just the moment of inertia of a cuboid but modified for easier steering.
 	// Center of mass offset is 0.65m above the base of the chassis and 0.25m towards the front.
-	const PxF32 chassisMass = 1500.0f;
-	const PxVec3 chassisDims(3.5f, 1.0f, 5.0f);
+	const PxF32 chassisMass = 500.0f;
+	const PxVec3 chassisDims(2.5f, 2.0f, 5.0f);
 	const PxVec3 chassisMOI(
 		(chassisDims.y * chassisDims.y + chassisDims.z * chassisDims.z) * chassisMass / 12.0f,
 		(chassisDims.x * chassisDims.x + chassisDims.z * chassisDims.z) * 0.8f * chassisMass / 12.0f,
 		(chassisDims.x * chassisDims.x + chassisDims.y * chassisDims.y) * chassisMass / 12.0f);
-	const PxVec3 chassisCMOffset(0.0f, -chassisDims.y * 0.5f + 0.65f, 0.25f);
+	const PxVec3 chassisCMOffset(0.0f, -chassisDims.y*0.5f + 0.65f, 0.25f);
 
 	// Set up the wheel mass, radius, width, moment of inertia, and number of wheels.
 	// Moment of inertia is just the moment of inertia of a cylinder.
@@ -270,6 +273,91 @@ void releaseAllControls() {
 	}
 }
 
+// KEYBOARD INPUT
+void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+	if (key == GLFW_KEY_W) {
+		switch (action) {
+		case GLFW_PRESS:
+			//switch to first gear
+			gVehicle4W->mDriveDynData.forceGearChange(PxVehicleGearsData::eFIRST);
+			gVehicleInputData.setAnalogAccel(1.0f);
+			break;
+
+		case GLFW_REPEAT:
+			//accelerate
+			gVehicleInputData.setAnalogAccel(1.0f);
+			break;
+
+		case GLFW_RELEASE:
+			//stop accelerate
+			gVehicleInputData.setAnalogAccel(0.0f);
+			break;
+
+		default:
+			break;
+		}
+	}
+
+	if (key == GLFW_KEY_D) {
+		switch (action) {
+		case GLFW_PRESS:
+			gVehicleInputData.setAnalogSteer(-1.0f);
+			break;
+
+		case GLFW_REPEAT:
+			gVehicleInputData.setAnalogSteer(-1.0f);
+			break;
+
+		case GLFW_RELEASE:
+			gVehicleInputData.setAnalogSteer(0.0f);
+			break;
+
+		default:
+			break;
+		}
+	}
+
+	if (key == GLFW_KEY_S) {
+		switch (action) {
+		case GLFW_PRESS:
+			gVehicle4W->mDriveDynData.forceGearChange(PxVehicleGearsData::eREVERSE);
+			gVehicleInputData.setAnalogAccel(1.0f);
+			break;
+
+		case GLFW_REPEAT:
+			gVehicleInputData.setAnalogAccel(1.0f);
+			break;
+
+		case GLFW_RELEASE:
+			gVehicleInputData.setAnalogAccel(0.0f);
+			break;
+
+		default:
+			break;
+		}
+	}
+
+	if (key == GLFW_KEY_A) {
+		switch (action) {
+		case GLFW_PRESS:
+			gVehicleInputData.setAnalogSteer(1.0f);
+			break;
+
+		case GLFW_REPEAT:
+			gVehicleInputData.setAnalogSteer(1.0f);
+			break;
+
+		case GLFW_RELEASE:
+			gVehicleInputData.setAnalogSteer(0.0f);
+			break;
+
+		default:
+			break;
+		}
+	}
+}
+
+
 void initPhysics() {
 	gFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, gAllocator, gErrorCallback);
 	gPvd = PxCreatePvd(*gFoundation);
@@ -331,10 +419,14 @@ void initPhysics() {
 	gVehicleModeTimer = 0.0f;
 	gVehicleOrderProgress = 0;
 	startBrakeMode();
+	releaseAllControls();
+
 }
 
-void stepPhysics() {
+void stepPhysics(GLFWwindow* window) {
 	const PxF32 timestep = 1.0f / 60.0f;
+
+	glfwSetKeyCallback(window, keyCallback);
 
 	// Update the control inputs for the vehicle.
 	if (gMimicKeyInputs) {
