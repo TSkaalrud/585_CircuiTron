@@ -14,8 +14,10 @@
 
 class GameObject : public Entity {
   private:
-	Render::Render& render;
 	std::string model_path;
+
+  protected:
+	Render::Render& render;
 	physx::PxTransform& transform;
 	std::optional<Render::GroupInstance> model;
 

@@ -1,4 +1,5 @@
 #include "entities/car.hpp"
+#include "entities/wall.hpp"
 #include "entities/entity.hpp"
 #include "entities/entity_manager.hpp"
 #include "physics/physics.h"
@@ -93,8 +94,8 @@ int main(int argc, char* argv[]) {
 		e_manager.addEntity(std::make_unique<Render::RenderTest>(render));
 	} else {
 		e_manager.addEntity(std::make_unique<Car>(render, 1, player1));
+		e_manager.addEntity(std::make_unique<Wall>(render, wall1));
 	}
-
 
 	// Loop will continue until "X" on window is clicked.
 	// We may want more complex closing behaviour
@@ -117,6 +118,8 @@ int main(int argc, char* argv[]) {
 		}
 		// simulate();
 		stepPhysics(window, player1, wall1);
+
+		//
 
 		time += timestep;
 
