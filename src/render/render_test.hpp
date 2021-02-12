@@ -32,7 +32,7 @@ class RenderTest : public Entity {
 		static auto start_time = std::chrono::high_resolution_clock::now();
 		auto current_time = std::chrono::high_resolution_clock::now();
 		auto seconds = std::chrono::duration_cast<std::chrono::duration<float>>(current_time - start_time).count();
-		const float dist = 250;
+		const float dist = 15;
 		const float speed = 1;
 
 		vec3 camera = {sin(seconds * speed) * dist, 0, cos(seconds * speed) * dist};

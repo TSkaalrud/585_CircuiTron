@@ -1,7 +1,8 @@
 #pragma once
+#include <GLFW/glfw3.h>
 
-void initPhysics(bool interactive);
+void initPhysics();
 
-void stepPhysics(bool /*interactive*/);
+void stepPhysics(GLFWwindow* window);
 
-void cleanupPhysics(bool /*interactive*/);
+void cleanupPhysics();
