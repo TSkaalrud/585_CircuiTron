@@ -11,6 +11,7 @@
 #include <imgui_impl_opengl3.h>
 #include <iostream>
 
+
 int main(int argc, char* argv[]) {
 	// Read in the command line args
 	std::vector<std::string> args;
@@ -88,7 +89,9 @@ int main(int argc, char* argv[]) {
 	}
 
 	// initialize physics
-	initPhysics();
+	physx::PxTransform player1;
+
+	initPhysics(player1);
 
 	// Loop will continue until "X" on window is clicked.
 	// We may want more complex closing behaviour
@@ -110,7 +113,7 @@ int main(int argc, char* argv[]) {
 			past = now;
 		}
 		// simulate();
-		stepPhysics(window);
+		stepPhysics(window, player1);
 
 		time += timestep;
 

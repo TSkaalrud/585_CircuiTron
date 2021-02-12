@@ -389,7 +389,7 @@ void spawnWall(PxF32 timestep) {
 
 }
 
-void initPhysics() {
+void initPhysics(PxTransform player) {
 	gFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, gAllocator, gErrorCallback);
 	gPvd = PxCreatePvd(*gFoundation);
 	PxPvdTransport* transport = PxDefaultPvdSocketTransportCreate(PVD_HOST, 5425, 10);
@@ -452,10 +452,13 @@ void initPhysics() {
 	startBrakeMode();
 	releaseAllControls();
 
+	player = gVehicle4W->getRigidDynamicActor()->getGlobalPose();
 }
 
-void stepPhysics(GLFWwindow* window) {
+void stepPhysics(GLFWwindow* window, PxTransform player) {
 	const PxF32 timestep = 1.0f / 60.0f;
+
+	player = gVehicle4W->getRigidDynamicActor()->getGlobalPose();
 
 	spawnWall(timestep);
 
