@@ -1,8 +1,10 @@
 #include "entities/entity.hpp"
 #include "entities/entity_manager.hpp"
+#include <chrono>
 #include "physics/physics.h"
 #include "render/render.hpp"
 #include "render/render_test.hpp"
+#include "entities/car.hpp"
 #include <GLFW/glfw3.h>
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
@@ -74,13 +76,16 @@ int main(int argc, char* argv[]) {
 	// Create entitity manager
 	EntityManager e_manager;
 
-	// Setting up fixed timestep, change to variable later!
+	// Set up variables for fixed and variable timestep
 	float timestep = 1.f / 60.f;
 	float time = 0;
-
-	// if (args.size() > 1 && args.at(1) == "view") {
-	e_manager.addEntity(std::make_unique<Render::RenderTest>(render));
-	// }
+	auto past = std::chrono::high_resolution_clock::now();
+	
+	if (args.size() > 1 && args.at(1) == "view") {
+		e_manager.addEntity(std::make_unique<Render::RenderTest>(render));
+	} else {
+		e_manager.addEntity(std::make_unique<Car>(render, 1));
+	}
 
 	// initialize physics
 	initPhysics(true);
@@ -98,11 +103,17 @@ int main(int argc, char* argv[]) {
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
+		// 1 for variable, 0 for fixed
+		if (1) {
+			auto now = std::chrono::high_resolution_clock::now();
+			timestep = std::chrono::duration_cast<std::chrono::duration<float>>(now - past).count();
+			past = now;
+		}
+
+		time += timestep;
+
 		// simulate();
 		stepPhysics(true);
-
-		// Fixed timestep for now
-		time += timestep;	
 
 		// Calls the update function all of the entities added to the manager
 		// Maybe not needed for now
@@ -121,7 +132,7 @@ int main(int argc, char* argv[]) {
 		// Future API to simplify some of these steps?
 		// Probably done by various entities once that system is functional?
 
-		e_manager.addEntitiesAfterFrame();		//not sure if this belong after the ImGUI stuff
+		e_manager.addEntitiesAfterFrame();	//not sure if this belong after the ImGUI stuff
 
 		// Draw the framerate counter
 		// This is replaced by Profiler if I get it working better
