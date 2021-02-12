@@ -118,10 +118,6 @@ int main(int argc, char* argv[]) {
 		// simulate();
 		stepPhysics(window, player1, wall1);
 
-		if (wall1.p.x != NULL) {
-			std::cout << wall1.p.x << std::endl;
-		}
-
 		time += timestep;
 
 		// Calls the update function all of the entities added to the manager
