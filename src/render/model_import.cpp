@@ -36,7 +36,7 @@ void process_node(
 		group.surfaces.push_back(Group::Surface{
 			.mesh = meshes[node->mMeshes[m]],
 			.material = scene->mMeshes[node->mMeshes[m]]->mMaterialIndex,
-			.transform = transform * convert(node->mTransformation)});
+			.transform = transform});
 	}
 	for (uint c = 0; c < node->mNumChildren; c++) {
 		process_node(scene, node->mChildren[c], group, transform, meshes, materials);
