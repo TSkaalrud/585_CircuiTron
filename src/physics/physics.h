@@ -4,8 +4,8 @@
 #include <foundation/Px.h>
 
 
-void initPhysics(physx::PxTransform player);
+void initPhysics(physx::PxTransform& player);
 
-void stepPhysics(GLFWwindow* window, physx::PxTransform player);
+void stepPhysics(GLFWwindow* window, physx::PxTransform& player);
 
 void cleanupPhysics();
