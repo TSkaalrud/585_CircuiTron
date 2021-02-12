@@ -62,7 +62,7 @@ class Core {
 	std::vector<Shader> shaders;
 
 	const int lightmapSize = 8192;
-	const float lightmapCoverage = 5;
+	const float lightmapCoverage = 200;
 
 	struct DirLight {
 		vec3 dir;
@@ -95,7 +95,7 @@ class Core {
 	void instance_set_material(InstanceHandle instance, MaterialHandle mat) { instances[instance].mat = mat; }
 	void instance_set_trans(InstanceHandle instance, mat4 trans) { instances[instance].trans = trans; }
 
-	void camera_set_pos(mat4 pos) { cameraPos = pos; }
+	void camera_set_pos(mat4 pos) { cameraPos = glm::inverse(pos); }
 	void camera_set_fov(float degrees) { fov = radians(degrees); }
 
 	DirLightHandle create_dir_light(vec3 colour, vec3 dir) {

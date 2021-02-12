@@ -26,8 +26,9 @@ class GameObject : public Entity {
 		render.camera_set_fov(50);
 
 		Render::Group group = importModel(model_path, render);
-
 		model.emplace(group);
+
+		Render::GroupInstance track(importModel("assets/The_Coffin_render.glb", render));
 
 		float pi = glm::pi<float>();
 		render.create_dir_light({pi, pi, pi}, {1, 1, 1});
@@ -36,13 +37,9 @@ class GameObject : public Entity {
 	}
 
 	void update(float deltaTime) override {
-		const float dist = 10;
-		const float speed = 1;
+		physx::PxTransform camera(0, 5, -10, physx::PxQuat(physx::PxPi, {0, 1, 0}) * physx::PxQuat(-0.2, {1, 0, 0}));
 
-		glm::vec3 camera = {10, 5, 0};
-		glm::mat4 cameraPos = lookAt(camera, glm::vec3{0, 0, 0}, glm::vec3{0, 1, 0});
-
-		render.camera_set_pos(cameraPos);
+		render.camera_set_pos(convertTransform(transform.transform(camera)));
 
 		model->setTransform(convertTransform(transform));
 	}
