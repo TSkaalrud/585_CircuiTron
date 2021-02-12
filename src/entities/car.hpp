@@ -11,7 +11,7 @@ class Car : public GameObject {
   public:
 	// change assets/test.glb to car model path
 	Car(Render::Render& render, int start_place, physx::PxTransform& pt)
-		: GameObject(render, "assets/DamagedHelmet.glb", pt), place(start_place){};
+		: GameObject(render, "assets/Bike_Final.glb", pt), place(start_place){};
 
 	// not sure if this would go here
 	void SpawnWall() {
