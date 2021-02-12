@@ -49,9 +49,11 @@
 #include "CTPVD.h"
 #include "CTPrint.h"
 #include "CTUtils.h"
-#include <GLFW\glfw3.h>
+#include <GLFW/glfw3.h>
 
 #include <iostream>
+#include <math.h>
+#include <stdio.h>
 
 using namespace physx;
 using namespace snippetvehicle;
@@ -157,7 +159,7 @@ VehicleDesc initVehicleDesc() {
 	// The moment of inertia is just the moment of inertia of a cuboid but modified for easier steering.
 	// Center of mass offset is 0.65m above the base of the chassis and 0.25m towards the front.
 	const PxF32 chassisMass = 500.0f;
-	const PxVec3 chassisDims(2.5f, 2.0f, 5.0f);
+	const PxVec3 chassisDims(2.5f, 2.0f, 10.0f);
 	const PxVec3 chassisMOI(
 		(chassisDims.y * chassisDims.y + chassisDims.z * chassisDims.z) * chassisMass / 12.0f,
 		(chassisDims.x * chassisDims.x + chassisDims.z * chassisDims.z) * 0.8f * chassisMass / 12.0f,
@@ -358,6 +360,35 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 }
 
 
+PxF32 boxTimeOffset = 0.25f;
+PxF32 boxTimer = 0.0f;
+
+PxVec3 trailPos;
+
+// basic wall generation
+void spawnWall(PxF32 timestep) { 
+	float xVel = gVehicle4W->getRigidDynamicActor()->getLinearVelocity().x;
+	float zVel = gVehicle4W->getRigidDynamicActor()->getLinearVelocity().z;
+	float vel = sqrt((xVel * xVel) + (zVel * zVel));
+	PxShape* wallShape = gPhysics->createShape(PxBoxGeometry(0.5f, 0.5f, 0.5f), *gMaterial);
+
+	boxTimer += timestep;
+
+	if (vel >= 20.0f && gVehicle4W->mDriveDynData.getCurrentGear() != PxVehicleGearsData::eREVERSE) {
+		if (boxTimer >= boxTimeOffset) {
+			if (trailPos.x != NULL) {
+				//make wall
+				PxRigidStatic* wallSeg = gPhysics->createRigidStatic(PxTransform(trailPos));
+				wallSeg->attachShape(*wallShape);
+				gScene->addActor(*wallSeg);
+			}
+			trailPos = gVehicle4W->getRigidDynamicActor()->getGlobalPose().p;
+			boxTimer = 0.0f;
+		}
+	}
+
+}
+
 void initPhysics() {
 	gFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, gAllocator, gErrorCallback);
 	gPvd = PxCreatePvd(*gFoundation);
@@ -425,6 +456,8 @@ void initPhysics() {
 
 void stepPhysics(GLFWwindow* window) {
 	const PxF32 timestep = 1.0f / 60.0f;
+
+	spawnWall(timestep);
 
 	glfwSetKeyCallback(window, keyCallback);
 

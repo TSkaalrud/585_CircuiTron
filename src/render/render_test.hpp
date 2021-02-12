@@ -18,7 +18,7 @@ class RenderTest : public Entity {
 	void enter() override {
 		render.camera_set_fov(50);
 
-		import_scene("assets/Bike_Final.glb", render);
+		import_scene("assets/DamagedHelmet.glb", render);
 
 		float pi = glm::pi<float>();
 		render.create_dir_light({pi, pi, pi}, {1, 1, 1});
@@ -30,7 +30,7 @@ class RenderTest : public Entity {
 		static auto start_time = std::chrono::high_resolution_clock::now();
 		auto current_time = std::chrono::high_resolution_clock::now();
 		auto seconds = std::chrono::duration_cast<std::chrono::duration<float>>(current_time - start_time).count();
-		const float dist = 6;
+		const float dist = 15;
 		const float speed = 1;
 
 		vec3 camera = {sin(seconds * speed) * dist, 0, cos(seconds * speed) * dist};
