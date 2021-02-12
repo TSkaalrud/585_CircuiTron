@@ -387,7 +387,7 @@ PxTransform trailPos;
 bool firstWall = true;
 
 // basic wall generation
-void spawnWall(PxF32 timestep, PxVehicleDrive4W* vehicle, PxTransform wall) { 
+void spawnWall(PxF32 timestep, PxVehicleDrive4W* vehicle, PxTransform& wall) { 
 	float xVel = vehicle->getRigidDynamicActor()->getLinearVelocity().x;
 	float zVel = vehicle->getRigidDynamicActor()->getLinearVelocity().z;
 	float vel = sqrt((xVel * xVel) + (zVel * zVel));
