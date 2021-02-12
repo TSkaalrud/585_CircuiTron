@@ -2,8 +2,6 @@
 
 #include <foundation/PxMat44.h>
 #include <foundation/PxTransform.h>
-#include <glm/gtc/quaternion.hpp>
-#include <glm/gtx/quaternion.hpp>
 #include <glm/mat4x4.hpp>
 
 glm::mat4 convertTransform(physx::PxTransform& t) {
