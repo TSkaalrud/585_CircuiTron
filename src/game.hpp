@@ -1,5 +1,6 @@
 #include <vector>
 #include <algorithm>
+
 #include "entities/car.hpp"
 #include "entities/checkpoint.hpp"
 #include "render/render.hpp"

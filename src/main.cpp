@@ -82,16 +82,18 @@ int main(int argc, char* argv[]) {
 	float time = 0;
 	auto past = std::chrono::high_resolution_clock::now();
 
-	if (args.size() > 1 && args.at(1) == "view") {
-		e_manager.addEntity(std::make_unique<Render::RenderTest>(render));
-	} else {
-		e_manager.addEntity(std::make_unique<Car>(render, 1));
-	}
-
 	// initialize physics
 	physx::PxTransform player1;
 
 	initPhysics(player1);
+
+
+	if (args.size() > 1 && args.at(1) == "view") {
+		e_manager.addEntity(std::make_unique<Render::RenderTest>(render));
+	} else {
+		e_manager.addEntity(std::make_unique<Car>(render, 1, player1));
+	}
+
 
 	// Loop will continue until "X" on window is clicked.
 	// We may want more complex closing behaviour

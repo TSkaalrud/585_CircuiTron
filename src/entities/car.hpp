@@ -7,10 +7,10 @@ class Car : public GameObject {
 		int lap = 1;
 		int checkpoint = 0;
 		int place = 0;
-	
+
 	public:
 		// change assets/test.glb to car model path
-		Car(Render::Render& render, int start_place) : GameObject(render, "assets/Bike_Final.glb") { 
+		Car(Render::Render& render, int start_place, physx::PxTransform pt) : GameObject(render, "assets/Bike_Final.glb", pt) { 
 			place = start_place;
 		};
 
