@@ -84,8 +84,9 @@ int main(int argc, char* argv[]) {
 
 	// initialize physics
 	physx::PxTransform player1;
+	physx::PxTransform wall1;
 
-	initPhysics(player1);
+	initPhysics();
 
 
 	if (args.size() > 1 && args.at(1) == "view") {
@@ -115,7 +116,11 @@ int main(int argc, char* argv[]) {
 			past = now;
 		}
 		// simulate();
-		stepPhysics(window, player1);
+		stepPhysics(window, player1, wall1);
+
+		if (wall1.p.x != NULL) {
+			std::cout << wall1.p.x << std::endl;
+		}
 
 		time += timestep;
 

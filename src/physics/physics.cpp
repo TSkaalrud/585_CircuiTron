@@ -81,6 +81,8 @@ PxVehicleDrivableSurfaceToTireFrictionPairs* gFrictionPairs = NULL;
 PxRigidStatic* gGroundPlane = NULL;
 PxVehicleDrive4W* gVehicle4W = NULL;
 
+PxRigidStatic* aWall = NULL;
+
 bool gIsVehicleInAir = true;
 
 PxF32 gSteerVsForwardSpeedData[2 * 8] = {0.0f,       0.75f,      5.0f,       0.75f,      30.0f,      0.125f,
@@ -158,8 +160,8 @@ VehicleDesc initVehicleDesc() {
 	// Set up the chassis mass, dimensions, moment of inertia, and center of mass offset.
 	// The moment of inertia is just the moment of inertia of a cuboid but modified for easier steering.
 	// Center of mass offset is 0.65m above the base of the chassis and 0.25m towards the front.
-	const PxF32 chassisMass = 500.0f;
-	const PxVec3 chassisDims(2.5f, 2.0f, 10.0f);
+	const PxF32 chassisMass = 250.0f;
+	const PxVec3 chassisDims(1.0f, 1.5f, 4.63f);
 	const PxVec3 chassisMOI(
 		(chassisDims.y * chassisDims.y + chassisDims.z * chassisDims.z) * chassisMass / 12.0f,
 		(chassisDims.x * chassisDims.x + chassisDims.z * chassisDims.z) * 0.8f * chassisMass / 12.0f,
@@ -168,9 +170,9 @@ VehicleDesc initVehicleDesc() {
 
 	// Set up the wheel mass, radius, width, moment of inertia, and number of wheels.
 	// Moment of inertia is just the moment of inertia of a cylinder.
-	const PxF32 wheelMass = 20.0f;
+	const PxF32 wheelMass = 15.0f;
 	const PxF32 wheelRadius = 0.5f;
-	const PxF32 wheelWidth = 1.0f;
+	const PxF32 wheelWidth = 0.3f;
 	const PxF32 wheelMOI = 0.5f * wheelMass * wheelRadius * wheelRadius;
 	const PxU32 nbWheels = 4;
 
@@ -357,39 +359,63 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 			break;
 		}
 	}
+
+	if (key == GLFW_KEY_LEFT_SHIFT) {
+		switch (action) {
+		case GLFW_PRESS:
+			gVehicleInputData.setAnalogBrake(1.0f);
+			break;
+
+		case GLFW_REPEAT:
+			gVehicleInputData.setAnalogBrake(1.0f);
+			break;
+
+		case GLFW_RELEASE:
+			gVehicleInputData.setAnalogBrake(0.0f);
+			break;
+
+		default:
+			break;
+		}
+	}
 }
 
 
 PxF32 boxTimeOffset = 0.25f;
 PxF32 boxTimer = 0.0f;
-
-PxVec3 trailPos;
+PxTransform trailPos;
+bool firstWall = true;
 
 // basic wall generation
-void spawnWall(PxF32 timestep) { 
-	float xVel = gVehicle4W->getRigidDynamicActor()->getLinearVelocity().x;
-	float zVel = gVehicle4W->getRigidDynamicActor()->getLinearVelocity().z;
+void spawnWall(PxF32 timestep, PxVehicleDrive4W* vehicle, PxTransform wall) { 
+	float xVel = vehicle->getRigidDynamicActor()->getLinearVelocity().x;
+	float zVel = vehicle->getRigidDynamicActor()->getLinearVelocity().z;
 	float vel = sqrt((xVel * xVel) + (zVel * zVel));
-	PxShape* wallShape = gPhysics->createShape(PxBoxGeometry(0.5f, 0.5f, 0.5f), *gMaterial);
+	PxShape* wallShape = gPhysics->createShape(PxBoxGeometry(0.1f, 1.0f, 3.0f), *gMaterial);
 
 	boxTimer += timestep;
 
-	if (vel >= 20.0f && gVehicle4W->mDriveDynData.getCurrentGear() != PxVehicleGearsData::eREVERSE) {
+	if (vel >= 15.0f && vehicle->mDriveDynData.getCurrentGear() != PxVehicleGearsData::eREVERSE) {
 		if (boxTimer >= boxTimeOffset) {
-			if (trailPos.x != NULL) {
-				//make wall
-				PxRigidStatic* wallSeg = gPhysics->createRigidStatic(PxTransform(trailPos));
-				wallSeg->attachShape(*wallShape);
-				gScene->addActor(*wallSeg);
+			if (trailPos.p.x != NULL) {
+				if (firstWall) {
+					aWall = gPhysics->createRigidStatic(trailPos);
+					aWall->attachShape(*wallShape);
+					gScene->addActor(*aWall);
+					firstWall = false;
+				} else {
+					aWall->setGlobalPose(trailPos);
+					wall = aWall->getGlobalPose();
+				}
 			}
-			trailPos = gVehicle4W->getRigidDynamicActor()->getGlobalPose().p;
+			trailPos = vehicle->getRigidDynamicActor()->getGlobalPose();
 			boxTimer = 0.0f;
 		}
 	}
 
 }
 
-void initPhysics(PxTransform& player) {
+void initPhysics() {
 	gFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, gAllocator, gErrorCallback);
 	gPvd = PxCreatePvd(*gFoundation);
 	PxPvdTransport* transport = PxDefaultPvdSocketTransportCreate(PVD_HOST, 5425, 10);
@@ -437,7 +463,7 @@ void initPhysics(PxTransform& player) {
 	VehicleDesc vehicleDesc = initVehicleDesc();
 	gVehicle4W = createVehicle4W(vehicleDesc, gPhysics, gCooking);
 	PxTransform startTransform(
-		PxVec3(0, (vehicleDesc.chassisDims.y * 0.5f + vehicleDesc.wheelRadius + 1.0f), 0), PxQuat(PxIdentity));
+		PxVec3(75.0f, (vehicleDesc.chassisDims.y * 0.5f + vehicleDesc.wheelRadius + 1.0f), 0.5f), PxQuat(PxIdentity));
 	gVehicle4W->getRigidDynamicActor()->setGlobalPose(startTransform);
 	gScene->addActor(*gVehicle4W->getRigidDynamicActor());
 
@@ -451,16 +477,14 @@ void initPhysics(PxTransform& player) {
 	gVehicleOrderProgress = 0;
 	startBrakeMode();
 	releaseAllControls();
-
-	player = gVehicle4W->getRigidDynamicActor()->getGlobalPose();
 }
 
-void stepPhysics(GLFWwindow* window, PxTransform& player) {
+void stepPhysics(GLFWwindow* window, PxTransform& player, PxTransform& wall) {
 	const PxF32 timestep = 1.0f / 60.0f;
 
 	player = gVehicle4W->getRigidDynamicActor()->getGlobalPose();
 
-	spawnWall(timestep);
+	spawnWall(timestep, gVehicle4W, wall);
 
 	glfwSetKeyCallback(window, keyCallback);
 
