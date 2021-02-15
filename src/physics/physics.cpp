@@ -161,7 +161,7 @@ VehicleDesc initVehicleDesc() {
 	// The moment of inertia is just the moment of inertia of a cuboid but modified for easier steering.
 	// Center of mass offset is 0.65m above the base of the chassis and 0.25m towards the front.
 	const PxF32 chassisMass = 250.0f;
-	const PxVec3 chassisDims(1.0f, 1.5f, 4.63f);
+	const PxVec3 chassisDims(1.0f, 1.5f, 2.315f);
 	const PxVec3 chassisMOI(
 		(chassisDims.y * chassisDims.y + chassisDims.z * chassisDims.z) * chassisMass / 12.0f,
 		(chassisDims.x * chassisDims.x + chassisDims.z * chassisDims.z) * 0.8f * chassisMass / 12.0f,
@@ -380,7 +380,6 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 	}
 }
 
-
 PxF32 boxTimeOffset = 0.25f;
 PxF32 boxTimer = 0.0f;
 PxTransform trailPos;
@@ -391,7 +390,15 @@ void spawnWall(PxF32 timestep, PxVehicleDrive4W* vehicle, PxTransform& wall) {
 	float xVel = vehicle->getRigidDynamicActor()->getLinearVelocity().x;
 	float zVel = vehicle->getRigidDynamicActor()->getLinearVelocity().z;
 	float vel = sqrt((xVel * xVel) + (zVel * zVel));
-	PxShape* wallShape = gPhysics->createShape(PxBoxGeometry(0.1f, 1.0f, 3.0f), *gMaterial);
+	PxShape* wallShape = gPhysics->createShape(PxBoxGeometry(0.4f, 0.6f, 2.315f), *gMaterial);
+
+	//set query filter data of the wall so thta the vehicle raycasts can hit the wall
+	PxFilterData qryFilterData(COLLISION_FLAG_OBSTACLE, COLLISION_FLAG_OBSTACLE_AGAINST, 0, 0);
+	wallShape->setQueryFilterData(qryFilterData);
+
+	//set simulation filter data of the wall so that the vehicle collides with the wall
+	PxFilterData wallSimFilterData(COLLISION_FLAG_OBSTACLE, COLLISION_FLAG_OBSTACLE_AGAINST, 0, 0);
+	wallShape->setSimulationFilterData(wallSimFilterData);
 
 	boxTimer += timestep;
 
