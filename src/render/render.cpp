@@ -42,15 +42,9 @@ struct _PBR {
 	float roughFactor;
 };
 
-uint shaderHandle = -1;
-
 MaterialHandle Render::create_pbr_material(MaterialPBR pbr) {
-	if (shaderHandle == -1) {
-		GLuint shader =
-			load_shader_program({{"shaders/default.vert", GL_VERTEX_SHADER}, {"shaders/pbr.frag", GL_FRAGMENT_SHADER}});
-		shaderHandle = shaders.size();
-		shaders.push_back({shader});
-	}
+	static ShaderHandle shader = registerShader(
+		{load_shader_program({{"shaders/default.vert", GL_VERTEX_SHADER}, {"shaders/pbr.frag", GL_FRAGMENT_SHADER}})});
 
 	GLuint uniform;
 	glCreateBuffers(1, &uniform);
@@ -69,8 +63,46 @@ MaterialHandle Render::create_pbr_material(MaterialPBR pbr) {
 		pbr.albedoTexture.value_or(whiteTexture), pbr.metalRoughTexture.value_or(whiteTexture),
 		pbr.emissiveTexture.value_or(whiteTexture)};
 
-	uint handle = materials.size();
-	materials.push_back(Material{.shader = shaderHandle, .uniform = uniform, .textures = textures});
-	return handle;
+	return registerMaterial(Material{.shader = shader, .uniform = uniform, .textures = textures});
+}
+
+template <class T> size_t vector_size(const std::vector<T>& vec) { return sizeof(T) * vec.size(); }
+
+Render::Render(void (*glGetProcAddr(const char*))()) : Core(glGetProcAddr) {
+	ShaderHandle skyboxShader = registerShader({load_shader_program(
+		{{"shaders/skybox.vert", GL_VERTEX_SHADER}, {"shaders/skybox.frag", GL_FRAGMENT_SHADER}})});
+	MaterialHandle skyboxMaterial = registerMaterial(Material{.shader = skyboxShader, .uniform = 0, .textures = {}});
+
+	std::vector<vec3> verticies = {
+		{-1, -1, -1}, {-1, -1, 1}, {-1, 1, -1}, {-1, 1, 1}, {1, -1, -1}, {1, -1, 1}, {1, 1, -1}, {1, 1, 1},
+	};
+
+	// clang-format off
+	std::vector<uint32_t> indicies = {
+		2, 0, 4, 4, 6, 2,
+		1, 0, 2, 2, 3, 1,
+		4, 5, 7, 7, 6, 4,
+		1, 3, 7, 7, 5, 1,
+		2, 6, 7, 7, 3, 2,
+		0, 1, 4, 4, 1, 5,
+	};
+	// clang-format on
+
+	GLuint vertex_buffer, index_buffer, vao;
+	glCreateBuffers(1, &vertex_buffer);
+	glCreateBuffers(1, &index_buffer);
+	glCreateVertexArrays(1, &vao);
+
+	glNamedBufferStorage(vertex_buffer, vector_size(verticies), verticies.data(), 0);
+	glNamedBufferStorage(index_buffer, vector_size(indicies), indicies.data(), 0);
+
+	glVertexArrayVertexBuffer(vao, 0, vertex_buffer, 0, sizeof(vec3));
+	glEnableVertexArrayAttrib(vao, 0);
+	glVertexArrayAttribFormat(vao, 0, 3, GL_FLOAT, false, 0);
+
+	glVertexArrayElementBuffer(vao, index_buffer);
+
+	uint skyboxMesh = registerMesh(Mesh{.vao = vao, .count = static_cast<uint>(indicies.size())});
+	registerInstance(Instance{.model = skyboxMesh, .mat = skyboxMaterial, .trans = mat4(1.0f)});
 }
 } // namespace Render

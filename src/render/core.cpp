@@ -54,9 +54,7 @@ uint Core::create_mesh(MeshDef def) {
 
 	glVertexArrayElementBuffer(vao, index_buffer);
 
-	uint handle = meshes.size();
-	meshes.push_back(Mesh{.vao = vao, .count = static_cast<uint>(def.indicies.size())});
-	return handle;
+	return registerMesh(Mesh{.vao = vao, .count = static_cast<uint>(def.indicies.size())});
 }
 
 uint Core::create_texture(int width, int height, int channels, bool srgb, void* data) {
@@ -95,7 +93,7 @@ void Core::renderScene() {
 
 		auto material = materials[i.mat];
 		glBindBufferBase(GL_UNIFORM_BUFFER, 1, material.uniform);
-		glBindTextures(4, material.textures.size(), material.textures.data());
+		glBindTextures(5, material.textures.size(), material.textures.data());
 
 		glUniformMatrix4fv(0, 1, false, value_ptr(i.trans));
 
@@ -104,12 +102,11 @@ void Core::renderScene() {
 }
 
 void Core::run() {
-	glClearColor(0, 0.2, 0.5, 1.0);
-
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_DEPTH_CLAMP);
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+	glDepthFunc(GL_LEQUAL);
 
 	glNamedBufferData(dirLightBuffer, vector_size(dirLights), dirLights.data(), GL_DYNAMIC_DRAW);
 

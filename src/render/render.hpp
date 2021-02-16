@@ -17,7 +17,7 @@ struct MaterialPBR {
 
 class Render : public Core {
   public:
-	Render(void (*glGetProcAddr(const char*))()) : Core(glGetProcAddr) {}
+	Render(void (*glGetProcAddr(const char*))());
 	Render(const Render&) = delete;
 
 	MaterialHandle create_pbr_material(MaterialPBR);
