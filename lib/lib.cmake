@@ -89,7 +89,7 @@ target_link_libraries(libs INTERFACE imgui)
 find_package(OpenAL CONFIG QUIET)
 if(NOT TARGET OpenAL::OpenAL)
 	FetchContent_Declare(OPENAL
-		URL https://github.com/kcat/openal-soft/archive/1.21.0.zip
+		URL https://github.com/kcat/openal-soft/archive/1.21.1.zip
 	)
 	FetchContent_GetProperties(OPENAL)
 	if(NOT openal_POPULATED)
