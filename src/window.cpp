@@ -47,17 +47,15 @@ Window::Window(GLFWwindow* window) : render(glfwGetProcAddress), window(window) 
 	// My callback uses the userpoint to store render
 	// This may need to be reworked as we may need the user pointer for other things as well.
 	glfwSetWindowUserPointer(window, this);
-	auto resizeCallback = [](GLFWwindow* glfwWindow, int width, int height) {
+	glfwSetFramebufferSizeCallback(window, [](GLFWwindow* glfwWindow, int width, int height) {
 		static_cast<Window*>(glfwGetWindowUserPointer(glfwWindow))->render.resize(width, height);
-	};
-
+	});
 	{
 		// Render needs to be resized before it can be used
 		int width, height;
 		glfwGetFramebufferSize(window, &width, &height);
 		render.resize(width, height);
 	}
-	glfwSetFramebufferSizeCallback(window, resizeCallback);
 
 	// Init imgui
 	IMGUI_CHECKVERSION();
