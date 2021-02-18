@@ -85,3 +85,18 @@ target_include_directories(imgui PUBLIC ${CMAKE_CURRENT_LIST_DIR}/imgui/)
 target_link_libraries(imgui gl glfw)
 target_compile_definitions(imgui PRIVATE IMGUI_IMPL_OPENGL_LOADER_CUSTOM="gl.hpp")
 target_link_libraries(libs INTERFACE imgui)
+
+find_package(OpenAL CONFIG QUIET)
+if(NOT TARGET OpenAL::OpenAL)
+	FetchContent_Declare(OPENAL
+		URL https://github.com/kcat/openal-soft/archive/1.21.0.zip
+	)
+	FetchContent_GetProperties(OPENAL)
+	if(NOT openal_POPULATED)
+		FetchContent_Populate(OPENAL)
+		add_subdirectory(${openal_SOURCE_DIR} EXCLUDE_FROM_ALL)
+	endif()
+	target_link_libraries(libs INTERFACE OpenAL)
+else()
+	target_link_libraries(libs INTERFACE OpenAL::OpenAL)
+endif()
