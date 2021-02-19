@@ -1,3 +1,9 @@
+//Audio
+#include "Audio/AudioEngine.h"
+#include "Audio/audioInstance.h"
+//#include <Audio/audioEngine.h>
+//#include <Audio/audioInstance.h>
+
 #include "entities/car.hpp"
 #include "entities/entity.hpp"
 #include "entities/entity_manager.hpp"
@@ -129,6 +135,8 @@ int main(int argc, char* argv[]) {
 		e_manager.update(time);
 
 		// sound();
+		AudioEngine stereo = AudioEngine();
+		stereo.initialize();
 
 		// Probably want to combine all this into a render()
 		render.run();
