@@ -1,6 +1,7 @@
+#pragma once
 //Audio
-#include "Audio/AudioEngine.h"
-#include "Audio/audioInstance.h"
+#include "Audio/audioEngine.h"
+//#include "Audio/audioInstance.h"
 //#include <Audio/audioEngine.h>
 //#include <Audio/audioInstance.h>
 
@@ -11,7 +12,7 @@
 #include "physics/physics.h"
 #include "render/render.hpp"
 #include "render/render_test.hpp"
-#include <AL/alc.h>
+//#include <AL/alc.h>
 #include <GLFW/glfw3.h>
 #include <chrono>
 #include <imgui.h>
@@ -81,7 +82,7 @@ int main(int argc, char* argv[]) {
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init(NULL);
 
-	auto audioDevice = alcOpenDevice(NULL);
+	//auto audioDevice = alcOpenDevice(NULL);
 
 	// Create entitity manager
 	EntityManager e_manager;
@@ -135,7 +136,7 @@ int main(int argc, char* argv[]) {
 		e_manager.update(time);
 
 		// sound();
-		AudioEngine stereo = AudioEngine();
+		Audio::AudioEngine stereo = Audio::AudioEngine();
 		stereo.initialize();
 
 		// Probably want to combine all this into a render()

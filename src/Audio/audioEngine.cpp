@@ -1,56 +1,12 @@
+#pragma once
 #include "audioEngine.h"
 
-#define NUM_BUFFERS 2
-#define NUM_SOURCES 2
-#define NUM_ENVIRONMENTS 2
-ALfloat listenerPos[] = {0.0, 0.0, 4.0};
-ALfloat listenerVel[] = {0.0, 0.0, 0.0};
-ALfloat listenerOri[] = {0.0, 0.0, 1.0, 0.0, 1.0, 0.0};
+namespace Audio {
 
-ALfloat source0Pos[] = {-2.0, 0.0, 0.0};
-ALfloat source0Vel[] = {0.0, 0.0, 0.0};
+AudioEngine::AudioEngine() {
 
-ALuint buffer[NUM_BUFFERS];
-ALuint source[NUM_SOURCES];
-ALuint environment[NUM_ENVIRONMENTS];
-
-ALsizei size, freq;
-ALenum format;
-ALvoid* data;
-
-/*
- * Struct that holds the RIFF data of the Wave file.
- * The RIFF data is the meta data information that holds,
- * the ID, size and format of the wave file
- */
-struct RIFF_Header {
-	char chunkID[4];
-	int chunkSize; // size not including chunkSize or chunkID
-	char format[4];
-};
-
-/*
- * Struct to hold fmt subchunk data for WAVE files.
- */
-struct WAVE_Format {
-	char subChunkID[4];
-	int subChunkSize;
-	short audioFormat;
-	short numChannels;
-	int sampleRate;
-	int byteRate;
-	short blockAlign;
-	short bitsPerSample;
-};
-
-/*
- * Struct to hold the data of the wave file
- */
-struct WAVE_Data {
-	char subChunkID[4]; // should contain the word data
-	int subChunk2Size;  // Stores the size of the data block
-};
-
+}
+AudioEngine::~AudioEngine() {};
 /*
  * Load wave file function. No need for ALUT with this
  */
@@ -77,7 +33,7 @@ void CheckError(int op = -1, int _err = 0) {
 	return;
 }
 
-bool _strcmp(const char* base, const char* cp) {
+bool AudioEngine::_strcmp(const char* base, const char* cp) {
 	for (int lx = 0; base[lx] != 0; lx++) {
 		if (cp[lx] != base[lx])
 			return false;
@@ -85,7 +41,7 @@ bool _strcmp(const char* base, const char* cp) {
 	return true;
 }
 
-bool loadWavFile(const char* filename, ALuint* buffer, ALsizei* size, ALsizei* frequency, ALenum* format) {
+bool AudioEngine::loadWavFile(const char* filename, ALuint* buffer, ALsizei* size, ALsizei* frequency, ALenum* format) {
 	// Local Declarations
 	fprintf(stderr, "[1] filename = %s\n", filename);
 	FILE* soundFile = NULL;
@@ -147,13 +103,13 @@ bool loadWavFile(const char* filename, ALuint* buffer, ALsizei* size, ALsizei* f
 				*format = AL_FORMAT_STEREO16;
 		}
 		// create our openAL buffer and check for success
-		CheckError();
+		//CheckError();
 		alGenBuffers(1, buffer);
-		CheckError();
+		//CheckError();
 		// now we put our data into the openAL buffer and
 		// check for success
 		alBufferData(*buffer, *format, (void*)data, *size, *frequency);
-		CheckError();
+		//CheckError();
 		// clean up and return true if successful
 		fclose(soundFile);
 		fprintf(stderr, "load ok\n");
@@ -172,18 +128,18 @@ bool loadWavFile(const char* filename, ALuint* buffer, ALsizei* size, ALsizei* f
 	}
 }
 
-void initialize() {
+void AudioEngine::initialize() {
 	alListenerfv(AL_POSITION, listenerPos);
 	alListenerfv(AL_VELOCITY, listenerVel);
 	alListenerfv(AL_ORIENTATION, listenerOri);
 
 	// Generate buffers, or else no sound will happen!
 	alGenSources(NUM_SOURCES, source);
-	CheckError();
+	//CheckError();
 
 	// BGM test
-	loadWavFile("assets/Cybersong.wav", buffer, &size, &freq, &format);
-	CheckError();
+	loadWavFile("assets/GunImpact.wav", buffer, &size, &freq, &format);
+	//CheckError();
 
 	alSourcef(source[0], AL_PITCH, 1.0f);
 	alSourcef(source[0], AL_GAIN, 1.0f);
@@ -193,10 +149,9 @@ void initialize() {
 	// alSourcei(source[0], AL_LOOPING, AL_TRUE);
 	alSourcePlay(source[0]);
 
-	for (int lx = 0; lx < 1000000000; lx++)
-		;
+	for (int lx = 0; lx < 1000000000; lx++);
 	// SE test
-	loadWavFile("assets/burr.wav", buffer + 1, &size, &freq, &format);
+	//loadWavFile("assets/burr.wav", buffer + 1, &size, &freq, &format);
 	alSourcef(source[1], AL_PITCH, 1.0f);
 	alSourcef(source[1], AL_GAIN, 1.0f);
 	alSourcefv(source[1], AL_POSITION, source0Pos);
@@ -207,3 +162,4 @@ void initialize() {
 
 	return;
 }
+} // namespace Audio
