@@ -81,7 +81,7 @@ namespace Audio {
 			ALvoid* data;
 
 		private:
-			void CheckError(int op, int _err);
+			void CheckError(int op = -1, int _err = 0);
 			bool _strcmp(const char* base, const char* cp);
 			bool loadWavFile(const char* filename, ALuint* buffer, ALsizei* size, ALsizei* frequency, ALenum* format);
 

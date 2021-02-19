@@ -1,4 +1,3 @@
-#pragma once
 #include "audioEngine.h"
 
 namespace Audio {
@@ -11,7 +10,7 @@ AudioEngine::~AudioEngine() {};
  * Load wave file function. No need for ALUT with this
  */
 
-void CheckError(int op = -1, int _err = 0) {
+void AudioEngine::CheckError(int op, int _err) {
 	int err;
 	if (op == -1)
 		err = alGetError(); // clear any error messages
@@ -67,7 +66,7 @@ bool AudioEngine::loadWavFile(const char* filename, ALuint* buffer, ALsizei* siz
 		// check for fmt tag in memory
 		if (_strcmp("fmt ", wave_format.subChunkID) == false)
 			throw("Invalid Wave Format");
-
+		
 		// check for extra parameters;
 		if (wave_format.subChunkSize > 16)
 			fseek(soundFile, sizeof(short), SEEK_CUR);
@@ -103,9 +102,9 @@ bool AudioEngine::loadWavFile(const char* filename, ALuint* buffer, ALsizei* siz
 				*format = AL_FORMAT_STEREO16;
 		}
 		// create our openAL buffer and check for success
-		//CheckError();
+		CheckError();
 		alGenBuffers(1, buffer);
-		//CheckError();
+		CheckError();
 		// now we put our data into the openAL buffer and
 		// check for success
 		alBufferData(*buffer, *format, (void*)data, *size, *frequency);
@@ -135,11 +134,11 @@ void AudioEngine::initialize() {
 
 	// Generate buffers, or else no sound will happen!
 	alGenSources(NUM_SOURCES, source);
-	//CheckError();
+	CheckError();
 
 	// BGM test
-	loadWavFile("assets/GunImpact.wav", buffer, &size, &freq, &format);
-	//CheckError();
+	loadWavFile("assets/Cybersong.wav", buffer, &size, &freq, &format);
+	CheckError();
 
 	alSourcef(source[0], AL_PITCH, 1.0f);
 	alSourcef(source[0], AL_GAIN, 1.0f);
