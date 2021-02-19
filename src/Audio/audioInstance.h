@@ -2,8 +2,9 @@
 #define _CRT_SECURE_NO_WARNINGS
 //#include <AL/al.h>
 //#include <AL/alc.h>
-#include "../../out/build/x64-Debug (default)/_deps/openal-src/include/AL/al.h"
+//#include "../../out/build/x64-Debug (default)/_deps/openal-src/include/AL/al.h"
 //#include "../../out/build/x64-Debug (default)/_deps/openal-src/include/AL/alc.h"
+#include <AL/al.h>
 
 class AudioInstance {
 
