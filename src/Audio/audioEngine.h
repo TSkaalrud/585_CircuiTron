@@ -9,8 +9,8 @@
 #include <vector>
 #include <memory>
 //#include "../../out/build/x64-Debug (default)/_deps/openal-src/include/AL/al.h"
-#include "../../out/build/x64-Debug (default)/_deps/openal-src/include/AL/alc.h"
-//#include <AL/alc.h>
+//#include "../../out/build/x64-Debug (default)/_deps/openal-src/include/AL/alc.h"
+#include <AL/alc.h>
 
 namespace Audio {
 	// audio is stored in an array, indexes are used to refer to the audio files in that array
@@ -65,12 +65,12 @@ namespace Audio {
 			AudioInstance& createInstance(int soundFile);
 			void killSources();
 
-			ALfloat listenerPos[3]; //   = {0.0, 0.0, 4.0};
-			ALfloat listenerVel[3]; //	  = {0.0, 0.0, 0.0};
-			ALfloat listenerOri[6]; //	  = {0.0, 0.0, 1.0, 0.0, 1.0, 0.0};
+			ALfloat listenerPos[3]    = {0.0, 0.0, 4.0};
+			ALfloat listenerVel[3]	  = {0.0, 0.0, 0.0};
+			ALfloat listenerOri[6]	  = {0.0, 0.0, 1.0, 0.0, 1.0, 0.0};
 
-			ALfloat source0Pos[3]; //	  = {-2.0, 0.0, 0.0};
-			ALfloat source0Vel[3]; //	  = {0.0, 0.0, 0.0};
+			ALfloat source0Pos[3]	  = {-2.0, 0.0, 0.0};
+			ALfloat source0Vel[3]	  = {0.0, 0.0, 0.0};
 
 			ALuint buffer[NUM_BUFFERS];
 			ALuint source[NUM_SOURCES];

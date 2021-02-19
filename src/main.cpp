@@ -4,6 +4,8 @@
 //#include "Audio/audioInstance.h"
 //#include <Audio/audioEngine.h>
 //#include <Audio/audioInstance.h>
+#include <AL/al.h>
+#include <AL/alc.h>
 
 #include "entities/car.hpp"
 #include "entities/entity.hpp"
@@ -105,6 +107,13 @@ int main(int argc, char* argv[]) {
 		e_manager.addEntity(std::make_unique<Wall>(render, wall1));
 	}
 
+	ALCdevice* dev = alcOpenDevice(NULL);
+	ALCcontext* ctx = alcCreateContext(dev, NULL);
+	alcMakeContextCurrent(ctx);
+	;
+	Audio::AudioEngine stereo = Audio::AudioEngine();
+
+
 	// Loop will continue until "X" on window is clicked.
 	// We may want more complex closing behaviour
 	while (!glfwWindowShouldClose(window)) {
@@ -136,7 +145,8 @@ int main(int argc, char* argv[]) {
 		e_manager.update(time);
 
 		// sound();
-		Audio::AudioEngine stereo = Audio::AudioEngine();
+
+		
 		stereo.initialize();
 
 		// Probably want to combine all this into a render()

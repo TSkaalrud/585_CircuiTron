@@ -108,7 +108,7 @@ bool AudioEngine::loadWavFile(const char* filename, ALuint* buffer, ALsizei* siz
 		// now we put our data into the openAL buffer and
 		// check for success
 		alBufferData(*buffer, *format, (void*)data, *size, *frequency);
-		//CheckError();
+		CheckError();
 		// clean up and return true if successful
 		fclose(soundFile);
 		fprintf(stderr, "load ok\n");
@@ -157,7 +157,7 @@ void AudioEngine::initialize() {
 	alSourcefv(source[1], AL_VELOCITY, source0Vel);
 	alSourcei(source[1], AL_BUFFER, buffer[1]);
 	// alSourcei(source[1], AL_LOOPING, AL_TRUE);
-	alSourcePlay(source[1]);
+	//alSourcePlay(source[1]);
 
 	return;
 }
