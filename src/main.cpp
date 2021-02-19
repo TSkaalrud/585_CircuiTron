@@ -1,17 +1,17 @@
 #include "entities/car.hpp"
-#include "entities/wall.hpp"
 #include "entities/entity.hpp"
 #include "entities/entity_manager.hpp"
+#include "entities/wall.hpp"
 #include "physics/physics.h"
 #include "render/render.hpp"
 #include "render/render_test.hpp"
+#include <AL/alc.h>
 #include <GLFW/glfw3.h>
 #include <chrono>
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 #include <iostream>
-
 
 int main(int argc, char* argv[]) {
 	// Read in the command line args
@@ -75,6 +75,8 @@ int main(int argc, char* argv[]) {
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init(NULL);
 
+	auto audioDevice = alcOpenDevice(NULL);
+
 	// Create entitity manager
 	EntityManager e_manager;
 
@@ -88,7 +90,6 @@ int main(int argc, char* argv[]) {
 	physx::PxTransform wall1;
 
 	initPhysics();
-
 
 	if (args.size() > 1 && args.at(1) == "view") {
 		e_manager.addEntity(std::make_unique<Render::RenderTest>(render));
