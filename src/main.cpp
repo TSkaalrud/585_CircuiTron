@@ -1,7 +1,7 @@
 #include "entities/car.hpp"
 #include "entities/entity_manager.hpp"
-#include "entities/fixed_orbit_cam.hpp"
 #include "entities/model_view.hpp"
+#include "entities/orbit_cam.hpp"
 #include "entities/wall.hpp"
 #include "physics/physics.h"
 #include "window.hpp"
@@ -33,7 +33,7 @@ int main(int argc, char* argv[]) {
 
 	if (args.size() > 1) {
 		e_manager.addEntity(std::make_unique<ModelView>(render, args.at(1)));
-		e_manager.addEntity(std::make_unique<FixedOrbitCam>(render));
+		e_manager.addEntity(std::make_unique<OrbitCam>(render, window));
 	} else {
 		e_manager.addEntity(std::make_unique<Car>(render, 1, player1));
 		e_manager.addEntity(std::make_unique<Wall>(render, wall1));

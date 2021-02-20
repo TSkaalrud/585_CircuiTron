@@ -26,9 +26,12 @@ class Window {
 	void endFrame();
 
 	bool keyPressed(int key) { return glfwGetKey(window, key) == GLFW_PRESS; }
-
+	bool mouseButton(int button) { return glfwGetMouseButton(window, button) == GLFW_PRESS; }
 	struct Cursor {
 		double xpos, ypos, deltax, deltay;
 	};
 	Cursor cursor;
+
+	enum CursorMode { Normal = GLFW_CURSOR_NORMAL, Hidden = GLFW_CURSOR_HIDDEN, Disabled = GLFW_CURSOR_DISABLED };
+	void setCursorMode(CursorMode mode) { glfwSetInputMode(window, GLFW_CURSOR, mode); }
 };

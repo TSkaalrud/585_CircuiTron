@@ -43,6 +43,9 @@ GLFWwindow* init() {
 
 Window::Window() : Window(init()){};
 Window::Window(GLFWwindow* window) : render(glfwGetProcAddress), window(window) {
+	if (glfwRawMouseMotionSupported())
+		glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+
 	// Resize render on window resize
 	glfwSetWindowUserPointer(window, this);
 	glfwSetFramebufferSizeCallback(window, [](GLFWwindow* glfwWindow, int width, int height) {
@@ -74,12 +77,6 @@ void Window::beginFrame() {
 	double xpos, ypos;
 	glfwGetCursorPos(window, &xpos, &ypos);
 	cursor = Cursor{.xpos = xpos, .ypos = ypos, .deltax = xpos - cursor.xpos, .deltay = ypos - cursor.ypos};
-	ImGui::Begin(
-		"Cursor", nullptr,
-		ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_AlwaysAutoResize |
-			ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoSavedSettings);
-	ImGui::Text("(%.1f,%.1f)\n(%.1f,%.1f)", cursor.xpos, cursor.ypos, cursor.deltax, cursor.deltay);
-	ImGui::End();
 }
 
 void Window::endFrame() {

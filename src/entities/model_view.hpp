@@ -22,5 +22,5 @@ class ModelView : public Entity {
 		render.create_dir_light({1, 1, 1}, {0, 0, -1});
 	}
 
-	void update(float deltaTime) override {}
+	void update(float) override {}
 };
