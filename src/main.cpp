@@ -1,8 +1,9 @@
 #include "entities/car.hpp"
 #include "entities/entity_manager.hpp"
+#include "entities/fixed_orbit_cam.hpp"
+#include "entities/model_view.hpp"
 #include "entities/wall.hpp"
 #include "physics/physics.h"
-#include "render/render_test.hpp"
 #include "window.hpp"
 #include <chrono>
 #include <iostream>
@@ -30,8 +31,9 @@ int main(int argc, char* argv[]) {
 
 	initPhysics();
 
-	if (args.size() > 1 && args.at(1) == "view") {
-		e_manager.addEntity(std::make_unique<Render::RenderTest>(render));
+	if (args.size() > 1) {
+		e_manager.addEntity(std::make_unique<ModelView>(render, args.at(1)));
+		e_manager.addEntity(std::make_unique<FixedOrbitCam>(render));
 	} else {
 		e_manager.addEntity(std::make_unique<Car>(render, 1, player1));
 		e_manager.addEntity(std::make_unique<Wall>(render, wall1));
