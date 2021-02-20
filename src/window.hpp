@@ -24,4 +24,11 @@ class Window {
 
 	void beginFrame();
 	void endFrame();
+
+	bool keyPressed(int key) { return glfwGetKey(window, key) == GLFW_PRESS; }
+
+	struct Cursor {
+		double xpos, ypos, deltax, deltay;
+	};
+	Cursor cursor;
 };
