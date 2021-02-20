@@ -48,8 +48,8 @@ Window::Window(GLFWwindow* window) : render(glfwGetProcAddress), window(window) 
 
 	// Resize render on window resize
 	glfwSetWindowUserPointer(window, this);
-	glfwSetFramebufferSizeCallback(window, [](GLFWwindow* glfwWindow, int width, int height) {
-		static_cast<Window*>(glfwGetWindowUserPointer(glfwWindow))->render.resize(width, height);
+	glfwSetFramebufferSizeCallback(window, [](GLFWwindow* window, int width, int height) {
+		static_cast<Window*>(glfwGetWindowUserPointer(window))->render.resize(width, height);
 	});
 	{
 		// Render needs to be resized before it can be used
@@ -57,6 +57,10 @@ Window::Window(GLFWwindow* window) : render(glfwGetProcAddress), window(window) 
 		glfwGetFramebufferSize(window, &width, &height);
 		render.resize(width, height);
 	}
+
+	glfwSetScrollCallback(window, [](GLFWwindow* window, double xoffset, double yoffset) {
+		static_cast<Window*>(glfwGetWindowUserPointer(window))->scroll.add(xoffset, yoffset);
+	});
 
 	// Init imgui
 	IMGUI_CHECKVERSION();
@@ -67,6 +71,7 @@ Window::Window(GLFWwindow* window) : render(glfwGetProcAddress), window(window) 
 };
 
 void Window::beginFrame() {
+	scroll.reset();
 	glfwPollEvents(); // This has to happen before ImGui::NewFrame()
 
 	// All imgui commands must happen after here
@@ -76,7 +81,7 @@ void Window::beginFrame() {
 
 	double xpos, ypos;
 	glfwGetCursorPos(window, &xpos, &ypos);
-	cursor = Cursor{.xpos = xpos, .ypos = ypos, .deltax = xpos - cursor.xpos, .deltay = ypos - cursor.ypos};
+	cursor.apply(xpos, ypos);
 }
 
 void Window::endFrame() {
