@@ -30,13 +30,6 @@ class OrbitCam : public Entity {
 		}
 		const float dist = 3;
 
-		ImGui::Begin(
-			"Cursor", nullptr,
-			ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_AlwaysAutoResize |
-				ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoSavedSettings);
-		ImGui::Text("(%.1f,%.1f)", xAngle, yAngle);
-		ImGui::End();
-
 		glm::mat4 cameraPos = glm::rotate(glm::mat4(1.0f), xAngle, {0, 1, 0}) *
 			glm::rotate(glm::mat4(1.0f), yAngle, {1, 0, 0}) * glm::translate(glm::mat4(1.0f), glm::vec3({0, 0, dist}));
 
