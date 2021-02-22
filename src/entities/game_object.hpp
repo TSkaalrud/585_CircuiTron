@@ -39,10 +39,10 @@ class GameObject : public Entity {
 	}
 
 	void update(float deltaTime) override {
-		physx::PxTransform camera(0, 5, -10, physx::PxQuat(physx::PxPi, {0, 1, 0}) * physx::PxQuat(-0.2, {1, 0, 0}));
+		physx::PxTransform camera(0, 5, -15, physx::PxQuat(physx::PxPi, {0, 1, 0}) * physx::PxQuat(-0.2, {1, 0, 0}));
 
 		render.camera_set_pos(convertTransform(transform.transform(camera)));
 
-		model->setTransform(convertTransform(transform));
+		model->setTransform(convertTransform(transform) * glm::scale(glm::mat4(1.0f), glm::vec3(2.0f)));
 	}
 };
