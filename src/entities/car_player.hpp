@@ -24,6 +24,6 @@ class CarPlayer : public Car {
 
 		render.camera_set_pos(convertTransform(transform.transform(camera)));
 
-		model->setTransform(convertTransform(transform));
+		model->setTransform(convertTransform(transform) * glm::scale(glm::mat4(1.0f), glm::vec3(2.0f)));
 	}
 };
