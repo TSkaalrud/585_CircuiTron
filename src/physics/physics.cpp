@@ -54,6 +54,7 @@
 #include <iostream>
 #include <math.h>
 #include <stdio.h>
+#include <vector>
 
 using namespace physx;
 using namespace snippetvehicle;
@@ -79,9 +80,9 @@ PxBatchQuery* gBatchQuery = NULL;
 PxVehicleDrivableSurfaceToTireFrictionPairs* gFrictionPairs = NULL;
 
 PxRigidStatic* gGroundPlane = NULL;
-PxVehicleDrive4W* gVehicle4W = NULL;
+// PxVehicleDrive4W* gVehicle4W = NULL;
 
-PxRigidStatic* aWall = NULL;
+std::vector<PxVehicleDrive4W*> CTbikes;
 
 bool gIsVehicleInAir = true;
 
@@ -161,17 +162,17 @@ VehicleDesc initVehicleDesc() {
 	// The moment of inertia is just the moment of inertia of a cuboid but modified for easier steering.
 	// Center of mass offset is 0.65m above the base of the chassis and 0.25m towards the front.
 	const PxF32 chassisMass = 250.0f;
-	const PxVec3 chassisDims(1.0f, 1.5f, 2.315f);
+	const PxVec3 chassisDims(0.8f, 1.2f, 2.315f);
 	const PxVec3 chassisMOI(
 		(chassisDims.y * chassisDims.y + chassisDims.z * chassisDims.z) * chassisMass / 12.0f,
 		(chassisDims.x * chassisDims.x + chassisDims.z * chassisDims.z) * 0.8f * chassisMass / 12.0f,
 		(chassisDims.x * chassisDims.x + chassisDims.y * chassisDims.y) * chassisMass / 12.0f);
-	const PxVec3 chassisCMOffset(0.0f, -chassisDims.y*0.5f + 0.65f, 0.25f);
+	const PxVec3 chassisCMOffset(0.0f, -chassisDims.y * 0.5f + 0.65f, 0.25f);
 
 	// Set up the wheel mass, radius, width, moment of inertia, and number of wheels.
 	// Moment of inertia is just the moment of inertia of a cylinder.
 	const PxF32 wheelMass = 15.0f;
-	const PxF32 wheelRadius = 0.5f;
+	const PxF32 wheelRadius = 0.3f;
 	const PxF32 wheelWidth = 0.3f;
 	const PxF32 wheelMOI = 0.5f * wheelMass * wheelRadius * wheelRadius;
 	const PxU32 nbWheels = 4;
@@ -205,7 +206,6 @@ void startAccelerateForwardsMode() {
 }
 
 void startAccelerateReverseMode() {
-	gVehicle4W->mDriveDynData.forceGearChange(PxVehicleGearsData::eREVERSE);
 
 	if (gMimicKeyInputs) {
 		gVehicleInputData.setDigitalAccel(true);
@@ -277,23 +277,93 @@ void releaseAllControls() {
 	}
 }
 
+PxF32 boxTimeOffset = 0.25f;
+PxF32 boxTimer = 0.0f;
+PxTransform trailPos;
+
+// basic wall generation
+void spawnWall(PxF32 timestep, PxVehicleDrive4W* vehicle, PxTransform& wall) {
+	//get speed of vehicle
+	float xVel = vehicle->getRigidDynamicActor()->getLinearVelocity().x;
+	float zVel = vehicle->getRigidDynamicActor()->getLinearVelocity().z;
+	float vel = sqrt((xVel * xVel) + (zVel * zVel));
+
+	PxShape* wallShape = gPhysics->createShape(PxBoxGeometry(0.4f, 0.6f, 2.315f), *gMaterial);
+
+	// set query filter data of the wall so thta the vehicle raycasts can hit the wall
+	PxFilterData qryFilterData(COLLISION_FLAG_OBSTACLE, COLLISION_FLAG_OBSTACLE_AGAINST, 0, 0);
+	wallShape->setQueryFilterData(qryFilterData);
+
+	// set simulation filter data of the wall so that the vehicle collides with the wall
+	PxFilterData wallSimFilterData(COLLISION_FLAG_OBSTACLE, COLLISION_FLAG_OBSTACLE_AGAINST, 0, 0);
+	wallShape->setSimulationFilterData(wallSimFilterData);
+
+	boxTimer += timestep;
+
+	if (vel >= 15.0f && vehicle->mDriveDynData.getCurrentGear() != PxVehicleGearsData::eREVERSE) {
+		if (boxTimer >= boxTimeOffset) {
+			if (trailPos.p.x != NULL) {
+				PxRigidStatic* aWall = gPhysics->createRigidStatic(trailPos);
+				aWall->attachShape(*wallShape);
+				gScene->addActor(*aWall);
+				wall = aWall->getGlobalPose();
+			}
+			trailPos = vehicle->getRigidDynamicActor()->getGlobalPose();
+			boxTimer = 0.0f;
+		}
+	}
+}
+
+// create and place a vehicle
+void initVehicle() {
+	PxVehicleDrive4W* gVehicle4W;
+
+	VehicleDesc vehicleDesc = initVehicleDesc();
+	gVehicle4W = createVehicle4W(vehicleDesc, gPhysics, gCooking);
+	PxTransform startTransform(
+		PxVec3(0.0f, (vehicleDesc.chassisDims.y * 0.5f + vehicleDesc.wheelRadius + 1.0f), 0.0f), PxQuat(PxIdentity));
+
+	CTbikes.push_back(gVehicle4W);
+
+	gVehicle4W->getRigidDynamicActor()->setGlobalPose(startTransform);
+
+	gScene->addActor(*gVehicle4W->getRigidDynamicActor());
+
+	// Set the vehicle to rest in first gear.
+	// Set the vehicle to use auto-gears.
+	gVehicle4W->setToRestState();
+	gVehicle4W->mDriveDynData.forceGearChange(PxVehicleGearsData::eFIRST);
+	gVehicle4W->mDriveDynData.setUseAutoGears(true);
+
+	gVehicleModeTimer = 0.0f;
+	gVehicleOrderProgress = 0;
+	startBrakeMode();
+	releaseAllControls();
+}
+
+// get bike transforms
+PxTransform getBikeTransform(PxVehicleDrive4W* bike) { return bike->getRigidDynamicActor()->getGlobalPose(); }
+
+// get wall transforms
+PxTransform getWallTransform(PxRigidStatic* wall) { return wall->getGlobalPose(); }
+
 // KEYBOARD INPUT
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
 	if (key == GLFW_KEY_W) {
 		switch (action) {
 		case GLFW_PRESS:
-			//switch to first gear
-			gVehicle4W->mDriveDynData.forceGearChange(PxVehicleGearsData::eFIRST);
+			// switch to first gear
+			CTbikes[0]->mDriveDynData.forceGearChange(PxVehicleGearsData::eFIRST);
 			gVehicleInputData.setAnalogAccel(1.0f);
 			break;
 
 		case GLFW_REPEAT:
-			//accelerate
+			// accelerate
 			gVehicleInputData.setAnalogAccel(1.0f);
 			break;
 
 		case GLFW_RELEASE:
-			//stop accelerate
+			// stop accelerate
 			gVehicleInputData.setAnalogAccel(0.0f);
 			break;
 
@@ -324,7 +394,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 	if (key == GLFW_KEY_S) {
 		switch (action) {
 		case GLFW_PRESS:
-			gVehicle4W->mDriveDynData.forceGearChange(PxVehicleGearsData::eREVERSE);
+			CTbikes[0]->mDriveDynData.forceGearChange(PxVehicleGearsData::eREVERSE);
 			gVehicleInputData.setAnalogAccel(1.0f);
 			break;
 
@@ -378,48 +448,17 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 			break;
 		}
 	}
-}
 
-PxF32 boxTimeOffset = 0.25f;
-PxF32 boxTimer = 0.0f;
-PxTransform trailPos;
-bool firstWall = true;
+	if (key == GLFW_KEY_SPACE) {
+		switch (action) {
+		case GLFW_PRESS:
+			initVehicle();
+			break;
 
-// basic wall generation
-void spawnWall(PxF32 timestep, PxVehicleDrive4W* vehicle, PxTransform& wall) { 
-	float xVel = vehicle->getRigidDynamicActor()->getLinearVelocity().x;
-	float zVel = vehicle->getRigidDynamicActor()->getLinearVelocity().z;
-	float vel = sqrt((xVel * xVel) + (zVel * zVel));
-	PxShape* wallShape = gPhysics->createShape(PxBoxGeometry(0.4f, 0.6f, 2.315f), *gMaterial);
-
-	//set query filter data of the wall so thta the vehicle raycasts can hit the wall
-	PxFilterData qryFilterData(COLLISION_FLAG_OBSTACLE, COLLISION_FLAG_OBSTACLE_AGAINST, 0, 0);
-	wallShape->setQueryFilterData(qryFilterData);
-
-	//set simulation filter data of the wall so that the vehicle collides with the wall
-	PxFilterData wallSimFilterData(COLLISION_FLAG_OBSTACLE, COLLISION_FLAG_OBSTACLE_AGAINST, 0, 0);
-	wallShape->setSimulationFilterData(wallSimFilterData);
-
-	boxTimer += timestep;
-
-	if (vel >= 15.0f && vehicle->mDriveDynData.getCurrentGear() != PxVehicleGearsData::eREVERSE) {
-		if (boxTimer >= boxTimeOffset) {
-			if (trailPos.p.x != NULL) {
-				if (firstWall) {
-					aWall = gPhysics->createRigidStatic(trailPos);
-					aWall->attachShape(*wallShape);
-					gScene->addActor(*aWall);
-					firstWall = false;
-				} else {
-					aWall->setGlobalPose(trailPos);
-					wall = aWall->getGlobalPose();
-				}
-			}
-			trailPos = vehicle->getRigidDynamicActor()->getGlobalPose();
-			boxTimer = 0.0f;
+		default:
+			break;
 		}
 	}
-
 }
 
 void initPhysics() {
@@ -455,7 +494,8 @@ void initPhysics() {
 	PxVehicleSetUpdateMode(PxVehicleUpdateMode::eVELOCITY_CHANGE);
 
 	// Create the batched scene queries for the suspension raycasts.
-	gVehicleSceneQueryData = VehicleSceneQueryData::allocate(1, PX_MAX_NB_WHEELS, 1, 1, WheelSceneQueryPreFilterBlocking, NULL, gAllocator);
+	gVehicleSceneQueryData =
+		VehicleSceneQueryData::allocate(1, PX_MAX_NB_WHEELS, 1, 1, WheelSceneQueryPreFilterBlocking, NULL, gAllocator);
 	gBatchQuery = VehicleSceneQueryData::setUpBatchedSceneQuery(0, *gVehicleSceneQueryData, gScene);
 
 	// Create the friction table for each combination of tire and surface type.
@@ -466,59 +506,46 @@ void initPhysics() {
 	gGroundPlane = createDrivablePlane(groundPlaneSimFilterData, gMaterial, gPhysics);
 	gScene->addActor(*gGroundPlane);
 
-	// Create a vehicle that will drive on the plane.
-	VehicleDesc vehicleDesc = initVehicleDesc();
-	gVehicle4W = createVehicle4W(vehicleDesc, gPhysics, gCooking);
-	PxTransform startTransform(
-		PxVec3(75.0f, (vehicleDesc.chassisDims.y * 0.5f + vehicleDesc.wheelRadius + 1.0f), 0.5f), PxQuat(PxIdentity));
-	gVehicle4W->getRigidDynamicActor()->setGlobalPose(startTransform);
-	gScene->addActor(*gVehicle4W->getRigidDynamicActor());
-
-	// Set the vehicle to rest in first gear.
-	// Set the vehicle to use auto-gears.
-	gVehicle4W->setToRestState();
-	gVehicle4W->mDriveDynData.forceGearChange(PxVehicleGearsData::eFIRST);
-	gVehicle4W->mDriveDynData.setUseAutoGears(true);
-
-	gVehicleModeTimer = 0.0f;
-	gVehicleOrderProgress = 0;
-	startBrakeMode();
-	releaseAllControls();
+	// Create vehicle that will drive on the plane. (This one is the player)
+	initVehicle();
 }
 
 void stepPhysics(GLFWwindow* window, PxTransform& player, PxTransform& wall) {
 	const PxF32 timestep = 1.0f / 60.0f;
 
-	player = gVehicle4W->getRigidDynamicActor()->getGlobalPose();
+	player = getBikeTransform(CTbikes[0]);
 
-	spawnWall(timestep, gVehicle4W, wall);
+	spawnWall(timestep, CTbikes[0], wall);
 
 	glfwSetKeyCallback(window, keyCallback);
 
 	// Update the control inputs for the vehicle.
 	if (gMimicKeyInputs) {
 		PxVehicleDrive4WSmoothDigitalRawInputsAndSetAnalogInputs(
-			gKeySmoothingData, gSteerVsForwardSpeedTable, gVehicleInputData, timestep, gIsVehicleInAir, *gVehicle4W);
+			gKeySmoothingData, gSteerVsForwardSpeedTable, gVehicleInputData, timestep, gIsVehicleInAir, *CTbikes[0]);
 	} else {
 		PxVehicleDrive4WSmoothAnalogRawInputsAndSetAnalogInputs(
-			gPadSmoothingData, gSteerVsForwardSpeedTable, gVehicleInputData, timestep, gIsVehicleInAir, *gVehicle4W);
+			gPadSmoothingData, gSteerVsForwardSpeedTable, gVehicleInputData, timestep, gIsVehicleInAir, *CTbikes[0]);
 	}
 
-	// Raycasts.
-	PxVehicleWheels* vehicles[1] = {gVehicle4W};
-	PxRaycastQueryResult* raycastResults = gVehicleSceneQueryData->getRaycastQueryResultBuffer(0);
-	const PxU32 raycastResultsSize = gVehicleSceneQueryData->getQueryResultBufferSize();
-	PxVehicleSuspensionRaycasts(gBatchQuery, 1, vehicles, raycastResultsSize, raycastResults);
+	for (int i = 0; i < CTbikes.size(); i++) {
+		// Raycasts.
+		PxVehicleWheels* vehicles[1] = {CTbikes[i]};
+		PxRaycastQueryResult* raycastResults = gVehicleSceneQueryData->getRaycastQueryResultBuffer(0);
+		const PxU32 raycastResultsSize = gVehicleSceneQueryData->getQueryResultBufferSize();
+		PxVehicleSuspensionRaycasts(gBatchQuery, 1, vehicles, raycastResultsSize, raycastResults);
 
-	// Vehicle update.
-	const PxVec3 grav = gScene->getGravity();
-	PxWheelQueryResult wheelQueryResults[PX_MAX_NB_WHEELS];
-	PxVehicleWheelQueryResult vehicleQueryResults[1] = {{wheelQueryResults, gVehicle4W->mWheelsSimData.getNbWheels()}};
-	PxVehicleUpdates(timestep, grav, *gFrictionPairs, 1, vehicles, vehicleQueryResults);
+		// Vehicle update.
+		const PxVec3 grav = gScene->getGravity();
+		PxWheelQueryResult wheelQueryResults[PX_MAX_NB_WHEELS];
+		PxVehicleWheelQueryResult vehicleQueryResults[1] = {
+			{wheelQueryResults, CTbikes[i]->mWheelsSimData.getNbWheels()}};
+		PxVehicleUpdates(timestep, grav, *gFrictionPairs, 1, vehicles, vehicleQueryResults);
 
-	// Work out if the vehicle is in the air.
-	gIsVehicleInAir =
-		gVehicle4W->getRigidDynamicActor()->isSleeping() ? false : PxVehicleIsInAir(vehicleQueryResults[0]);
+		// Work out if the vehicle is in the air.
+		gIsVehicleInAir =
+			CTbikes[i]->getRigidDynamicActor()->isSleeping() ? false : PxVehicleIsInAir(vehicleQueryResults[0]);
+	}
 
 	// Scene update.
 	gScene->simulate(timestep);
@@ -526,8 +553,11 @@ void stepPhysics(GLFWwindow* window, PxTransform& player, PxTransform& wall) {
 }
 
 void cleanupPhysics() {
-	gVehicle4W->getRigidDynamicActor()->release();
-	gVehicle4W->free();
+	for (int i = 0; i < CTbikes.size(); i++) {
+		CTbikes[i]->getRigidDynamicActor()->release();
+		CTbikes[i]->free();
+	}
+
 	PX_RELEASE(gGroundPlane);
 	PX_RELEASE(gBatchQuery);
 	gVehicleSceneQueryData->free(gAllocator);
