@@ -22,11 +22,20 @@ struct MeshDef {
 	std::vector<uint32_t> indicies;
 };
 
+#define REGISTER(T, collection)                                                                                        \
+	std::vector<T> collection;                                                                                         \
+	T##Handle register##T(T item) {                                                                                    \
+		uint handle = collection.size();                                                                               \
+		collection.push_back(item);                                                                                    \
+		return handle;                                                                                                 \
+	}
+
 typedef uint MeshHandle;
 typedef uint InstanceHandle;
 typedef uint MaterialHandle;
 typedef uint DirLightHandle;
 typedef uint TextureHandle;
+typedef uint ShaderHandle;
 
 class Core {
   protected:
@@ -41,25 +50,25 @@ class Core {
 		uint mat;
 		mat4 trans;
 	};
-	std::vector<Instance> instances;
+	REGISTER(Instance, instances)
 
 	struct Mesh {
 		GLuint vao;
 		uint count;
 	};
-	std::vector<Mesh> meshes;
+	REGISTER(Mesh, meshes)
 
 	struct Material {
 		uint shader;
 		GLuint uniform;
 		std::vector<TextureHandle> textures;
 	};
-	std::vector<Material> materials;
+	REGISTER(Material, materials)
 
 	struct Shader {
 		GLuint shader;
 	};
-	std::vector<Shader> shaders;
+	REGISTER(Shader, shaders)
 
 	const int lightmapSize = 8192;
 	const float lightmapCoverage = 200;
@@ -71,7 +80,7 @@ class Core {
 		float _pad1;
 		mat4 shadowMapTrans;
 	};
-	std::vector<DirLight> dirLights;
+	REGISTER(DirLight, dirLights)
 	GLuint dirLightBuffer, dirLightShadow;
 
 	void renderScene();
@@ -86,10 +95,12 @@ class Core {
 	}
 
 	MeshHandle create_mesh(MeshDef);
-	InstanceHandle create_instance() {
-		uint handle = instances.size();
-		instances.push_back(Instance{});
-		return handle;
+	InstanceHandle create_instance(MeshHandle mesh, MaterialHandle mat, mat4 trans = mat4(1.0f)) {
+		InstanceHandle instance = registerInstance(Instance{});
+		instance_set_mesh(instance, mesh);
+		instance_set_material(instance, mat);
+		instance_set_trans(instance, trans);
+		return instance;
 	}
 	void instance_set_mesh(InstanceHandle instance, MeshHandle mesh) { instances[instance].model = mesh; }
 	void instance_set_material(InstanceHandle instance, MaterialHandle mat) { instances[instance].mat = mat; }
@@ -99,8 +110,7 @@ class Core {
 	void camera_set_fov(float degrees) { fov = radians(degrees); }
 
 	DirLightHandle create_dir_light(vec3 colour, vec3 dir) {
-		uint handle = dirLights.size();
-		dirLights.push_back(DirLight{});
+		uint handle = registerDirLight(DirLight{});
 		dir_light_set_colour(handle, colour);
 		dir_light_set_dir(handle, dir);
 		return handle;

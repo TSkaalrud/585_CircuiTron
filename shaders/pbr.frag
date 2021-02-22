@@ -16,9 +16,9 @@ layout(std140, binding = 1) uniform Material {
 	float metalFactor;
 	float roughFactor;
 };
-layout(binding = 4) uniform sampler2D albedoTex;
-layout(binding = 5) uniform sampler2D metalRoughTex;
-layout(binding = 6) uniform sampler2D emissiveTexture;
+layout(binding = 5) uniform sampler2D albedoTex;
+layout(binding = 6) uniform sampler2D metalRoughTex;
+layout(binding = 7) uniform sampler2D emissiveTexture;
 
 struct DirLight {
 	vec3 dir;
