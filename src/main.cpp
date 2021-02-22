@@ -1,5 +1,6 @@
 #include "entities/car.hpp"
 #include "entities/entity_manager.hpp"
+#include "entities/game.hpp"
 #include "entities/model_view.hpp"
 #include "entities/orbit_cam.hpp"
 #include "entities/wall.hpp"
