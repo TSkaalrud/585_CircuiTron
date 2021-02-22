@@ -510,14 +510,12 @@ void initPhysics() {
 	initVehicle();
 }
 
-void stepPhysics(GLFWwindow* window, PxTransform& player, PxTransform& wall) {
+void stepPhysics(PxTransform& player, PxTransform& wall) {
 	const PxF32 timestep = 1.0f / 60.0f;
 
 	player = getBikeTransform(CTbikes[0]);
 
 	spawnWall(timestep, CTbikes[0], wall);
-
-	glfwSetKeyCallback(window, keyCallback);
 
 	// Update the control inputs for the vehicle.
 	if (gMimicKeyInputs) {

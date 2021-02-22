@@ -55,7 +55,7 @@ int main(int argc, char* argv[]) {
 			past = now;
 		}
 		// simulate();
-		// stepPhysics(window, player1, wall1);
+		 stepPhysics(player1, wall1);
 
 		time += timestep;
 

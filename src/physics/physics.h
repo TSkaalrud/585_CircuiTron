@@ -12,6 +12,6 @@ physx::PxTransform getWallTransform(physx::PxRigidStatic* wall);
 
 void initPhysics();
 
-void stepPhysics(GLFWwindow* window, physx::PxTransform& player, physx::PxTransform&);
+void stepPhysics(physx::PxTransform& player, physx::PxTransform&);
 
 void cleanupPhysics();
