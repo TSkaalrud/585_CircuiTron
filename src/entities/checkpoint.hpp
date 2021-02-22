@@ -4,11 +4,8 @@
 
 class Checkpoint : public GameObject {
 	private:
-		Render::Render& render;
-		
 	public:
-		Checkpoint(Render::Render& r) : GameObject(r, "path/to/model") {}
+		Checkpoint(Render::Render& render, physx::PxTransform& pt, Render::Group& group) : GameObject(render, pt, group){};
 
-		// this is place holder till we add collisions
-		void onCollisionWithCar(Car c) { c.addLap(); }
+		void update(float deltaTime) override {}
 };

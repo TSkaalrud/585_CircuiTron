@@ -2,6 +2,7 @@
 #include "entities/wall.hpp"
 #include "entities/entity.hpp"
 #include "entities/entity_manager.hpp"
+#include "entities/game.hpp"
 #include "physics/physics.h"
 #include "render/render.hpp"
 #include "render/render_test.hpp"
@@ -89,12 +90,12 @@ int main(int argc, char* argv[]) {
 
 	initPhysics();
 
-
 	if (args.size() > 1 && args.at(1) == "view") {
 		e_manager.addEntity(std::make_unique<Render::RenderTest>(render));
 	} else {
-		e_manager.addEntity(std::make_unique<Car>(render, 1, player1));
-		e_manager.addEntity(std::make_unique<Wall>(render, wall1));
+		//e_manager.addEntity(std::make_unique<Car>(render, 1, player1, car_model));
+		//e_manager.addEntity(std::make_unique<Wall>(render, wall1, wall_model));
+		e_manager.addEntity(std::make_unique<Game>(render, 1, e_manager, player1, wall1));
 	}
 
 	// Loop will continue until "X" on window is clicked.

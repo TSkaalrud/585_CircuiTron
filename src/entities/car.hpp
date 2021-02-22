@@ -9,19 +9,13 @@ class Car : public GameObject {
 	int place = 0;
 
   public:
-	// change assets/test.glb to car model path
-	Car(Render::Render& render, int start_place, physx::PxTransform& pt)
-		: GameObject(render, "assets/Bike_Final.glb", pt), place(start_place){};
-
-	// not sure if this would go here
-	void SpawnWall() {
-		// spawn wall behind car
-	}
+	Car(Render::Render& render, int start_place, physx::PxTransform& pt, Render::Group& group)
+		: GameObject(render, pt, group), place(start_place){};
 
 	void setPlace(int n) { place = n; }
 	int getPlace() { return place; }
 
-	void addLap(int n) { lap++; }
+	void addLap() { lap++; }
 	int getLap() { return lap; }
 
 	void addCheckpoint() { checkpoint++; }
