@@ -57,6 +57,7 @@ class BikePlayer : public Bike {
 		
 		if (window.keyPressed(83)) {		// s
 			//std::cout << 's pressed' << std::endl;
+			bikeReverse(0);
 		} else {
 			//std::cout << 's released' << std::endl;
 			if (!window.keyPressed(87)) {
