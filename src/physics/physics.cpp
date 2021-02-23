@@ -328,8 +328,9 @@ PxTransform getWallInfo(int i, int j) { return walls[i][j]->getGlobalPose(); }
 
 //accelerate function used for input
 void bikeAccelerate(int i) {
-	if (CTbikes[i]->mDriveDynData.getCurrentGear() != PxVehicleGearsData::eFIRST) {
+	if (CTbikes[i]->mDriveDynData.getCurrentGear() == PxVehicleGearsData::eREVERSE) {
 		CTbikes[i]->mDriveDynData.forceGearChange(PxVehicleGearsData::eFIRST);
+		std::cout << "here" << std::endl;
 	}
 	else {
 		inputDatas[i].setAnalogAccel(1.0f);
@@ -356,7 +357,7 @@ void bikeTurnLeft(int i) { inputDatas[i].setAnalogSteer(1.0f); }
 //gas/turn/brake release functions used for input
 void bikeReleaseGas(int i) { inputDatas[i].setAnalogAccel(0.0f); }
 
-void bikeReleaseSteer(int i) { inputDatas[i].setAnalogSteer(1.0f); }
+void bikeReleaseSteer(int i) { inputDatas[i].setAnalogSteer(0.0f); }
 
 void bikeReleaseBrake(int i) { inputDatas[i].setAnalogBrake(0.0f); }
 
