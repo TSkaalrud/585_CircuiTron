@@ -83,6 +83,8 @@ PxRigidStatic* gGroundPlane = NULL;
 // PxVehicleDrive4W* gVehicle4W = NULL;
 
 std::vector<PxVehicleDrive4W*> CTbikes;
+std::vector<std::vector<PxRigidStatic*>> walls;
+std::vector<PxVehicleDrive4WRawInputData> inputDatas;
 
 bool gIsVehicleInAir = true;
 
@@ -123,7 +125,7 @@ PxVehiclePadSmoothingData gPadSmoothingData = {
 		5.0f   // fall rate eANALOG_INPUT_STEER_RIGHT
 	}};
 
-PxVehicleDrive4WRawInputData gVehicleInputData;
+//PxVehicleDrive4WRawInputData gVehicleInputData;
 
 enum DriveMode {
 	eDRIVE_MODE_ACCEL_FORWARDS = 0,
@@ -196,6 +198,8 @@ VehicleDesc initVehicleDesc() {
 
 	return vehicleDesc;
 }
+
+/*
 
 void startAccelerateForwardsMode() {
 	if (gMimicKeyInputs) {
@@ -277,6 +281,8 @@ void releaseAllControls() {
 	}
 }
 
+*/
+
 PxF32 boxTimeOffset = 0.25f;
 PxF32 boxTimer = 0.0f;
 PxTransform trailPos;
@@ -314,8 +320,56 @@ void spawnWall(PxF32 timestep, PxVehicleDrive4W* vehicle, PxTransform& wall) {
 	}
 }
 
-// create and place a vehicle
+// get bike transforms (i = bike number)
+PxTransform getBikeTransform(int i) { return CTbikes[i]->getRigidDynamicActor()->getGlobalPose(); }
+
+// get wall transforms (i = bike number, j = wall segment number)
+PxTransform getWallInfo(int i, int j) { return walls[i][j]->getGlobalPose(); }
+
+//accelerate function used for input
+void bikeAccelerate(int i) {
+	if (CTbikes[i]->mDriveDynData.getCurrentGear() != PxVehicleGearsData::eFIRST) {
+		CTbikes[i]->mDriveDynData.forceGearChange(PxVehicleGearsData::eFIRST);
+	}
+	else {
+		inputDatas[i].setAnalogAccel(1.0f);
+	} 
+}
+
+//reverse function used for input
+void bikeReverse(int i) {
+	if (CTbikes[i]->mDriveDynData.getCurrentGear() != PxVehicleGearsData::eREVERSE) {
+		CTbikes[i]->mDriveDynData.forceGearChange(PxVehicleGearsData::eREVERSE);
+	} else {
+		inputDatas[i].setAnalogAccel(1.0f);
+	}
+}
+
+//brake function for input
+void bikeBreak(int i) { inputDatas[i].setAnalogBrake(1.0f); }
+
+//turn functions used for input
+void bikeTurnRight(int i) { inputDatas[i].setAnalogSteer(-1.0f); }
+
+void bikeTurnLeft(int i) { inputDatas[i].setAnalogSteer(1.0f); }
+
+//gas/turn/brake release functions used for input
+void bikeReleaseGas(int i) { inputDatas[i].setAnalogAccel(0.0f); }
+
+void bikeReleaseSteer(int i) { inputDatas[i].setAnalogSteer(1.0f); }
+
+void bikeReleaseBrake(int i) { inputDatas[i].setAnalogBrake(0.0f); }
+
+void bikeReleaseAll(int i) { 
+	inputDatas[i].setAnalogAccel(0.0f); 
+	inputDatas[i].setAnalogSteer(0.0f);
+	inputDatas[i].setAnalogBrake(0.0f);
+}
+
 void initVehicle() {
+	PxVehicleDrive4WRawInputData gVehicleInputData;
+	inputDatas.push_back(gVehicleInputData);
+
 	PxVehicleDrive4W* gVehicle4W;
 
 	VehicleDesc vehicleDesc = initVehicleDesc();
@@ -337,128 +391,9 @@ void initVehicle() {
 
 	gVehicleModeTimer = 0.0f;
 	gVehicleOrderProgress = 0;
-	startBrakeMode();
-	releaseAllControls();
-}
-
-// get bike transforms
-PxTransform getBikeTransform(PxVehicleDrive4W* bike) { return bike->getRigidDynamicActor()->getGlobalPose(); }
-
-// get wall transforms
-PxTransform getWallTransform(PxRigidStatic* wall) { return wall->getGlobalPose(); }
-
-// KEYBOARD INPUT
-void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-	if (key == GLFW_KEY_W) {
-		switch (action) {
-		case GLFW_PRESS:
-			// switch to first gear
-			CTbikes[0]->mDriveDynData.forceGearChange(PxVehicleGearsData::eFIRST);
-			gVehicleInputData.setAnalogAccel(1.0f);
-			break;
-
-		case GLFW_REPEAT:
-			// accelerate
-			gVehicleInputData.setAnalogAccel(1.0f);
-			break;
-
-		case GLFW_RELEASE:
-			// stop accelerate
-			gVehicleInputData.setAnalogAccel(0.0f);
-			break;
-
-		default:
-			break;
-		}
-	}
-
-	if (key == GLFW_KEY_D) {
-		switch (action) {
-		case GLFW_PRESS:
-			gVehicleInputData.setAnalogSteer(-1.0f);
-			break;
-
-		case GLFW_REPEAT:
-			gVehicleInputData.setAnalogSteer(-1.0f);
-			break;
-
-		case GLFW_RELEASE:
-			gVehicleInputData.setAnalogSteer(0.0f);
-			break;
-
-		default:
-			break;
-		}
-	}
-
-	if (key == GLFW_KEY_S) {
-		switch (action) {
-		case GLFW_PRESS:
-			CTbikes[0]->mDriveDynData.forceGearChange(PxVehicleGearsData::eREVERSE);
-			gVehicleInputData.setAnalogAccel(1.0f);
-			break;
-
-		case GLFW_REPEAT:
-			gVehicleInputData.setAnalogAccel(1.0f);
-			break;
-
-		case GLFW_RELEASE:
-			gVehicleInputData.setAnalogAccel(0.0f);
-			break;
-
-		default:
-			break;
-		}
-	}
-
-	if (key == GLFW_KEY_A) {
-		switch (action) {
-		case GLFW_PRESS:
-			gVehicleInputData.setAnalogSteer(1.0f);
-			break;
-
-		case GLFW_REPEAT:
-			gVehicleInputData.setAnalogSteer(1.0f);
-			break;
-
-		case GLFW_RELEASE:
-			gVehicleInputData.setAnalogSteer(0.0f);
-			break;
-
-		default:
-			break;
-		}
-	}
-
-	if (key == GLFW_KEY_LEFT_SHIFT) {
-		switch (action) {
-		case GLFW_PRESS:
-			gVehicleInputData.setAnalogBrake(1.0f);
-			break;
-
-		case GLFW_REPEAT:
-			gVehicleInputData.setAnalogBrake(1.0f);
-			break;
-
-		case GLFW_RELEASE:
-			gVehicleInputData.setAnalogBrake(0.0f);
-			break;
-
-		default:
-			break;
-		}
-	}
-
-	if (key == GLFW_KEY_SPACE) {
-		switch (action) {
-		case GLFW_PRESS:
-			initVehicle();
-			break;
-
-		default:
-			break;
-		}
-	}
+	bikeBreak(CTbikes.size() - 1);
+	bikeReleaseAll(CTbikes.size() - 1);
+	
 }
 
 void initPhysics() {
@@ -513,17 +448,20 @@ void initPhysics() {
 void stepPhysics(PxTransform& player, PxTransform& wall) {
 	const PxF32 timestep = 1.0f / 60.0f;
 
-	player = getBikeTransform(CTbikes[0]);
+	player = getBikeTransform(0);
 
 	spawnWall(timestep, CTbikes[0], wall);
 
-	// Update the control inputs for the vehicle.
-	if (gMimicKeyInputs) {
-		PxVehicleDrive4WSmoothDigitalRawInputsAndSetAnalogInputs(
-			gKeySmoothingData, gSteerVsForwardSpeedTable, gVehicleInputData, timestep, gIsVehicleInAir, *CTbikes[0]);
-	} else {
-		PxVehicleDrive4WSmoothAnalogRawInputsAndSetAnalogInputs(
-			gPadSmoothingData, gSteerVsForwardSpeedTable, gVehicleInputData, timestep, gIsVehicleInAir, *CTbikes[0]);
+	for (int i = 0; i < CTbikes.size(); i++) {
+		if (gMimicKeyInputs) {
+			PxVehicleDrive4WSmoothDigitalRawInputsAndSetAnalogInputs(
+				gKeySmoothingData, gSteerVsForwardSpeedTable, inputDatas[i], timestep, gIsVehicleInAir,
+				*CTbikes[i]);
+		} else {
+			PxVehicleDrive4WSmoothAnalogRawInputsAndSetAnalogInputs(
+				gPadSmoothingData, gSteerVsForwardSpeedTable, inputDatas[i], timestep, gIsVehicleInAir,
+				*CTbikes[i]);
+		}
 	}
 
 	for (int i = 0; i < CTbikes.size(); i++) {
