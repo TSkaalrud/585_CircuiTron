@@ -6,9 +6,27 @@
 
 void initVehicle();
 
-physx::PxTransform getBikeTransform(physx::PxVehicleDrive4W* bike);
+physx::PxTransform getBikeTransform(int i);
 
-physx::PxTransform getWallTransform(physx::PxRigidStatic* wall);
+physx::PxTransform getWallTransform(int i, int j);
+
+void bikeAccelerate(int i);
+
+void bikeReverse(int i);
+
+void bikeBreak(int i);
+
+void bikeTurnRight(int i);
+
+void bikeTurnLeft(int i);
+
+void bikeReleaseGas(int i);
+
+void bikeReleaseSteer(int i);
+
+void bikeReleaseBrake(int i);
+
+void bikeReleaseAll(int i);
 
 void initPhysics();
 
