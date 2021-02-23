@@ -37,32 +37,49 @@ class BikePlayer : public Bike {
 	void checkInput() {
 		if (window.keyPressed(87)) {		// w
 			//std::cout << 'w pressed' << std::endl;
+			bikeAccelerate(0);
 		} else {
-			//std::cout << 'w released' << std::endl;
+			// std::cout << 'w released' << std::endl;
+			if (!window.keyPressed(83)) {
+				bikeReleaseGas(0);
+			}
 		}
 		
 		if (window.keyPressed(65)) {		// a
 			//std::cout << 'a pressed' << std::endl;
+			bikeTurnLeft(0);
 		} else {
 			//std::cout << 'a released' << std::endl;
+			if (!window.keyPressed(68)) {
+				bikeReleaseSteer(0);
+			}
 		}
 		
 		if (window.keyPressed(83)) {		// s
 			//std::cout << 's pressed' << std::endl;
 		} else {
 			//std::cout << 's released' << std::endl;
+			if (!window.keyPressed(87)) {
+				bikeReleaseGas(0);
+			}
 		}
 		
 		if (window.keyPressed(68)) {		// d
 			//std::cout << 'd pressed' << std::endl;
+			bikeTurnRight(0);
 		} else {
 			//std::cout << 'd released' << std::endl;
+			if (!window.keyPressed(65)) {
+				bikeReleaseSteer(0);
+			}
 		}
 
 		if (window.keyPressed(340)) {		// left shift
 			//std::cout << 'left shift pressed' << std::endl;
+			bikeBreak(0);
 		} else {
 			//std::cout << 'left shift released' << std::endl;
+			bikeReleaseBrake(0);
 		}
 	}
 };
