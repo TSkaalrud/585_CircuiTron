@@ -2,14 +2,14 @@
 
 #include "game_object.hpp"
 
-class Car : public GameObject {
+class Bike : public GameObject {
   private:
 	int lap = 1;
 	int checkpoint = 0;
 	int place = 0;
 
   public:
-	Car(Render::Render& render, int start_place, physx::PxTransform& pt, Render::Group& group)
+	Bike(Render::Render& render, int start_place, physx::PxTransform& pt, Render::Group& group)
 		: GameObject(render, pt, group), place(start_place){};
 
 	void setPlace(int n) { place = n; }

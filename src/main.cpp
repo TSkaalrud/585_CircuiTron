@@ -1,9 +1,7 @@
-#include "entities/car.hpp"
 #include "entities/entity_manager.hpp"
 #include "entities/game.hpp"
 #include "entities/model_view.hpp"
 #include "entities/orbit_cam.hpp"
-#include "entities/wall.hpp"
 #include "physics/physics.h"
 #include "window.hpp"
 #include <chrono>
@@ -36,9 +34,7 @@ int main(int argc, char* argv[]) {
 		e_manager.addEntity(std::make_unique<ModelView>(render, args.at(1)));
 		e_manager.addEntity(std::make_unique<OrbitCam>(render, window));
 	} else {
-		//e_manager.addEntity(std::make_unique<Car>(render, 1, player1, car_model));
-		//e_manager.addEntity(std::make_unique<Wall>(render, wall1, wall_model));
-		e_manager.addEntity(std::make_unique<Game>(render, 1, e_manager, player1, wall1));
+		e_manager.addEntity(std::make_unique<Game>(window, render, 1, e_manager, player1, wall1));
 	}
 
 	// Loop will continue until "X" on window is clicked.
