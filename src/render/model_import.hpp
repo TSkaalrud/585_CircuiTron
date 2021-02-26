@@ -8,4 +8,6 @@ namespace Render {
 
 Group importModel(std::string filename, Render&);
 
+TextureHandle importSkybox(std::string filename, Render&);
+
 }

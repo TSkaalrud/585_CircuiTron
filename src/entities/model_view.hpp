@@ -9,10 +9,16 @@ class ModelView : public Entity {
   private:
 	Render::Render& render;
 	Render::Group group;
+	Render::TextureHandle skyboxTexture;
 
   public:
-	ModelView(Render::Render& render, std::string modelPath) : render(render), group(importModel(modelPath, render)){};
+	ModelView(
+		Render::Render& render, std::string modelPath = "assets/DamagedHelmet.glb",
+		std::string skyboxPath = "assets/neurathen_rock_castle_4k.hdr")
+		: render(render), group(importModel(modelPath, render)), skyboxTexture(importSkybox(skyboxPath, render)){};
 	void enter() override {
+
+		render.set_skybox_texture(skyboxTexture);
 
 		Render::GroupInstance model(group);
 

@@ -35,26 +35,26 @@ GLuint load_shader_program(std::vector<ShaderStage> stages) {
 
 	return program;
 }
-struct _PBR {
+
+struct PBR {
 	vec4 albedoFactor;
 	vec3 emissiveFactor;
 	float metalFactor;
 	float roughFactor;
 };
-
 MaterialHandle Render::create_pbr_material(MaterialPBR pbr) {
 	static ShaderHandle shader = registerShader(
 		{load_shader_program({{"shaders/default.vert", GL_VERTEX_SHADER}, {"shaders/pbr.frag", GL_FRAGMENT_SHADER}})});
 
 	GLuint uniform;
 	glCreateBuffers(1, &uniform);
-	_PBR _pbr = {
+	PBR _pbr = {
 		.albedoFactor = pbr.albedoFactor,
 		.emissiveFactor = pbr.emissiveFactor,
 		.metalFactor = pbr.metalFactor,
 		.roughFactor = pbr.roughFactor,
 	};
-	glNamedBufferStorage(uniform, sizeof(_PBR), &_pbr, 0);
+	glNamedBufferStorage(uniform, sizeof(PBR), &_pbr, 0);
 
 	static uint8_t white[3] = {255, 255, 255};
 	static auto whiteTexture = create_texture(1, 1, 3, false, &white);
@@ -70,7 +70,7 @@ template <class T> size_t vector_size(const std::vector<T>& vec) { return sizeof
 
 Render::Render(void (*glGetProcAddr(const char*))()) : Core(glGetProcAddr) {
 	ShaderHandle skyboxShader = registerShader({load_shader_program(
-		{{"shaders/skybox.vert", GL_VERTEX_SHADER}, {"shaders/skybox.frag", GL_FRAGMENT_SHADER}})});
+		{{"shaders/skybox.vert", GL_VERTEX_SHADER}, {"shaders/testSkybox.frag", GL_FRAGMENT_SHADER}})});
 	MaterialHandle skyboxMaterial = registerMaterial(Material{.shader = skyboxShader, .uniform = 0, .textures = {}});
 
 	std::vector<vec3> verticies = {
@@ -103,6 +103,16 @@ Render::Render(void (*glGetProcAddr(const char*))()) : Core(glGetProcAddr) {
 	glVertexArrayElementBuffer(vao, index_buffer);
 
 	uint skyboxMesh = registerMesh(Mesh{.vao = vao, .count = static_cast<uint>(indicies.size())});
-	registerInstance(Instance{.model = skyboxMesh, .mat = skyboxMaterial, .trans = mat4(1.0f)});
+	skybox = create_instance(skyboxMesh, skyboxMaterial);
 }
+
+void Render::set_skybox_texture(TextureHandle texture) {
+	static ShaderHandle skyboxShader = registerShader({load_shader_program(
+		{{"shaders/skybox.vert", GL_VERTEX_SHADER}, {"shaders/rectSkybox.frag", GL_FRAGMENT_SHADER}})});
+	static MaterialHandle skyboxMaterial =
+		registerMaterial(Material{.shader = skyboxShader, .uniform = 0, .textures = {texture}});
+	materials[skyboxMaterial].textures[0] = texture;
+	set_skybox_material(skyboxMaterial);
+}
+
 } // namespace Render
