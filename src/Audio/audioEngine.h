@@ -8,9 +8,10 @@
 #include <cstring>
 #include <vector>
 #include <memory>
+#include <AL/al.h>
+#include <AL/alc.h>
 //#include "../../out/build/x64-Debug (default)/_deps/openal-src/include/AL/al.h"
 //#include "../../out/build/x64-Debug (default)/_deps/openal-src/include/AL/alc.h"
-#include <AL/alc.h>
 
 namespace Audio {
 	// audio is stored in an array, indexes are used to refer to the audio files in that array

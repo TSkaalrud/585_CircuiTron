@@ -1,4 +1,3 @@
-#pragma once
 //Audio
 #include "Audio/audioEngine.h"
 //#include "Audio/audioInstance.h"
@@ -6,6 +5,8 @@
 //#include <Audio/audioInstance.h>
 #include <AL/al.h>
 #include <AL/alc.h>
+//#include "../../out/build/x64-Debug (default)/_deps/openal-src/include/AL/al.h"
+//#include "../../out/build/x64-Debug (default)/_deps/openal-src/include/AL/alc.h"
 
 #include "entities/car.hpp"
 #include "entities/entity.hpp"
@@ -112,6 +113,7 @@ int main(int argc, char* argv[]) {
 	alcMakeContextCurrent(ctx);
 	;
 	Audio::AudioEngine stereo = Audio::AudioEngine();
+	stereo.initialize();
 
 
 	// Loop will continue until "X" on window is clicked.
@@ -147,7 +149,7 @@ int main(int argc, char* argv[]) {
 		// sound();
 
 		
-		stereo.initialize();
+
 
 		// Probably want to combine all this into a render()
 		render.run();

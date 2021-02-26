@@ -67,11 +67,28 @@ bool AudioEngine::loadWavFile(const char* filename, ALuint* buffer, ALsizei* siz
 		if (_strcmp("fmt ", wave_format.subChunkID) == false)
 			throw("Invalid Wave Format");
 		
+		//loop this skipping ahead by subchunk2 size?
+		//stuck on parsing the list when looking for data. 
+		//when can't find it, skip ahead and look again. 
+		//could be multiple blocks so loop
+
+		//Parser cannot handle random author metadata, be sure 
+		//to scrub it from the file before trying to parse it.
+
+		/* solution should utilize something like this (this still crashes though
+		fread(&wave_data, sizeof(WAVE_Data), 1, soundFile);
+		while (_strcmp("data", wave_data.subChunkID) == false) {
+			fseek(soundFile, wave_data.subChunk2Size, SEEK_CUR);
+			fread(&wave_data, sizeof(WAVE_Data), 1, soundFile);
+		}
+		*/
+
 		// check for extra parameters;
 		if (wave_format.subChunkSize > 16)
-			fseek(soundFile, sizeof(short), SEEK_CUR);
+			fseek(soundFile, sizeof(uint8_t), SEEK_CUR);
 
 		// Read in the the last byte of data before the sound file
+
 		fread(&wave_data, sizeof(WAVE_Data), 1, soundFile);
 		// check for data tag in memory
 		if (_strcmp("data", wave_data.subChunkID) == false)
@@ -145,19 +162,19 @@ void AudioEngine::initialize() {
 	alSourcefv(source[0], AL_POSITION, source0Pos);
 	alSourcefv(source[0], AL_VELOCITY, source0Vel);
 	alSourcei(source[0], AL_BUFFER, buffer[0]);
-	// alSourcei(source[0], AL_LOOPING, AL_TRUE);
-	alSourcePlay(source[0]);
+	alSourcei(source[0], AL_LOOPING, AL_TRUE);
+	//alSourcePlay(source[0]);
 
 	for (int lx = 0; lx < 1000000000; lx++);
 	// SE test
-	//loadWavFile("assets/burr.wav", buffer + 1, &size, &freq, &format);
+	loadWavFile("assets/GunImpact.wav", buffer + 1, &size, &freq, &format);
 	alSourcef(source[1], AL_PITCH, 1.0f);
 	alSourcef(source[1], AL_GAIN, 1.0f);
 	alSourcefv(source[1], AL_POSITION, source0Pos);
 	alSourcefv(source[1], AL_VELOCITY, source0Vel);
 	alSourcei(source[1], AL_BUFFER, buffer[1]);
 	// alSourcei(source[1], AL_LOOPING, AL_TRUE);
-	//alSourcePlay(source[1]);
+	alSourcePlay(source[1]);
 
 	return;
 }
