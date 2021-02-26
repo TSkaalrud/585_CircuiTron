@@ -6,7 +6,8 @@ layout(location = 2) in vec2 uv;
 layout(location = 0) uniform mat4 model;
 
 layout(std140, binding = 0) uniform Camera {
-	mat4 camMat;
+	mat4 proj;
+	mat4 view;
 	vec3 camPos;
 };
 
@@ -17,7 +18,7 @@ layout(location = 1) out vec3 outNormal;
 layout(location = 2) out vec2 outuv;
 
 void main() {
-	gl_Position = camMat * worldPos;
+	gl_Position = proj * view * worldPos;
 	outWorldPos = vec3(worldPos);
 	outNormal = mat3(transpose(inverse(model))) * normal;
 	outuv = uv;

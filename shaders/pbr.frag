@@ -6,7 +6,8 @@ layout(location = 2) in vec2 uv;
 layout(binding = 0) uniform sampler2DArrayShadow dirLightShadowMaps;
 
 layout(std140, binding = 0) uniform Camera {
-	mat4 camMat;
+	mat4 proj;
+	mat4 view;
 	vec3 camPos;
 };
 

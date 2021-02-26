@@ -6,7 +6,8 @@
 namespace Render {
 
 struct Camera {
-	mat4 camMat;
+	mat4 proj;
+	mat4 view;
 	vec3 camPos;
 };
 
@@ -116,7 +117,7 @@ void Core::run() {
 		glNamedFramebufferTextureLayer(framebuffer, GL_DEPTH_ATTACHMENT, dirLightShadow, 0, i);
 		glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 
-		Camera cam = {.camMat = dirLights[i].shadowMapTrans, .camPos = dirLights[i].dir};
+		Camera cam = {.proj = mat4(1.0f), .view = dirLights[i].shadowMapTrans, .camPos = dirLights[i].dir};
 		glNamedBufferSubData(cameraBuffer, 0, sizeof(Camera), &cam);
 
 		glViewport(0, 0, lightmapSize, lightmapSize);
@@ -129,7 +130,8 @@ void Core::run() {
 	}
 
 	Camera cam = {
-		.camMat = infinitePerspective(fov, static_cast<float>(width) / static_cast<float>(height), 0.1f) * cameraPos,
+		.proj = infinitePerspective(fov, static_cast<float>(width) / static_cast<float>(height), 0.1f),
+		.view = cameraPos,
 		.camPos = vec3(inverse(cameraPos) * vec4{0, 0, 0, 1})};
 	glNamedBufferSubData(cameraBuffer, 0, sizeof(Camera), &cam);
 
