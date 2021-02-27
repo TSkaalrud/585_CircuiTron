@@ -43,8 +43,12 @@ struct PBR {
 	float roughFactor;
 };
 MaterialHandle Render::create_pbr_material(MaterialPBR pbr) {
-	static ShaderHandle shader = registerShader(
-		{load_shader_program({{"shaders/default.vert", GL_VERTEX_SHADER}, {"shaders/pbr.frag", GL_FRAGMENT_SHADER}})});
+	static ShaderHandle shader = registerShader(Shader{
+		load_shader_program({{"shaders/default.vert", GL_VERTEX_SHADER}, {"shaders/pbr.frag", GL_FRAGMENT_SHADER}}),
+		Shader::Type::Opaque});
+	static ShaderHandle depthShader = registerShader(Shader{
+		load_shader_program({{"shaders/default.vert", GL_VERTEX_SHADER}, {"shaders/depth.frag", GL_FRAGMENT_SHADER}}),
+		Shader::Type::Depth | Shader::Type::Shadow});
 
 	GLuint uniform;
 	glCreateBuffers(1, &uniform);
@@ -63,15 +67,19 @@ MaterialHandle Render::create_pbr_material(MaterialPBR pbr) {
 		pbr.albedoTexture.value_or(whiteTexture), pbr.metalRoughTexture.value_or(whiteTexture),
 		pbr.emissiveTexture.value_or(whiteTexture)};
 
-	return registerMaterial(Material{.shader = shader, .uniform = uniform, .textures = textures});
+	return registerMaterial(Material{
+		{.shader = shader, .uniform = uniform, .textures = textures},
+		{.shader = depthShader, .uniform = 0, .textures = {}}});
 }
 
 template <class T> size_t vector_size(const std::vector<T>& vec) { return sizeof(T) * vec.size(); }
 
 Render::Render(void (*glGetProcAddr(const char*))()) : Core(glGetProcAddr) {
-	ShaderHandle skyboxShader = registerShader({load_shader_program(
-		{{"shaders/skybox.vert", GL_VERTEX_SHADER}, {"shaders/testSkybox.frag", GL_FRAGMENT_SHADER}})});
-	MaterialHandle skyboxMaterial = registerMaterial(Material{.shader = skyboxShader, .uniform = 0, .textures = {}});
+	ShaderHandle skyboxShader = registerShader(Shader{
+		load_shader_program(
+			{{"shaders/skybox.vert", GL_VERTEX_SHADER}, {"shaders/testSkybox.frag", GL_FRAGMENT_SHADER}}),
+		Shader::Type::Skybox});
+	MaterialHandle skyboxMaterial = registerMaterial(Material{{.shader = skyboxShader, .uniform = 0, .textures = {}}});
 
 	std::vector<vec3> verticies = {
 		{-1, -1, -1}, {-1, -1, 1}, {-1, 1, -1}, {-1, 1, 1}, {1, -1, -1}, {1, -1, 1}, {1, 1, -1}, {1, 1, 1},
@@ -107,11 +115,13 @@ Render::Render(void (*glGetProcAddr(const char*))()) : Core(glGetProcAddr) {
 }
 
 void Render::set_skybox_texture(TextureHandle texture) {
-	static ShaderHandle skyboxShader = registerShader({load_shader_program(
-		{{"shaders/skybox.vert", GL_VERTEX_SHADER}, {"shaders/rectSkybox.frag", GL_FRAGMENT_SHADER}})});
+	static ShaderHandle skyboxShader = registerShader(Shader{
+		load_shader_program(
+			{{"shaders/skybox.vert", GL_VERTEX_SHADER}, {"shaders/rectSkybox.frag", GL_FRAGMENT_SHADER}}),
+		Shader::Type::Skybox});
 	static MaterialHandle skyboxMaterial =
-		registerMaterial(Material{.shader = skyboxShader, .uniform = 0, .textures = {texture}});
-	materials[skyboxMaterial].textures[0] = texture;
+		registerMaterial(Material{{.shader = skyboxShader, .uniform = 0, .textures = {texture}}});
+	materials[skyboxMaterial][0].textures[0] = texture;
 	set_skybox_material(skyboxMaterial);
 }
 

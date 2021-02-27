@@ -58,15 +58,21 @@ class Core {
 	};
 	REGISTER(Mesh, meshes)
 
-	struct Material {
+	struct ShaderConfig {
 		uint shader;
 		GLuint uniform;
 		std::vector<TextureHandle> textures;
 	};
+	typedef std::vector<ShaderConfig> Material;
 	REGISTER(Material, materials)
 
 	struct Shader {
 		GLuint shader;
+		enum Type { Opaque = 1 << 0, Depth = 1 << 1, Shadow = 1 << 2, Skybox = 1 << 4 };
+		friend inline Type operator|(const Type lhs, const Type rhs) {
+			return static_cast<Type>(static_cast<int>(lhs) | static_cast<int>(rhs));
+		}
+		Type type;
 	};
 	REGISTER(Shader, shaders)
 
@@ -83,7 +89,7 @@ class Core {
 	REGISTER(DirLight, dirLights)
 	GLuint dirLightBuffer, dirLightShadow;
 
-	void renderScene();
+	void renderScene(Shader::Type type);
 
   public:
 	Core(void (*(const char*))());

@@ -87,18 +87,25 @@ uint Core::create_texture(int width, int height, int channels, bool srgb, void* 
 	return texture;
 }
 
-void Core::renderScene() {
+void Core::renderScene(Shader::Type type) {
 	for (auto& i : instances) {
-		glUseProgram(shaders[materials[i.mat].shader].shader);
+		if (i.mat < 0)
+			continue;
+
 		glBindVertexArray(meshes[i.model].vao);
+		for (auto& shader : materials[i.mat]) {
+			if ((shaders[shader.shader].type & type) == 0)
+				continue;
 
-		auto material = materials[i.mat];
-		glBindBufferBase(GL_UNIFORM_BUFFER, 1, material.uniform);
-		glBindTextures(5, material.textures.size(), material.textures.data());
+			glUseProgram(shaders[shader.shader].shader);
 
-		glUniformMatrix4fv(0, 1, false, value_ptr(i.trans));
+			glBindBufferBase(GL_UNIFORM_BUFFER, 1, shader.uniform);
+			glBindTextures(5, shader.textures.size(), shader.textures.data());
 
-		glDrawElements(GL_TRIANGLES, meshes[i.model].count, GL_UNSIGNED_INT, 0);
+			glUniformMatrix4fv(0, 1, false, value_ptr(i.trans));
+
+			glDrawElements(GL_TRIANGLES, meshes[i.model].count, GL_UNSIGNED_INT, 0);
+		}
 	}
 }
 
@@ -123,7 +130,7 @@ void Core::run() {
 		glViewport(0, 0, lightmapSize, lightmapSize);
 		glClear(GL_DEPTH_BUFFER_BIT);
 		glCullFace(GL_FRONT);
-		renderScene();
+		renderScene(Shader::Type::Shadow);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glDeleteFramebuffers(1, &framebuffer);
@@ -141,7 +148,7 @@ void Core::run() {
 
 	glBindTextures(0, 1, &dirLightShadow);
 	glCullFace(GL_BACK);
-	renderScene();
+	renderScene(Shader::Type::Opaque | Shader::Type::Skybox);
 }
 
 } // namespace Render
