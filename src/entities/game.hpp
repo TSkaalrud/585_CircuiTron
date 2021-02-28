@@ -6,6 +6,7 @@
 #include "entities/entity_manager.hpp"
 
 #include "entities/bike_player.hpp"
+#include "entities/bike_ai.hpp"
 #include "entities/checkpoint.hpp"
 #include "entities/wall.hpp"
 #include "render/model_import.hpp"
@@ -52,8 +53,14 @@ class Game : public Entity {
 	void enter() override { 
 		Render::GroupInstance track(track_model);
 
-		for (int i = 0; i < players; i++) {
-			std::unique_ptr<Bike> b = std::make_unique<BikePlayer>(window, render, i, car_pt, car_model);
+		std::unique_ptr<Bike> b = std::make_unique<BikePlayer>(window, render, 0, car_pt, car_model);
+		bikes.push_back(b.get());
+		e_manager.addEntity(std::move(b));
+
+		for (int i = 0; i < players - 1; i++) {
+			initVehicle();
+
+			std::unique_ptr<Bike> b = std::make_unique<BikeAI>(render, i, car_pt, car_model);
 			bikes.push_back(b.get());
 			e_manager.addEntity(std::move(b));
 		}

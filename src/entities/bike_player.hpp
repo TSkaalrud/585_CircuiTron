@@ -4,8 +4,6 @@
 #include "window.hpp"
 #include "physics/physics.h"
 
-#include <iostream>
-
 class BikePlayer : public Bike {
   private:
 	Window& window;
@@ -25,7 +23,7 @@ class BikePlayer : public Bike {
 	}
 
 	void update(float deltaTime) override {
-		physx::PxTransform camera(0, 5, -20, physx::PxQuat(physx::PxPi, {0, 1, 0}) * physx::PxQuat(-0.2, {1, 0, 0}));
+		physx::PxTransform camera(0, 100, -100, physx::PxQuat(physx::PxPi, {0, 1, 0}) * physx::PxQuat(-1, {1, 0, 0}));
 
 		checkInput();
 
@@ -36,7 +34,6 @@ class BikePlayer : public Bike {
 
 	void checkInput() {
 		if (window.keyPressed(87)) {		// w
-			std::cout << "w" << std::endl;
 			bikeAccelerate(0);
 		} else {
 			if (!window.keyPressed(83)) {

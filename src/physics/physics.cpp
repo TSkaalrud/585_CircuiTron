@@ -367,6 +367,8 @@ void bikeReleaseAll(int i) {
 	inputDatas[i].setAnalogBrake(0.0f);
 }
 
+float offset = 0.0f;
+
 void initVehicle() {
 	PxVehicleDrive4WRawInputData gVehicleInputData;
 	inputDatas.push_back(gVehicleInputData);
@@ -376,7 +378,9 @@ void initVehicle() {
 	VehicleDesc vehicleDesc = initVehicleDesc();
 	gVehicle4W = createVehicle4W(vehicleDesc, gPhysics, gCooking);
 	PxTransform startTransform(
-		PxVec3(0.0f, (vehicleDesc.chassisDims.y * 0.5f + vehicleDesc.wheelRadius + 1.0f), 0.0f), PxQuat(PxIdentity));
+		PxVec3(offset, (vehicleDesc.chassisDims.y * 0.5f + vehicleDesc.wheelRadius + 1.0f), -offset), PxQuat(PxIdentity));
+
+	offset += 50.0f;
 
 	CTbikes.push_back(gVehicle4W);
 
