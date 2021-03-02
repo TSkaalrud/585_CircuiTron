@@ -283,41 +283,67 @@ void releaseAllControls() {
 
 */
 
-PxF32 boxTimeOffset = 0.25f;
-PxF32 boxTimer = 0.0f;
-PxTransform trailPos;
+void makeWallSeg(PxTransform a, PxTransform b) { 
+	PxTransform wallSeg;
+
+	//get length of wall segment
+	PxVec3 aTob = b.p - a.p; 
+	float length = aTob.magnitude();
+
+	//get position and rotation of wall segment
+	wallSeg.p = (a.p + b.p) / 2.0f;
+	wallSeg.q.x = (a.q.x + b.q.x) / 2.0f;
+	wallSeg.q.y = (a.q.y + b.q.y) / 2.0f;
+	wallSeg.q.z = (a.q.z + b.q.z) / 2.0f;
+	wallSeg.q.w = (a.q.w + b.q.w) / 2.0f;
+	
+	//make wall segment
+	PxShape* wallShape = gPhysics->createShape(PxBoxGeometry(0.1f, 0.6f, length / 2.0f), *gMaterial);
+	
+	// set query filter data of the wall so that the vehicle raycasts can hit the wall
+	PxFilterData qryFilterData(COLLISION_FLAG_OBSTACLE, COLLISION_FLAG_OBSTACLE_AGAINST, 0, 0);
+	wallShape->setQueryFilterData(qryFilterData);
+	
+	// set simulation filter data of the wall so that the vehicle collides with the wall
+	/*PxFilterData wallSimFilterData(COLLISION_FLAG_OBSTACLE, COLLISION_FLAG_OBSTACLE_AGAINST, 0, 0);
+	wallShape->setSimulationFilterData(wallSimFilterData);*/
+	
+	PxRigidStatic* aWall = gPhysics->createRigidStatic(wallSeg);
+	aWall->attachShape(*wallShape);
+	gScene->addActor(*aWall);
+}
+
+PxF32 timer = 0.0f;
+PxF32 wallTime = 0.25f;
+PxTransform wallFront;
+PxTransform wallBack;
 
 // basic wall generation
-void spawnWall(PxF32 timestep, PxVehicleDrive4W* vehicle, PxTransform& wall) {
+void spawnWall(PxF32 timestep, int i, PxTransform& wall) {
+	PxVehicleDrive4W* vehicle = CTbikes[i];
+
 	//get speed of vehicle
 	float xVel = vehicle->getRigidDynamicActor()->getLinearVelocity().x;
 	float zVel = vehicle->getRigidDynamicActor()->getLinearVelocity().z;
 	float vel = sqrt((xVel * xVel) + (zVel * zVel));
 
-	PxShape* wallShape = gPhysics->createShape(PxBoxGeometry(0.4f, 0.6f, 2.315f), *gMaterial);
-
-	// set query filter data of the wall so thta the vehicle raycasts can hit the wall
-	PxFilterData qryFilterData(COLLISION_FLAG_OBSTACLE, COLLISION_FLAG_OBSTACLE_AGAINST, 0, 0);
-	wallShape->setQueryFilterData(qryFilterData);
-
-	// set simulation filter data of the wall so that the vehicle collides with the wall
-	PxFilterData wallSimFilterData(COLLISION_FLAG_OBSTACLE, COLLISION_FLAG_OBSTACLE_AGAINST, 0, 0);
-	wallShape->setSimulationFilterData(wallSimFilterData);
-
-	boxTimer += timestep;
+	timer += timestep;
 
 	if (vel >= 15.0f && vehicle->mDriveDynData.getCurrentGear() != PxVehicleGearsData::eREVERSE) {
-		if (boxTimer >= boxTimeOffset) {
-			if (trailPos.p.x != NULL) {
-				PxRigidStatic* aWall = gPhysics->createRigidStatic(trailPos);
-				aWall->attachShape(*wallShape);
-				gScene->addActor(*aWall);
-				wall = aWall->getGlobalPose();
+		if (timer >= wallTime) {
+			if (wallFront.p.x != NULL) {
+				wallBack = wallFront;
+				wallFront = vehicle->getRigidDynamicActor()->getGlobalPose();
+
+				makeWallSeg(wallBack, wallFront);
 			}
-			trailPos = vehicle->getRigidDynamicActor()->getGlobalPose();
-			boxTimer = 0.0f;
+			wallFront = vehicle->getRigidDynamicActor()->getGlobalPose();
+			timer = 0.0f;
 		}
+	} else {
+		wallFront.p.x = NULL;
 	}
+
 }
 
 // get bike transforms (i = bike number)
@@ -367,6 +393,8 @@ void bikeReleaseAll(int i) {
 	inputDatas[i].setAnalogBrake(0.0f);
 }
 
+float spawnOffset = 0.0f;
+
 void initVehicle() {
 	PxVehicleDrive4WRawInputData gVehicleInputData;
 	inputDatas.push_back(gVehicleInputData);
@@ -376,7 +404,9 @@ void initVehicle() {
 	VehicleDesc vehicleDesc = initVehicleDesc();
 	gVehicle4W = createVehicle4W(vehicleDesc, gPhysics, gCooking);
 	PxTransform startTransform(
-		PxVec3(0.0f, (vehicleDesc.chassisDims.y * 0.5f + vehicleDesc.wheelRadius + 1.0f), 0.0f), PxQuat(PxIdentity));
+		PxVec3(0.0f + spawnOffset, (vehicleDesc.chassisDims.y * 0.5f + vehicleDesc.wheelRadius + 1.0f), 0.0f), PxQuat(PxIdentity));
+
+	spawnOffset += 5.0f;
 
 	CTbikes.push_back(gVehicle4W);
 
@@ -451,7 +481,7 @@ void stepPhysics(PxTransform& player, PxTransform& wall) {
 
 	player = getBikeTransform(0);
 
-	spawnWall(timestep, CTbikes[0], wall);
+	spawnWall(timestep, 0, wall);
 
 	for (int i = 0; i < CTbikes.size(); i++) {
 		if (gMimicKeyInputs) {
