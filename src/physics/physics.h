@@ -4,11 +4,26 @@
 #include <foundation/Px.h>
 #include <PxPhysicsAPI.h>
 
+struct wallSegment {
+	int bikeNumber;
+
+	physx::PxRigidStatic* wall;
+
+	physx::PxTransform front;
+	physx::PxTransform back;
+};
+
 void initVehicle();
 
 physx::PxTransform getBikeTransform(int i);
 
-physx::PxTransform getWallTransform(int i, int j);
+physx::PxTransform getWallPos(int i, int j);
+
+physx::PxTransform getWallFront(int i, int j);
+
+physx::PxTransform getWallBack(int i, int j);
+
+int getWallOwner(int i, int j);
 
 void bikeAccelerate(int i);
 

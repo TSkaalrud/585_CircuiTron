@@ -45,6 +45,7 @@
 #include "CTVehicleSceneQuery.h"
 #include "CTVehicleTireFriction.h"
 #include "vehicle/PxVehicleUtil.h"
+#include "physics.h"
 
 #include "CTPVD.h"
 #include "CTPrint.h"
@@ -83,7 +84,7 @@ PxRigidStatic* gGroundPlane = NULL;
 // PxVehicleDrive4W* gVehicle4W = NULL;
 
 std::vector<PxVehicleDrive4W*> CTbikes;
-std::vector<std::vector<PxRigidStatic*>> walls;
+std::vector<std::vector<wallSegment>> walls;
 std::vector<PxVehicleDrive4WRawInputData> inputDatas;
 
 bool gIsVehicleInAir = true;
@@ -283,7 +284,7 @@ void releaseAllControls() {
 
 */
 
-void makeWallSeg(PxTransform a, PxTransform b) { 
+void makeWallSeg(int i, PxTransform a, PxTransform b) { 
 	PxTransform wallSeg;
 
 	//get length of wall segment
@@ -311,6 +312,9 @@ void makeWallSeg(PxTransform a, PxTransform b) {
 	PxRigidStatic* aWall = gPhysics->createRigidStatic(wallSeg);
 	aWall->attachShape(*wallShape);
 	gScene->addActor(*aWall);
+
+	wallSegment segment = {i, aWall, b, a};
+	walls[i].push_back(segment);
 }
 
 PxF32 timer = 0.0f;
@@ -335,7 +339,7 @@ void spawnWall(PxF32 timestep, int i, PxTransform& wall) {
 				wallBack = wallFront;
 				wallFront = vehicle->getRigidDynamicActor()->getGlobalPose();
 
-				makeWallSeg(wallBack, wallFront);
+				makeWallSeg(i, wallBack, wallFront);
 			}
 			wallFront = vehicle->getRigidDynamicActor()->getGlobalPose();
 			timer = 0.0f;
@@ -349,8 +353,12 @@ void spawnWall(PxF32 timestep, int i, PxTransform& wall) {
 // get bike transforms (i = bike number)
 PxTransform getBikeTransform(int i) { return CTbikes[i]->getRigidDynamicActor()->getGlobalPose(); }
 
-// get wall transforms (i = bike number, j = wall segment number)
-PxTransform getWallInfo(int i, int j) { return walls[i][j]->getGlobalPose(); }
+// getter methods for bike walls (i = bike number, j = wall segment number)
+physx::PxTransform getWallPos(int i, int j) { return walls[i][j].wall->getGlobalPose(); };
+
+physx::PxTransform getWallFront(int i, int j) { return walls[i][j].front; };
+
+physx::PxTransform getWallBack(int i, int j) { return walls[i][j].back; };
 
 //accelerate function used for input
 void bikeAccelerate(int i) {
@@ -409,6 +417,9 @@ void initVehicle() {
 	spawnOffset += 5.0f;
 
 	CTbikes.push_back(gVehicle4W);
+	
+	std::vector<wallSegment> bikeWalls;
+	walls.push_back(bikeWalls);
 
 	gVehicle4W->getRigidDynamicActor()->setGlobalPose(startTransform);
 
