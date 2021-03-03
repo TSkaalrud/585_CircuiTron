@@ -354,6 +354,8 @@ void bikeTurnRight(int i) { inputDatas[i].setAnalogSteer(-1.0f); }
 
 void bikeTurnLeft(int i) { inputDatas[i].setAnalogSteer(1.0f); }
 
+void bikeTurnPrecise(int i, float n) { inputDatas[i].setAnalogSteer(n);  }
+
 //gas/turn/brake release functions used for input
 void bikeReleaseGas(int i) { inputDatas[i].setAnalogAccel(0.0f); }
 

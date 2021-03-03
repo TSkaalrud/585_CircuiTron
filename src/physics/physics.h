@@ -20,6 +20,8 @@ void bikeTurnRight(int i);
 
 void bikeTurnLeft(int i);
 
+void bikeTurnPrecise(int i, float n);
+
 void bikeReleaseGas(int i);
 
 void bikeReleaseSteer(int i);

@@ -7,6 +7,7 @@ class Bike : public GameObject {
 	int lap = 1;
 	int checkpoint = 0;
 	int place = 0;
+	int health = 100;
 
   public:
 	Bike(Render::Render& render, int start_place, physx::PxTransform& pt, Render::Group& group)
@@ -21,4 +22,6 @@ class Bike : public GameObject {
 	void addCheckpoint() { checkpoint++; }
 	void resetCheckpoint() { checkpoint = 0; }
 	int getCheckpoint() { return checkpoint; }
+
+	void loseHealth() { health -= 10; }
 };
