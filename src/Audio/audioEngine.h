@@ -20,7 +20,7 @@ namespace Audio {
 	// const int SOUND_FILE_TTG_RACE = 3;
 
 	#define NUM_BUFFERS 2
-	#define NUM_SOURCES 2
+	#define NUM_SOURCES 25
 	#define NUM_ENVIRONMENTS 2
 
 	/*

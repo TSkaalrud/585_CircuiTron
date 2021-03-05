@@ -153,6 +153,66 @@ void AudioEngine::initialize() {
 	alGenSources(NUM_SOURCES, source);
 	CheckError();
 
+	loadWavFile("assets/audio/Cybersong.wav", buffer, &size, &freq, &format);
+	CheckError();
+	loadWavFile("assets/audio/Ambience.wav", buffer + 1, &size, &freq, &format);
+	CheckError();
+	loadWavFile("assets/audio/Apprehension.wav", buffer + 2, &size, &freq, &format);
+	CheckError();
+	loadWavFile("assets/audio/Bike_Impact.wav", buffer + 3, &size, &freq, &format);
+	CheckError();
+	loadWavFile("assets/audio/Despawn.wav", buffer + 4, &size, &freq, &format);
+	CheckError();
+	loadWavFile("assets/audio/Electric_Hum.wav", buffer + 5, &size, &freq, &format);
+	CheckError();
+	loadWavFile("assets/audio/Engine_Idle.wav", buffer + 6, &size, &freq, &format);
+	CheckError();
+	loadWavFile("assets/audio/Gun_Impact.wav", buffer + 7, &size, &freq, &format);
+	CheckError();
+	loadWavFile("assets/audio/Gun_Impact2.wav", buffer + 8, &size, &freq, &format);
+	CheckError();
+	loadWavFile("assets/audio/Healing.wav", buffer + 9, &size, &freq, &format);
+	CheckError();
+	loadWavFile("assets/audio/Healing_2.wav", buffer + 10, &size, &freq, &format);
+	CheckError();
+	loadWavFile("assets/audio/Healing_3.wav", buffer + 11, &size, &freq, &format);
+	CheckError();
+	loadWavFile("assets/audio/Idle_Wub.wav", buffer + 12, &size, &freq, &format);
+	CheckError();
+	loadWavFile("assets/audio/Rev-down.wav", buffer + 13, &size, &freq, &format);
+	CheckError();
+	loadWavFile("assets/audio/Rev-down2.wav", buffer + 14, &size, &freq, &format);
+	CheckError();
+	loadWavFile("assets/audio/Rev-steady.wav", buffer + 15, &size, &freq, &format);
+	CheckError();
+	loadWavFile("assets/audio/Rev-up.wav", buffer + 16, &size, &freq, &format);
+	CheckError();
+	loadWavFile("assets/audio/Rev-up2.wav", buffer + 17, &size, &freq, &format);
+	CheckError();
+	loadWavFile("assets/audio/Rev-up3.wav", buffer + 18, &size, &freq, &format);
+	CheckError();
+	loadWavFile("assets/audio/Sizzle.wav", buffer + 19, &size, &freq, &format);
+	CheckError();
+	loadWavFile("assets/audio/Slipstream.wav", buffer + 20, &size, &freq, &format);
+	CheckError();
+	loadWavFile("assets/audio/Slipstream2.wav", buffer + 21, &size, &freq, &format);
+	CheckError();
+	loadWavFile("assets/audio/WAD.wav", buffer + 22, &size, &freq, &format);
+	CheckError();
+	loadWavFile("assets/audio/WubWub.wav", buffer + 23, &size, &freq, &format);
+	CheckError();
+	loadWavFile("assets/audio/burr.wav", buffer + 24, &size, &freq, &format);
+	CheckError();
+
+	//alSourcef(source[1], AL_PITCH, 1.0f);
+	//alSourcef(source[1], AL_GAIN, 1.0f);
+	//alSourcefv(source[1], AL_POSITION, source0Pos);
+	//alSourcefv(source[1], AL_VELOCITY, source0Vel);
+	alSourcei(source[1], AL_BUFFER, buffer[0]);
+	// alSourcei(source[1], AL_LOOPING, AL_TRUE);
+	alSourcePlay(source[1]);
+
+	/*
 	// BGM test
 	loadWavFile("assets/Cybersong.wav", buffer, &size, &freq, &format);
 	CheckError();
@@ -163,7 +223,7 @@ void AudioEngine::initialize() {
 	alSourcefv(source[0], AL_VELOCITY, source0Vel);
 	alSourcei(source[0], AL_BUFFER, buffer[0]);
 	alSourcei(source[0], AL_LOOPING, AL_TRUE);
-	//alSourcePlay(source[0]);
+	alSourcePlay(source[0]);
 
 	for (int lx = 0; lx < 1000000000; lx++);
 	// SE test
@@ -175,7 +235,10 @@ void AudioEngine::initialize() {
 	alSourcei(source[1], AL_BUFFER, buffer[1]);
 	// alSourcei(source[1], AL_LOOPING, AL_TRUE);
 	alSourcePlay(source[1]);
-
+	*/
 	return;
+
+	
+
 }
 } // namespace Audio
