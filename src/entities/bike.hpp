@@ -24,4 +24,9 @@ class Bike : public GameObject {
 	int getCheckpoint() { return checkpoint; }
 
 	void loseHealth() { health -= 10; }
+
+	void wallCollision() { 
+		loseHealth();
+		//play sound?
+	}
 };

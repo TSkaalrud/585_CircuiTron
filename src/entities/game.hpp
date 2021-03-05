@@ -68,10 +68,10 @@ class Game : public Entity {
 	}
 
 	void update(float deltaTime) override { 
-		UpdatePlaces();
+		updatePlaces();
 	}
 
-	void UpdatePlaces() {
+	void updatePlaces() {
 		// updates the places based on car positions/laps
 		// this will most likely be implemented by comparing cars by lap
 		// if lap is equal compare by checkpoint (divide the track up invisibly)
@@ -81,5 +81,9 @@ class Game : public Entity {
 		for (int i = 0; i < bikes.size(); i++) {
 			bikes[i]->setPlace(i+1);
 		}
+	}
+
+	void wallCollision(int i) { 
+		bikes[i]->wallCollision();
 	}
 };
