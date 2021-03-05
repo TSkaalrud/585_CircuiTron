@@ -45,6 +45,7 @@
 #include "CTVehicleSceneQuery.h"
 #include "CTVehicleTireFriction.h"
 #include "vehicle/PxVehicleUtil.h"
+#include "physics.h"
 
 #include "CTPVD.h"
 #include "CTPrint.h"
@@ -83,7 +84,7 @@ PxRigidStatic* gGroundPlane = NULL;
 // PxVehicleDrive4W* gVehicle4W = NULL;
 
 std::vector<PxVehicleDrive4W*> CTbikes;
-std::vector<std::vector<PxRigidStatic*>> walls;
+std::vector<std::vector<wallSegment>> walls;
 std::vector<PxVehicleDrive4WRawInputData> inputDatas;
 
 bool gIsVehicleInAir = true;
@@ -283,48 +284,85 @@ void releaseAllControls() {
 
 */
 
-PxF32 boxTimeOffset = 0.25f;
-PxF32 boxTimer = 0.0f;
-PxTransform trailPos;
+void makeWallSeg(int i, PxTransform a, PxTransform b) { 
+	PxTransform wallSeg;
+
+	//get length of wall segment
+	PxVec3 aTob = b.p - a.p; 
+	float length = aTob.magnitude();
+
+	//get position and rotation of wall segment
+	wallSeg.p = (a.p + b.p) / 2.0f;
+	wallSeg.q.x = (a.q.x + b.q.x) / 2.0f;
+	wallSeg.q.y = (a.q.y + b.q.y) / 2.0f;
+	wallSeg.q.z = (a.q.z + b.q.z) / 2.0f;
+	wallSeg.q.w = (a.q.w + b.q.w) / 2.0f;
+	
+	//make wall segment
+	PxShape* wallShape = gPhysics->createShape(PxBoxGeometry(0.1f, 0.6f, length / 2.0f), *gMaterial);
+	
+	// set query filter data of the wall so that the vehicle raycasts can hit the wall
+	PxFilterData qryFilterData(COLLISION_FLAG_OBSTACLE, COLLISION_FLAG_OBSTACLE_AGAINST, 0, 0);
+	wallShape->setQueryFilterData(qryFilterData);
+	
+	// set simulation filter data of the wall so that the vehicle collides with the wall
+	/*PxFilterData wallSimFilterData(COLLISION_FLAG_OBSTACLE, COLLISION_FLAG_OBSTACLE_AGAINST, 0, 0);
+	wallShape->setSimulationFilterData(wallSimFilterData);*/
+	
+	PxRigidStatic* aWall = gPhysics->createRigidStatic(wallSeg);
+	aWall->attachShape(*wallShape);
+	gScene->addActor(*aWall);
+
+	wallSegment segment = {i, aWall, b, a};
+	walls[i].push_back(segment);
+}
+
+PxF32 timer = 0.0f;
+PxF32 wallTime = 0.25f;
+PxTransform wallFront;
+PxTransform wallBack;
 
 // basic wall generation
-void spawnWall(PxF32 timestep, PxVehicleDrive4W* vehicle, PxTransform& wall) {
+void spawnWall(PxF32 timestep, int i, PxTransform& wall) {
+	PxVehicleDrive4W* vehicle = CTbikes[i];
+
 	//get speed of vehicle
 	float xVel = vehicle->getRigidDynamicActor()->getLinearVelocity().x;
 	float zVel = vehicle->getRigidDynamicActor()->getLinearVelocity().z;
 	float vel = sqrt((xVel * xVel) + (zVel * zVel));
 
-	PxShape* wallShape = gPhysics->createShape(PxBoxGeometry(0.4f, 0.6f, 2.315f), *gMaterial);
-
-	// set query filter data of the wall so thta the vehicle raycasts can hit the wall
-	PxFilterData qryFilterData(COLLISION_FLAG_OBSTACLE, COLLISION_FLAG_OBSTACLE_AGAINST, 0, 0);
-	wallShape->setQueryFilterData(qryFilterData);
-
-	// set simulation filter data of the wall so that the vehicle collides with the wall
-	PxFilterData wallSimFilterData(COLLISION_FLAG_OBSTACLE, COLLISION_FLAG_OBSTACLE_AGAINST, 0, 0);
-	wallShape->setSimulationFilterData(wallSimFilterData);
-
-	boxTimer += timestep;
+	timer += timestep;
 
 	if (vel >= 15.0f && vehicle->mDriveDynData.getCurrentGear() != PxVehicleGearsData::eREVERSE) {
-		if (boxTimer >= boxTimeOffset) {
-			if (trailPos.p.x != NULL) {
-				PxRigidStatic* aWall = gPhysics->createRigidStatic(trailPos);
-				aWall->attachShape(*wallShape);
-				gScene->addActor(*aWall);
-				wall = aWall->getGlobalPose();
+		if (timer >= wallTime) {
+			if (wallFront.p.x != NULL) {
+				wallBack = wallFront;
+				wallFront = vehicle->getRigidDynamicActor()->getGlobalPose();
+
+				makeWallSeg(i, wallBack, wallFront);
 			}
-			trailPos = vehicle->getRigidDynamicActor()->getGlobalPose();
-			boxTimer = 0.0f;
+			wallFront = vehicle->getRigidDynamicActor()->getGlobalPose();
+			timer = 0.0f;
 		}
+	} else {
+		wallFront.p.x = NULL;
 	}
+
 }
+
+int getNumBikes() { return CTbikes.size(); }
 
 // get bike transforms (i = bike number)
 PxTransform getBikeTransform(int i) { return CTbikes[i]->getRigidDynamicActor()->getGlobalPose(); }
 
-// get wall transforms (i = bike number, j = wall segment number)
-PxTransform getWallInfo(int i, int j) { return walls[i][j]->getGlobalPose(); }
+// getter methods for bike walls (i = bike number, j = wall segment number)
+physx::PxTransform getWallPos(int i, int j) { return walls[i][j].wall->getGlobalPose(); };
+
+physx::PxTransform getWallFront(int i, int j) { return walls[i][j].front; };
+
+physx::PxTransform getWallBack(int i, int j) { return walls[i][j].back; };
+
+int getNumWalls(int i) { return walls[i].size(); }
 
 //accelerate function used for input
 void bikeAccelerate(int i) {
@@ -369,7 +407,7 @@ void bikeReleaseAll(int i) {
 	inputDatas[i].setAnalogBrake(0.0f);
 }
 
-float offset = 0.0f;
+float spawnOffset = 0.0f;
 
 void initVehicle() {
 	PxVehicleDrive4WRawInputData gVehicleInputData;
@@ -380,11 +418,14 @@ void initVehicle() {
 	VehicleDesc vehicleDesc = initVehicleDesc();
 	gVehicle4W = createVehicle4W(vehicleDesc, gPhysics, gCooking);
 	PxTransform startTransform(
-		PxVec3(offset, (vehicleDesc.chassisDims.y * 0.5f + vehicleDesc.wheelRadius + 1.0f), -offset), PxQuat(PxIdentity));
+		PxVec3(0.0f + spawnOffset, (vehicleDesc.chassisDims.y * 0.5f + vehicleDesc.wheelRadius + 1.0f), 0.0f), PxQuat(PxIdentity));
 
-	offset += 50.0f;
+	spawnOffset += 5.0f;
 
 	CTbikes.push_back(gVehicle4W);
+	
+	std::vector<wallSegment> bikeWalls;
+	walls.push_back(bikeWalls);
 
 	gVehicle4W->getRigidDynamicActor()->setGlobalPose(startTransform);
 
@@ -457,7 +498,7 @@ void stepPhysics(PxTransform& player, PxTransform& wall) {
 
 	player = getBikeTransform(0);
 
-	spawnWall(timestep, CTbikes[0], wall);
+	spawnWall(timestep, 0, wall);
 
 	for (int i = 0; i < CTbikes.size(); i++) {
 		if (gMimicKeyInputs) {

@@ -17,18 +17,13 @@ class GameObject : public Entity {
   protected:
 	Render::Group& group;
 	Render::Render& render;
-	physx::PxTransform& transform;
 	std::optional<Render::GroupInstance> model;
 
   public:
-	GameObject(Render::Render& r, physx::PxTransform& pt, Render::Group& g)
-		: render(r), group(g), transform(pt){};
+	GameObject(Render::Render& r, Render::Group& g)
+		: render(r), group(g) {};
 
 	void enter() override {
 		model.emplace(group);
-	}
-
-	void update(float deltaTime) override {
-		model->setTransform(convertTransform(transform));
 	}
 };
