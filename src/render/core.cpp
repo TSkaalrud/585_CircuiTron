@@ -5,12 +5,6 @@
 
 namespace Render {
 
-struct Camera {
-	mat4 proj;
-	mat4 view;
-	vec3 camPos;
-};
-
 Core::Core(void (*glGetProcAddr(const char*))()) {
 	loadGL(glGetProcAddr);
 
@@ -118,11 +112,11 @@ void Core::run() {
 
 	glNamedBufferData(dirLightBuffer, vector_size(dirLights), dirLights.data(), GL_DYNAMIC_DRAW);
 
+	GLuint framebuffer;
+	glCreateFramebuffers(1, &framebuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 	for (size_t i = 0; i < dirLights.size(); i++) {
-		GLuint framebuffer;
-		glCreateFramebuffers(1, &framebuffer);
 		glNamedFramebufferTextureLayer(framebuffer, GL_DEPTH_ATTACHMENT, dirLightShadow, 0, i);
-		glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 
 		Camera cam = {.proj = mat4(1.0f), .view = dirLights[i].shadowMapTrans, .camPos = dirLights[i].dir};
 		glNamedBufferSubData(cameraBuffer, 0, sizeof(Camera), &cam);
@@ -131,10 +125,9 @@ void Core::run() {
 		glClear(GL_DEPTH_BUFFER_BIT);
 		glCullFace(GL_FRONT);
 		renderScene(Shader::Type::Shadow);
-
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glDeleteFramebuffers(1, &framebuffer);
 	}
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glDeleteFramebuffers(1, &framebuffer);
 
 	Camera cam = {
 		.proj = infinitePerspective(fov, static_cast<float>(width) / static_cast<float>(height), 0.1f),

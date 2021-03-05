@@ -112,9 +112,52 @@ Render::Render(void (*glGetProcAddr(const char*))()) : Core(glGetProcAddr) {
 
 	uint skyboxMesh = registerMesh(Mesh{.vao = vao, .count = static_cast<uint>(indicies.size())});
 	skybox = create_instance(skyboxMesh, skyboxMaterial);
+
+	glCreateTextures(GL_TEXTURE_CUBE_MAP, 1, &skyboxCubemap);
+	glTextureStorage2D(skyboxCubemap, 1, GL_RGB16F, skyboxSize, skyboxSize);
 }
 
-void Render::set_skybox_texture(TextureHandle texture) {
+const glm::mat4 captureViews[] = {
+	glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)),
+	glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)),
+	glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)),
+	glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)),
+	glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)),
+	glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f))};
+
+void Render::render_cubemap(Shader::Type type, GLuint cubemap, int size) {
+	GLuint framebuffer, renderbuffer;
+	glCreateFramebuffers(1, &framebuffer);
+	glCreateRenderbuffers(1, &renderbuffer);
+	glNamedRenderbufferStorage(renderbuffer, GL_DEPTH_COMPONENT24, size, size);
+	glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer);
+	glNamedFramebufferRenderbuffer(framebuffer, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, renderbuffer);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+	for (int i = 0; i < 6; i++) {
+		glNamedFramebufferTextureLayer(framebuffer, GL_COLOR_ATTACHMENT0, cubemap, 0, i);
+
+		Camera cam = {
+			.proj = infinitePerspective(glm::radians(90.0f), 1.0f, 0.1f),
+			.view = captureViews[i],
+			.camPos = vec3(0.0f)};
+		glNamedBufferSubData(cameraBuffer, 0, sizeof(Camera), &cam);
+
+		glViewport(0, 0, size, size);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		renderScene(type);
+	}
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glDeleteFramebuffers(1, &framebuffer);
+	glDeleteRenderbuffers(1, &renderbuffer);
+}
+
+void Render::update_skybox() {
+	render_cubemap(Shader::Type::Skybox, skyboxCubemap, skyboxSize);
+	// set_skybox_cube_texture(skyboxCubemap, false);
+}
+
+void Render::set_skybox_rect_texture(TextureHandle texture, bool update) {
 	static ShaderHandle skyboxShader = registerShader(Shader{
 		load_shader_program(
 			{{"shaders/skybox.vert", GL_VERTEX_SHADER}, {"shaders/rectSkybox.frag", GL_FRAGMENT_SHADER}}),
@@ -122,7 +165,18 @@ void Render::set_skybox_texture(TextureHandle texture) {
 	static MaterialHandle skyboxMaterial =
 		registerMaterial(Material{{.shader = skyboxShader, .uniform = 0, .textures = {texture}}});
 	materials[skyboxMaterial][0].textures[0] = texture;
-	set_skybox_material(skyboxMaterial);
+	set_skybox_material(skyboxMaterial, update);
+}
+
+void Render::set_skybox_cube_texture(TextureHandle texture, bool update) {
+	static ShaderHandle skyboxShader = registerShader(Shader{
+		load_shader_program(
+			{{"shaders/skybox.vert", GL_VERTEX_SHADER}, {"shaders/cubeSkybox.frag", GL_FRAGMENT_SHADER}}),
+		Shader::Type::Skybox});
+	static MaterialHandle skyboxMaterial =
+		registerMaterial(Material{{.shader = skyboxShader, .uniform = 0, .textures = {texture}}});
+	materials[skyboxMaterial][0].textures[0] = texture;
+	set_skybox_material(skyboxMaterial, update);
 }
 
 } // namespace Render

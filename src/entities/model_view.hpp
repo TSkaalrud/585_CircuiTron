@@ -18,7 +18,7 @@ class ModelView : public Entity {
 		: render(render), group(importModel(modelPath, render)), skyboxTexture(importSkybox(skyboxPath, render)){};
 	void enter() override {
 
-		render.set_skybox_texture(skyboxTexture);
+		render.set_skybox_rect_texture(skyboxTexture);
 
 		Render::GroupInstance model(group);
 
