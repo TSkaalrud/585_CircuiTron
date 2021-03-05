@@ -2,6 +2,9 @@
 
 #include <algorithm>
 #include <vector>
+#include <string>
+
+#include <assimp/Importer.hpp>
 
 #include "entities/entity_manager.hpp"
 
@@ -14,6 +17,8 @@
 
 #include "physics/physics.h"
 #include "window.hpp"
+#include <assimp/postprocess.h>
+#include <assimp/scene.h>
 
 struct {
 	bool operator()(Bike* a, Bike* b) const {
@@ -34,6 +39,8 @@ class Game : public Entity {
 	Render::Group wall_model;
 	Render::Group track_model;
 
+	std::vector<std::vector<glm::vec3>> ai_waypoints; // a list of waypoints for each ai bike
+
 	physx::PxTransform& car_pt;
 	physx::PxTransform& wall_pt;
 
@@ -48,7 +55,14 @@ class Game : public Entity {
 		: window(window), render(render), e_manager(em), players(players), car_pt(car_pt), wall_pt(wall_pt),
 		  car_model(importModel("assets/Bike_Final.glb", render)),
 		  wall_model(importModel("assets/Wall_blob.glb", render)),
-		  track_model(importModel("assets/The_Coffin_render.glb", render)) {}
+		  track_model(importModel("assets/The_Coffin_render.glb", render))
+		  {
+		//loading in the AI waypoint vertices with a dummy variable 0 for the player bike id
+		//std::vector<glm::vec3> map;
+		//ai_waypoints.push_back(map);
+		UploadMap("assets/AI_waypoints_1.obj");
+
+	}
 
 	void enter() override { 
 		Render::GroupInstance track(track_model);
@@ -60,7 +74,7 @@ class Game : public Entity {
 		for (int i = 0; i < players - 1; i++) {
 			initVehicle();
 
-			std::unique_ptr<Bike> b = std::make_unique<BikeAI>(render, i, car_pt, car_model);
+			std::unique_ptr<Bike> b = std::make_unique<BikeAI>(render, i, car_pt, car_model, ai_waypoints[i]);
 			bikes.push_back(b.get());
 			e_manager.addEntity(std::move(b));
 		}
@@ -81,6 +95,28 @@ class Game : public Entity {
 		for (int i = 0; i < bikes.size(); i++) {
 			bikes[i]->setPlace(i+1);
 		}
+	}
+
+	void UploadMap(const char waypoints[]) {
+		Assimp::Importer importer;
+
+		//read the file
+		const aiScene* scene = importer.ReadFile(waypoints, aiProcess_PreTransformVertices);
+		if (!scene || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
+			std::cout << "ERROR::ASSIMP::" << importer.GetErrorString() << std::endl;
+			return;
+		}
+		//fetch each vertex of the waypoint mesh
+		std::vector<glm::vec3> map;
+		for (int i = 0; i < scene->mMeshes[0]->mNumVertices; i++) {
+			glm::vec3 v;
+			v.x = scene->mMeshes[0]->mVertices[i].x;
+			v.y = scene->mMeshes[0]->mVertices[i].y;
+			v.z = scene->mMeshes[0]->mVertices[i].z;
+			map.push_back(v);
+		}
+		//pushback the ai_map array
+		ai_waypoints.push_back(map);
 	}
 
 	void wallCollision(int i) { 
