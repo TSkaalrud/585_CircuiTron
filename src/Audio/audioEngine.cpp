@@ -3,7 +3,9 @@
 namespace Audio {
 
 AudioEngine::AudioEngine() {
-
+	ALCdevice* dev = alcOpenDevice(NULL);
+	ALCcontext* ctx = alcCreateContext(dev, NULL);
+	alcMakeContextCurrent(ctx);
 }
 AudioEngine::~AudioEngine() {};
 /*
@@ -153,6 +155,7 @@ void AudioEngine::initialize() {
 	alGenSources(NUM_SOURCES, source);
 	CheckError();
 
+	//load in all audio files into buffer sequentially
 	loadWavFile("assets/audio/Cybersong.wav", buffer, &size, &freq, &format);
 	CheckError();
 	loadWavFile("assets/audio/Ambience.wav", buffer + 1, &size, &freq, &format);
@@ -208,10 +211,12 @@ void AudioEngine::initialize() {
 	//alSourcef(source[1], AL_GAIN, 1.0f);
 	//alSourcefv(source[1], AL_POSITION, source0Pos);
 	//alSourcefv(source[1], AL_VELOCITY, source0Vel);
-	alSourcei(source[1], AL_BUFFER, buffer[0]);
+	//alSourcei(source[24], AL_BUFFER, buffer[0]);
 	// alSourcei(source[1], AL_LOOPING, AL_TRUE);
-	alSourcePlay(source[1]);
+	//alSourcePlay(source[24]);
 
+	//alSourcei(source[24], AL_BUFFER, buffer[1]);
+	//alSourcePlay(source[24]);
 	/*
 	// BGM test
 	loadWavFile("assets/Cybersong.wav", buffer, &size, &freq, &format);

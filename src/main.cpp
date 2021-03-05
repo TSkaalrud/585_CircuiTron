@@ -3,6 +3,8 @@
 #include "Audio/audioInstance.h"
 #include <AL/al.h>
 #include <AL/alc.h>
+//#include "../../out/build/x64-Debug (default)/_deps/openal-src/include/AL/al.h"
+//#include "../../out/build/x64-Debug (default)/_deps/openal-src/include/AL/alc.h"
 
 #include "entities/car.hpp"
 #include "entities/entity.hpp"
@@ -103,12 +105,15 @@ int main(int argc, char* argv[]) {
 		e_manager.addEntity(std::make_unique<Wall>(render, wall1));
 	}
 
-	ALCdevice* dev = alcOpenDevice(NULL);
-	ALCcontext* ctx = alcCreateContext(dev, NULL);
-	alcMakeContextCurrent(ctx);
-	;
+	//initialize audio
 	Audio::AudioEngine stereo = Audio::AudioEngine();
 	stereo.initialize();
+	AudioInstance* bgm = new AudioInstance();
+	bgm->playSound(stereo.buffer[Audio::SOUND_FILE_CYBERSONG_BGM]);
+	AudioInstance* sfx_1 = new AudioInstance();
+	sfx_1->playSound(stereo.buffer[Audio::SOUND_FILE_AMBIENCE_BGM]);
+	AudioInstance* sfx_2 = new AudioInstance();
+	sfx_2->playSound(stereo.buffer[Audio::SOUND_FILE_GUN_IMPACT_SFX]);
 
 
 	// Loop will continue until "X" on window is clicked.
