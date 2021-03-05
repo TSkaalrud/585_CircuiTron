@@ -5,7 +5,7 @@
 class Checkpoint : public GameObject {
 	private:
 	public:
-		Checkpoint(Render::Render& render, physx::PxTransform& pt, Render::Group& group) : GameObject(render, pt, group){};
+		Checkpoint(Render::Render& render, Render::Group& group) : GameObject(render, group){};
 
 		void update(float deltaTime) override {}
 };

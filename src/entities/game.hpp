@@ -32,16 +32,13 @@ class Game : public Entity {
 	Render::Group wall_model;
 	Render::Group track_model;
 
-	physx::PxTransform& car_pt;
-	physx::PxTransform& wall_pt;
-
 	Window& window;
 	Render::Render& render;
 	EntityManager& e_manager;
 
   public:
-	Game(Window& window, Render::Render& render, int players, EntityManager& em, physx::PxTransform& car_pt, physx::PxTransform& wall_pt)
-		: window(window), render(render), e_manager(em), players(players), car_pt(car_pt), wall_pt(wall_pt),
+	Game(Window& window, Render::Render& render, int players, EntityManager& em)
+		: window(window), render(render), e_manager(em), players(players),
 		  car_model(importModel("assets/Bike_Final.glb", render)),
 		  wall_model(importModel("assets/Wall_blob.glb", render)),
 		  track_model(importModel("assets/The_Coffin_render.glb", render)) {}
@@ -50,11 +47,11 @@ class Game : public Entity {
 		Render::GroupInstance track(track_model);
 
 		for (int i = 0; i < players; i++) {
-			std::unique_ptr<Bike> b = std::make_unique<BikePlayer>(window, render, i, car_pt, car_model);
+			std::unique_ptr<Bike> b = std::make_unique<BikePlayer>(window, render, i, car_model);
 			bikes.push_back(b.get());
 			e_manager.addEntity(std::move(b));
 		}
-		e_manager.addEntity(std::make_unique<Wall>(render, wall_pt, wall_model));
+		e_manager.addEntity(std::make_unique<Wall>(render, wall_model));
 	}
 
 	void update(float deltaTime) override { 

@@ -350,6 +350,8 @@ void spawnWall(PxF32 timestep, int i, PxTransform& wall) {
 
 }
 
+int getNumBikes() { return CTbikes.size(); }
+
 // get bike transforms (i = bike number)
 PxTransform getBikeTransform(int i) { return CTbikes[i]->getRigidDynamicActor()->getGlobalPose(); }
 
@@ -359,6 +361,8 @@ physx::PxTransform getWallPos(int i, int j) { return walls[i][j].wall->getGlobal
 physx::PxTransform getWallFront(int i, int j) { return walls[i][j].front; };
 
 physx::PxTransform getWallBack(int i, int j) { return walls[i][j].back; };
+
+int getNumWalls(int i) { return walls[i].size(); }
 
 //accelerate function used for input
 void bikeAccelerate(int i) {

@@ -15,6 +15,8 @@ struct wallSegment {
 
 void initVehicle();
 
+int getNumBikes();
+
 physx::PxTransform getBikeTransform(int i);
 
 physx::PxTransform getWallPos(int i, int j);
@@ -22,6 +24,8 @@ physx::PxTransform getWallPos(int i, int j);
 physx::PxTransform getWallFront(int i, int j);
 
 physx::PxTransform getWallBack(int i, int j);
+
+int getNumWalls(int i);
 
 int getWallOwner(int i, int j);
 

@@ -10,8 +10,8 @@ class BikePlayer : public Bike {
   private:
 	Window& window;
   public:
-	BikePlayer(Window& window, Render::Render& render, int start_place, physx::PxTransform& pt, Render::Group& group)
-		: Bike(render, start_place, pt, group), window(window){};
+	BikePlayer(Window& window, Render::Render& render, int start_place, Render::Group& group)
+		: Bike(render, start_place, group), window(window){};
 
 	void enter() override {
 		render.camera_set_fov(50);
@@ -29,9 +29,9 @@ class BikePlayer : public Bike {
 
 		checkInput();
 
-		render.camera_set_pos(convertTransform(transform.transform(camera)));
+		render.camera_set_pos(convertTransform(getBikeTransform(0).transform(camera)));
 
-		model->setTransform(convertTransform(transform) * glm::scale(glm::mat4(1.0f), glm::vec3(2.0f)));
+		model->setTransform(convertTransform(getBikeTransform(0)) * glm::scale(glm::mat4(1.0f), glm::vec3(2.0f)));
 	}
 
 	void checkInput() {

@@ -9,8 +9,8 @@ class Bike : public GameObject {
 	int place = 0;
 
   public:
-	Bike(Render::Render& render, int start_place, physx::PxTransform& pt, Render::Group& group)
-		: GameObject(render, pt, group), place(start_place){};
+	Bike(Render::Render& render, int start_place, Render::Group& group)
+		: GameObject(render, group), place(start_place){};
 
 	void setPlace(int n) { place = n; }
 	int getPlace() { return place; }
