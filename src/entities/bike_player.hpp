@@ -12,7 +12,7 @@ class BikePlayer : public Bike {
 		: Bike(render, start_place, pt, group), window(window){};
 
 	void enter() override {
-		render.camera_set_fov(50);
+		render.camera_set_fov(100);
 
 		model.emplace(group);
 
