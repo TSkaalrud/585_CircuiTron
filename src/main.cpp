@@ -82,8 +82,6 @@ int main(int argc, char* argv[]) {
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init(NULL);
 
-	//auto audioDevice = alcOpenDevice(NULL);
-
 	// Create entitity manager
 	EntityManager e_manager;
 
@@ -109,11 +107,11 @@ int main(int argc, char* argv[]) {
 	Audio::AudioEngine stereo = Audio::AudioEngine();
 	stereo.initialize();
 	AudioInstance* bgm = new AudioInstance();
-	bgm->playSound(stereo.buffer[Audio::SOUND_FILE_CYBERSONG_BGM]);
+	bgm->playSound(stereo.buffer[Audio::SOUND_FILE_CYBERSONG_BGM]); //Song
 	AudioInstance* sfx_1 = new AudioInstance();
-	sfx_1->playSound(stereo.buffer[Audio::SOUND_FILE_AMBIENCE_BGM]);
+	sfx_1->playSound(stereo.buffer[Audio::SOUND_FILE_AMBIENCE_BGM]); //ambient environment sounds
 	AudioInstance* sfx_2 = new AudioInstance();
-	sfx_2->playSound(stereo.buffer[Audio::SOUND_FILE_GUN_IMPACT_SFX]);
+	sfx_2->playSound(stereo.buffer[Audio::SOUND_FILE_GUN_IMPACT_SFX]); //random sound effect example
 
 
 	// Loop will continue until "X" on window is clicked.
