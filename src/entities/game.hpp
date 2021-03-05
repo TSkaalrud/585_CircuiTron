@@ -41,9 +41,6 @@ class Game : public Entity {
 
 	std::vector<std::vector<glm::vec3>> ai_waypoints; // a list of waypoints for each ai bike
 
-	physx::PxTransform& car_pt;
-	physx::PxTransform& wall_pt;
-
 	Window& window;
 	Render::Render& render;
 	EntityManager& e_manager;
@@ -65,14 +62,14 @@ class Game : public Entity {
 	void enter() override { 
 		Render::GroupInstance track(track_model);
 
-		std::unique_ptr<Bike> b = std::make_unique<BikePlayer>(window, render, 0, car_pt, car_model);
+		std::unique_ptr<Bike> b = std::make_unique<BikePlayer>(window, render, 0, car_model);
 		bikes.push_back(b.get());
 		e_manager.addEntity(std::move(b));
 
 		for (int i = 0; i < players - 1; i++) {
 			initVehicle();
 
-			std::unique_ptr<Bike> b = std::make_unique<BikeAI>(render, i, car_pt, car_model, ai_waypoints[i]);
+			std::unique_ptr<Bike> b = std::make_unique<BikeAI>(render, i, car_model, ai_waypoints[i]);
 			bikes.push_back(b.get());
 			e_manager.addEntity(std::move(b));
 		}

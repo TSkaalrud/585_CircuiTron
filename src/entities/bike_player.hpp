@@ -12,7 +12,7 @@ class BikePlayer : public Bike {
 		: Bike(render, start_place, group), window(window){};
 
 	void enter() override {
-		render.camera_set_fov(100);
+		render.camera_set_fov(50);
 
 		model.emplace(group);
 
@@ -23,7 +23,7 @@ class BikePlayer : public Bike {
 	}
 
 	void update(float deltaTime) override {
-		physx::PxTransform camera(0, 100, -100, physx::PxQuat(physx::PxPi, {0, 1, 0}) * physx::PxQuat(-1, {1, 0, 0}));
+		physx::PxTransform camera(0, 5, -20, physx::PxQuat(physx::PxPi, {0, 1, 0}) * physx::PxQuat(-0.2, {1, 0, 0}));
 
 		checkInput();
 
