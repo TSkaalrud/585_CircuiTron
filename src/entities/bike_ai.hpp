@@ -29,7 +29,6 @@ class BikeAI : public Bike {
 			buffer--;
 		}
 		
-
 		model->setTransform(convertTransform(getBikeTransform(1)) * glm::scale(glm::mat4(1.0f), glm::vec3(2.0f)));
 	}
 
@@ -54,7 +53,6 @@ class BikeAI : public Bike {
 				nextWaypoint = 1;
 				addLap();
 				resetWaypoint();
-
 			} else {
 				nextWaypoint++;
 				addWaypoint();
@@ -67,24 +65,23 @@ class BikeAI : public Bike {
 			if (d > 0) {
 				//std::cout << "left" << std::endl;
 
-				bikeReleaseSteer(1);
-				bikeTurnPrecise(1, 0.25);
-				bikeAccelerate(1);
+				bikeReleaseSteer(getId());
+				bikeTurnPrecise(getId(), 0.25f);
+				//bikeTurnLeft(getId());
+				bikeAccelerate(getId());
 			} else if (d < 0) {
 				//std::cout << "right" << std::endl;
 
-				bikeReleaseSteer(1);
-				bikeTurnPrecise(1, -0.25);
-				bikeAccelerate(1);
+				bikeReleaseSteer(getId());
+				bikeTurnPrecise(getId(), -0.25f);
+				//bikeTurnRight(getId());
+				bikeAccelerate(getId());
 			} else {
 				//std::cout << "on" << std::endl;
-				bikeReleaseSteer(1);
+				bikeReleaseSteer(getId());
 			}
 		} else {
-			bikeReleaseAll(1);
+			bikeReleaseAll(getId());
 		}
-		
-
-
 	}
 };

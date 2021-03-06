@@ -371,7 +371,7 @@ void bikeAccelerate(int i) {
 		std::cout << "here" << std::endl;
 	}
 	else {
-		inputDatas[i].setAnalogAccel(1.0f);
+		inputDatas[i].setAnalogAccel(0.5f);
 	} 
 }
 

@@ -70,10 +70,11 @@ class Game : public Entity {
 		for (int i = 0; i < players - 1; i++) {
 			initVehicle();
 
-			std::unique_ptr<Bike> b = std::make_unique<BikeAI>(render, i+1, car_model, ai_waypoints[i]);
+			std::unique_ptr<Bike> b = std::make_unique<BikeAI>(render, i+2, car_model, ai_waypoints[i]);
 			bikes.push_back(b.get());
 			e_manager.addEntity(std::move(b));
 		}
+
 		e_manager.addEntity(std::make_unique<Wall>(render, wall_model));
 	}
 
@@ -98,7 +99,7 @@ class Game : public Entity {
 
 	void checkWin() {
 		// three laps to win
-		if (bikes[0]->getLap()-1 == 1) {
+		if (bikes[0]->getLap()-1 == 3) {
 			if (bikes[0]->getId() == 0) {
 				std::cout << "Player Wins!" << std::endl;
 			} else {
