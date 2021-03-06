@@ -31,6 +31,8 @@ int getWallOwner(int i, int j);
 
 void bikeAccelerate(int i);
 
+void bikeAcceleratePrecise(int i, float n);
+
 void bikeReverse(int i);
 
 void bikeBreak(int i);

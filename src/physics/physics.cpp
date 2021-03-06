@@ -371,8 +371,17 @@ void bikeAccelerate(int i) {
 		std::cout << "here" << std::endl;
 	}
 	else {
-		inputDatas[i].setAnalogAccel(0.5f);
+		inputDatas[i].setAnalogAccel(1.0f);
 	} 
+}
+
+void bikeAcceleratePrecise(int i, float n) {
+	if (CTbikes[i]->mDriveDynData.getCurrentGear() == PxVehicleGearsData::eREVERSE) {
+		CTbikes[i]->mDriveDynData.forceGearChange(PxVehicleGearsData::eFIRST);
+		std::cout << "here" << std::endl;
+	} else {
+		inputDatas[i].setAnalogAccel(n);
+	}
 }
 
 //reverse function used for input

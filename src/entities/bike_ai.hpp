@@ -68,14 +68,14 @@ class BikeAI : public Bike {
 				bikeReleaseSteer(getId());
 				bikeTurnPrecise(getId(), 0.25f);
 				//bikeTurnLeft(getId());
-				bikeAccelerate(getId());
+				bikeAcceleratePrecise(getId(), 0.5f);
 			} else if (d < 0) {
 				//std::cout << "right" << std::endl;
 
 				bikeReleaseSteer(getId());
 				bikeTurnPrecise(getId(), -0.25f);
 				//bikeTurnRight(getId());
-				bikeAccelerate(getId());
+				bikeAcceleratePrecise(getId(), 0.5f);
 			} else {
 				//std::cout << "on" << std::endl;
 				bikeReleaseSteer(getId());
