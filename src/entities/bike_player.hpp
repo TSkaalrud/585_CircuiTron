@@ -4,12 +4,18 @@
 #include "window.hpp"
 #include "physics/physics.h"
 
+#include <iostream>
+
 class BikePlayer : public Bike {
   private:
 	Window& window;
+
+	std::vector<glm::vec3> waypoints;
+	int currentWaypoint = 0, nextWaypoint = 1;
   public:
-	BikePlayer(Window& window, Render::Render& render, int start_place, Render::Group& group)
-		: Bike(render, start_place, group), window(window){};
+	BikePlayer(Window& window, Render::Render& render, int start_place, Render::Group& group,
+			   std::vector<glm::vec3> waypoints)
+		: Bike(render, start_place, group), window(window), waypoints(waypoints) {};
 
 	void enter() override {
 		render.camera_set_fov(50);
@@ -25,7 +31,11 @@ class BikePlayer : public Bike {
 	void update(float deltaTime) override {
 		physx::PxTransform camera(0, 5, -20, physx::PxQuat(physx::PxPi, {0, 1, 0}) * physx::PxQuat(-0.2, {1, 0, 0}));
 
-		checkInput();
+		if (!getLocked()) {
+			checkInput();
+		}
+		
+		updateWaypoint();
 
 		render.camera_set_pos(convertTransform(getBikeTransform(0).transform(camera)));
 
@@ -69,6 +79,29 @@ class BikePlayer : public Bike {
 			bikeBreak(0);
 		} else {
 			bikeReleaseBrake(0);
+		}
+	}
+
+	void updateWaypoint() {
+		glm::vec3 target = waypoints[currentWaypoint];
+		physx::PxVec3 player = getBikeTransform(0).p;
+		float dist = glm::sqrt(glm::pow(target.x - player.x, 2) + glm::pow(target.z - player.z, 2));
+
+		if (dist < 10.0f) {
+			currentWaypoint = nextWaypoint;
+			if (nextWaypoint == waypoints.size()) {
+				currentWaypoint = 0;
+				nextWaypoint = 1;
+				addLap();
+				resetWaypoint();
+
+			} else {
+				nextWaypoint++;
+				addWaypoint();
+			}
+
+			std::cout << "Current Lap: " << getLap() << std::endl;
+			std::cout << "Current Waypoint: " << getWaypoint() << std::endl;
 		}
 	}
 };

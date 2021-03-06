@@ -24,7 +24,7 @@ struct {
 	bool operator()(Bike* a, Bike* b) const {
 		if (a->getLap() != b->getLap())
 			return a->getLap() > b->getLap();
-		return a->getCheckpoint() > b->getCheckpoint();
+		return a->getWaypoint() > b->getWaypoint();
 	}
 } place_sort;
 
@@ -45,6 +45,8 @@ class Game : public Entity {
 	Render::Render& render;
 	EntityManager& e_manager;
 
+	bool gameover = false;
+
   public:
 	Game(Window& window, Render::Render& render, int players, EntityManager& em)
 		: window(window), render(render), e_manager(em), players(players),
@@ -55,21 +57,20 @@ class Game : public Entity {
 		//loading in the AI waypoint vertices with a dummy variable 0 for the player bike id
 		//std::vector<glm::vec3> map;
 		//ai_waypoints.push_back(map);
-		UploadMap("assets/AI_waypoints_1.obj");
-
+		uploadMap("assets/AI_waypoints_1.obj");
 	}
 
 	void enter() override { 
 		Render::GroupInstance track(track_model);
 
-		std::unique_ptr<Bike> b = std::make_unique<BikePlayer>(window, render, 0, car_model);
+		std::unique_ptr<Bike> b = std::make_unique<BikePlayer>(window, render, 1, car_model, ai_waypoints[0]);
 		bikes.push_back(b.get());
 		e_manager.addEntity(std::move(b));
 
 		for (int i = 0; i < players - 1; i++) {
 			initVehicle();
 
-			std::unique_ptr<Bike> b = std::make_unique<BikeAI>(render, i, car_model, ai_waypoints[i]);
+			std::unique_ptr<Bike> b = std::make_unique<BikeAI>(render, i+1, car_model, ai_waypoints[i]);
 			bikes.push_back(b.get());
 			e_manager.addEntity(std::move(b));
 		}
@@ -77,7 +78,10 @@ class Game : public Entity {
 	}
 
 	void update(float deltaTime) override { 
-		updatePlaces();
+		if (!gameover) {
+			updatePlaces();
+			checkWin();
+		}
 	}
 
 	void updatePlaces() {
@@ -92,7 +96,32 @@ class Game : public Entity {
 		}
 	}
 
-	void UploadMap(const char waypoints[]) {
+	void checkWin() {
+		// three laps to win
+		if (bikes[0]->getLap()-1 == 1) {
+			if (bikes[0]->getId() == 0) {
+				std::cout << "Player Wins!" << std::endl;
+			} else {
+				std::cout << "AI " << bikes[0]->getId() << " Wins!" << std::endl;
+			}
+			lockAllBikes();
+			gameover = true;
+		}
+	}
+
+	void lockAllBikes() {
+		for (int i = 0; i < bikes.size(); i++) {
+			bikes[i]->lockBike();
+		}
+	}
+
+	void unlockAllBikes() {
+		for (int i = 0; i < bikes.size(); i++) {
+			bikes[i]->unlockBike();
+		}
+	}
+
+	void uploadMap(const char waypoints[]) {
 		Assimp::Importer importer;
 
 		//read the file

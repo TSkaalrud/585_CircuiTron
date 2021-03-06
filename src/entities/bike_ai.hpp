@@ -11,7 +11,6 @@ class BikeAI : public Bike {
 	bool right = false;
 	//timer before AI bikes will start driving
 	int buffer = 120;
-	int buffer2 = 120;
 	//AI waypoint list, current target, and next target
 	std::vector<glm::vec3> waypoints;
 	int currentWaypoint = 0, nextWaypoint = 1;
@@ -23,15 +22,18 @@ class BikeAI : public Bike {
 		: Bike(render, start_place, group), waypoints(waypoints) {};
 
 	void update(float deltaTime) override {
-		if (buffer < 0) {
-			followPlayer();
+		if (!getLocked()) {
+			if (buffer < 0) {
+				followWaypoint();
+			}
+			buffer--;
 		}
-		buffer--;
+		
 
 		model->setTransform(convertTransform(getBikeTransform(1)) * glm::scale(glm::mat4(1.0f), glm::vec3(2.0f)));
 	}
 
-	void followPlayer() { 
+	void followWaypoint() { 
 		//physx::PxTransform player = getBikeTransform(0);
 		glm::vec3 target = waypoints[currentWaypoint];
 		physx::PxTransform ai = getBikeTransform(1);
@@ -48,12 +50,17 @@ class BikeAI : public Bike {
 		if (dist < 10) {
 			currentWaypoint = nextWaypoint;
 			if (nextWaypoint == waypoints.size()) {
-				nextWaypoint = 0;
+				currentWaypoint = 0;
+				nextWaypoint = 1;
+				addLap();
+				resetWaypoint();
+
 			} else {
 				nextWaypoint++;
+				addWaypoint();
 			}
 		}
-		std::cout << currentWaypoint << " distance = " << (int)dist << std::endl;
+		//std::cout << currentWaypoint << " distance = " << (int)dist << std::endl;
 
 
 		if (dist > 10.0f) {
