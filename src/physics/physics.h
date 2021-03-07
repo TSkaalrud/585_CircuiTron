@@ -57,6 +57,6 @@ void bikeControl(int i);
 
 void initPhysics();
 
-void stepPhysics(physx::PxTransform& player, physx::PxTransform&);
+void stepPhysics();
 
 void cleanupPhysics();

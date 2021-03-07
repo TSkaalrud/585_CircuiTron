@@ -88,6 +88,7 @@ PxRigidStatic* gGroundPlane = NULL;
 std::vector<PxVehicleDrive4W*> CTbikes;
 std::vector<std::vector<wallSegment>> walls;
 std::vector<PxVehicleDrive4WRawInputData> inputDatas;
+std::vector<bool> isVehicleInAir;
 
 bool gIsVehicleInAir = true;
 
@@ -310,9 +311,15 @@ void makeWallSeg(int i, PxTransform a, PxTransform b) {
 	wallShape->setQueryFilterData(qryFilterData);
 	
 	// set simulation filter data of the wall so that the vehicle collides with the wall
-	/*PxFilterData wallSimFilterData(COLLISION_FLAG_OBSTACLE, COLLISION_FLAG_OBSTACLE_AGAINST, 0, 0);
-	wallShape->setSimulationFilterData(wallSimFilterData);*/
-	
+	PxFilterData wallSimFilterData(COLLISION_FLAG_OBSTACLE, COLLISION_FLAG_OBSTACLE_AGAINST, 0, 0);
+	wallShape->setSimulationFilterData(wallSimFilterData);
+
+	//turn off simulation for walls (disable collisions)
+	wallShape->setFlag(PxShapeFlag::eSIMULATION_SHAPE, false);
+
+	//make walls trigger volumes
+	wallShape->setFlag(PxShapeFlag::eTRIGGER_SHAPE, true);
+
 	PxRigidStatic* aWall = gPhysics->createRigidStatic(wallSeg);
 	aWall->attachShape(*wallShape);
 	gScene->addActor(*aWall);
@@ -327,17 +334,12 @@ PxTransform wallFront;
 PxTransform wallBack;
 
 // basic wall generation
-void spawnWall(PxF32 timestep, int i, PxTransform& wall) {
+void spawnWall(PxF32 timestep, int i) {
 	PxVehicleDrive4W* vehicle = CTbikes[i];
-
-	//get speed of vehicle
-	float xVel = vehicle->getRigidDynamicActor()->getLinearVelocity().x;
-	float zVel = vehicle->getRigidDynamicActor()->getLinearVelocity().z;
-	float vel = sqrt((xVel * xVel) + (zVel * zVel));
-
+	
 	timer += timestep;
 
-	if (vel >= 15.0f && vehicle->mDriveDynData.getCurrentGear() != PxVehicleGearsData::eREVERSE) {
+	if (vehicle->computeForwardSpeed() >= 15.0f && vehicle->mDriveDynData.getCurrentGear() != PxVehicleGearsData::eREVERSE) {
 		if (timer >= wallTime) {
 			if (wallFront.p.x != NULL) {
 				wallBack = wallFront;
@@ -351,9 +353,11 @@ void spawnWall(PxF32 timestep, int i, PxTransform& wall) {
 	} else {
 		wallFront.p.x = NULL;
 	}
-
 }
 
+
+
+//return number of bikes
 int getNumBikes() { return CTbikes.size(); }
 
 // get bike transforms (i = bike number)
@@ -468,8 +472,18 @@ void bikeControl(int bike) {
 float spawnOffset = 0.0f;
 
 void initVehicle() {
+	// Data each bike needs
+	//input data
 	PxVehicleDrive4WRawInputData gVehicleInputData;
 	inputDatas.push_back(gVehicleInputData);
+
+	//wall arrays
+	std::vector<wallSegment> bikeWalls;
+	walls.push_back(bikeWalls);
+
+	//is vehicle in air
+	bool gIsVehicleInAir = true;
+	isVehicleInAir.push_back(gIsVehicleInAir);
 
 	PxVehicleDrive4W* gVehicle4W;
 
@@ -481,9 +495,6 @@ void initVehicle() {
 	spawnOffset += 5.0f;
 
 	CTbikes.push_back(gVehicle4W);
-	
-	std::vector<wallSegment> bikeWalls;
-	walls.push_back(bikeWalls);
 
 	gVehicle4W->getRigidDynamicActor()->setGlobalPose(startTransform);
 
@@ -594,21 +605,19 @@ void initPhysics() {
 	initVehicle();
 }
 
-void stepPhysics(PxTransform& player, PxTransform& wall) {
+void stepPhysics() {
 	const PxF32 timestep = 1.0f / 60.0f;
 
-	player = getBikeTransform(0);
-
-	spawnWall(timestep, 0, wall);
+	spawnWall(timestep, 0);
 
 	for (int i = 0; i < CTbikes.size(); i++) {
 		if (gMimicKeyInputs) {
 			PxVehicleDrive4WSmoothDigitalRawInputsAndSetAnalogInputs(
-				gKeySmoothingData, gSteerVsForwardSpeedTable, inputDatas[i], timestep, gIsVehicleInAir,
+				gKeySmoothingData, gSteerVsForwardSpeedTable, inputDatas[i], timestep, isVehicleInAir[i],
 				*CTbikes[i]);
 		} else {
 			PxVehicleDrive4WSmoothAnalogRawInputsAndSetAnalogInputs(
-				gPadSmoothingData, gSteerVsForwardSpeedTable, inputDatas[i], timestep, gIsVehicleInAir,
+				gPadSmoothingData, gSteerVsForwardSpeedTable, inputDatas[i], timestep, isVehicleInAir[i],
 				*CTbikes[i]);
 		}
 	}
@@ -628,7 +637,7 @@ void stepPhysics(PxTransform& player, PxTransform& wall) {
 		PxVehicleUpdates(timestep, grav, *gFrictionPairs, 1, vehicles, vehicleQueryResults);
 
 		// Work out if the vehicle is in the air.
-		gIsVehicleInAir =
+		isVehicleInAir[i] =
 			CTbikes[i]->getRigidDynamicActor()->isSleeping() ? false : PxVehicleIsInAir(vehicleQueryResults[0]);
 	}
 

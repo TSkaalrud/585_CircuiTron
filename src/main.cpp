@@ -25,9 +25,6 @@ int main(int argc, char* argv[]) {
 	auto past = std::chrono::high_resolution_clock::now();
 
 	// initialize physics
-	physx::PxTransform player1;
-	physx::PxTransform wall1;
-
 	initPhysics();
 
 	if (args.size() > 1) {
@@ -51,7 +48,7 @@ int main(int argc, char* argv[]) {
 			past = now;
 		}
 		// simulate();
-		 stepPhysics(player1, wall1);
+		 stepPhysics();
 
 		time += timestep;
 

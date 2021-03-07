@@ -43,6 +43,11 @@ PxFilterFlags VehicleFilterShader(
 	PX_UNUSED(constantBlock);
 	PX_UNUSED(constantBlockSize);
 
+	if (PxFilterObjectIsTrigger(attributes0) || PxFilterObjectIsTrigger(attributes1)) {
+		pairFlags = PxPairFlag::eTRIGGER_DEFAULT;
+		return PxFilterFlag::eDEFAULT;
+	}
+
 	if ((0 == (filterData0.word0 & filterData1.word1)) && (0 == (filterData1.word0 & filterData0.word1)))
 		return PxFilterFlag::eSUPPRESS;
 
