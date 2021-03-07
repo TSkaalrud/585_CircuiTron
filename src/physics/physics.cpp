@@ -436,9 +436,9 @@ void bikeBooster(int bike, int keyPressed) {
 }
 
 /* keep bike in euler angle terms between
--0.5 and +0.5  in the x (pitch)
+-0.5 and +0.5 rads in the x (pitch)
 don't care about y (yaw)
-pi/3 and 2*pi/3 (roll)
+pi/3 and 2*pi/3 rads (roll)
 */
 void bikeControl(int bike) { 
 	
