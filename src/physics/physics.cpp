@@ -52,6 +52,8 @@
 #include "CTUtils.h"
 #include <GLFW/glfw3.h>
 
+#include "OBJ_Loader.h"
+
 #include <iostream>
 #include <math.h>
 #include <stdio.h>
@@ -497,7 +499,36 @@ void initVehicle() {
 	gVehicleOrderProgress = 0;
 	bikeBreak(CTbikes.size() - 1);
 	bikeReleaseAll(CTbikes.size() - 1);
-	
+}
+
+physx::PxTriangleMesh* cookTrack() {
+
+	objl::Loader loader;
+
+	loader.LoadFile("assets/The_Coffin_cooked.obj");
+
+	std::vector<objl::Vertex> verts = loader.LoadedVertices;
+	std::vector<unsigned int> indices = loader.LoadedIndices;
+
+	PxTriangleMeshDesc meshDesc;
+	meshDesc.points.count = verts.size();
+	meshDesc.points.stride = sizeof(PxVec3);
+	meshDesc.points.data = &verts[0];
+
+	meshDesc.triangles.count = indices.size();
+	meshDesc.triangles.stride = 3 * sizeof(unsigned int);
+	meshDesc.triangles.data = &indices[0];
+
+	PxDefaultMemoryOutputStream writeBuffer;
+	PxTriangleMeshCookingResult::Enum result;
+
+	bool status = gCooking->cookTriangleMesh(meshDesc, writeBuffer, &result);
+	if (!status) {
+		return NULL;
+	}
+
+	PxDefaultMemoryInputData readBuffer(writeBuffer.getData(), writeBuffer.getSize());
+	return gPhysics->createTriangleMesh(readBuffer);
 }
 
 void initPhysics() {
@@ -544,6 +575,20 @@ void initPhysics() {
 	PxFilterData groundPlaneSimFilterData(COLLISION_FLAG_GROUND, COLLISION_FLAG_GROUND_AGAINST, 0, 0);
 	gGroundPlane = createDrivablePlane(groundPlaneSimFilterData, gMaterial, gPhysics);
 	gScene->addActor(*gGroundPlane);
+
+	// Cook track
+	PxTriangleMesh* trackMesh = cookTrack();
+	PxShape* trackShape = gPhysics->createShape(PxTriangleMeshGeometry(trackMesh), *gMaterial);
+
+	PxFilterData trackFilterData(COLLISION_FLAG_DRIVABLE_OBSTACLE, COLLISION_FLAG_DRIVABLE_OBSTACLE_AGAINST, 0, 0);
+	trackShape->setQueryFilterData(trackFilterData);
+
+	PxFilterData trackSimFilterData(COLLISION_FLAG_DRIVABLE_OBSTACLE, COLLISION_FLAG_DRIVABLE_OBSTACLE_AGAINST, 0, 0);
+	trackShape->setSimulationFilterData(trackSimFilterData);
+	
+	PxRigidStatic* track = gPhysics->createRigidStatic(trackShape->getLocalPose());
+	track->attachShape(*trackShape);
+	gScene->addActor(*track);
 
 	// Create vehicle that will drive on the plane. (This one is the player)
 	initVehicle();
