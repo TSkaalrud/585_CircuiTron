@@ -33,17 +33,15 @@ class BikeAI : public Bike {
 	}
 
 	void followWaypoint() { 
-		//physx::PxTransform player = getBikeTransform(0);
 		glm::vec3 target = waypoints[currentWaypoint];
 		physx::PxTransform ai = getBikeTransform(1);
 
-		physx::PxVec3 v = ai.q.getBasisVector2() + ai.p;
+		physx::PxVec3 heading = ai.q.getBasisVector2() + ai.p;
 
-		//physx::PxVec3 pn = player.p;
-		physx::PxVec3 an = ai.p;
+		physx::PxVec3 ai_pos = ai.p;
 
-		float d = (target.x - an.x) * (v.z - an.z) - (target.z - an.z) * (v.x - an.x);
-		float dist = glm::sqrt(glm::pow(target.x - an.x, 2) + glm::pow(target.z - an.z, 2));
+		float d = (target.x - ai_pos.x) * (heading.z - ai_pos.z) - (target.z - ai_pos.z) * (heading.x - ai_pos.x);
+		float dist = glm::sqrt(glm::pow(target.x - ai_pos.x, 2) + glm::pow(target.z - ai_pos.z, 2));
 		
 		//update to next WP if distance is less than 10 -- play with this number for feel
 		if (dist < 10) {
@@ -60,20 +58,40 @@ class BikeAI : public Bike {
 		}
 		//std::cout << currentWaypoint << " distance = " << (int)dist << std::endl;
 
+		physx::PxTransform player = getBikeTransform(0);
+		physx::PxVec3 player_pos = player.p;
+
+		glm::vec3 toTarget(target.x - ai_pos.x, target.y - ai_pos.y, target.z - ai_pos.z);
+		glm::vec3 toHeading(heading.x - ai_pos.x, heading.y - ai_pos.y, heading.z - ai_pos.z);
+
+		float dot = glm::dot(toTarget, toHeading);
+		float mag = glm::length(toTarget) * glm::length(toHeading);
+
+		float angle = glm::acos(dot / mag);
+
+		//std::cout << angle << std::endl;
+
+		float angleRange = (3.14f - 0.0f);
+		float radiusRange = (1.0f - 0.0f);
+
+		float radius = (((angle - 0.0f) * radiusRange) / angleRange) - 0.0f;
+
+		std::cout << radius << std::endl;
+
 
 		if (dist > 10.0f) {
 			if (d > 0) {
 				//std::cout << "left" << std::endl;
 
 				bikeReleaseSteer(getId());
-				bikeTurnPrecise(getId(), 0.25f);
+				bikeTurnPrecise(getId(), radius);
 				//bikeTurnLeft(getId());
 				bikeAcceleratePrecise(getId(), 0.5f);
 			} else if (d < 0) {
 				//std::cout << "right" << std::endl;
 
 				bikeReleaseSteer(getId());
-				bikeTurnPrecise(getId(), -0.25f);
+				bikeTurnPrecise(getId(), -radius);
 				//bikeTurnRight(getId());
 				bikeAcceleratePrecise(getId(), 0.5f);
 			} else {
