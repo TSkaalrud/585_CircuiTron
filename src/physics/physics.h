@@ -49,6 +49,10 @@ void bikeReleaseBrake(int i);
 
 void bikeReleaseAll(int i);
 
+void bikeBooster(int i, int keyPressed);
+
+void bikeControl(int i);
+
 void initPhysics();
 
 void stepPhysics(physx::PxTransform& player, physx::PxTransform&);

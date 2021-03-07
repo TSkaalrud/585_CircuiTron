@@ -3,10 +3,18 @@
 #include "bike.hpp"
 #include "window.hpp"
 #include "physics/physics.h"
+#include <string>
+#include <iostream>
 
 class BikePlayer : public Bike {
   private:
 	Window& window;
+
+	//CD = cooldowns for abilities
+	int BoostCD = 0;
+	int StrafeCD = 0;
+	int WADCharge = 0;
+
   public:
 	BikePlayer(Window& window, Render::Render& render, int start_place, Render::Group& group)
 		: Bike(render, start_place, group), window(window){};
@@ -25,6 +33,10 @@ class BikePlayer : public Bike {
 	void update(float deltaTime) override {
 		physx::PxTransform camera(0, 5, -20, physx::PxQuat(physx::PxPi, {0, 1, 0}) * physx::PxQuat(-0.2, {1, 0, 0}));
 
+		//reduce CD's and regenerate health ***until slipstreaming is in***
+		if (BoostCD > 0) {	BoostCD--;	}
+		if (StrafeCD > 0) {	StrafeCD--;	}
+		modifyHealth(1);
 		checkInput();
 
 		render.camera_set_pos(convertTransform(getBikeTransform(0).transform(camera)));
@@ -70,5 +82,50 @@ class BikePlayer : public Bike {
 		} else {
 			bikeReleaseBrake(0);
 		}
+
+		//bike Booster (jump) functions use glfw keyboard #defines @ https://www.glfw.org/docs/3.3/group__keys.html
+		if (window.keyPressed(265)) { // up arrow - boost up
+			if (BoostCD < 1 && getHealth() > 10) {
+				modifyHealth(-10);
+				bikeBooster(0, 265);
+				BoostCD += 60;
+				std::cout << "health: " << getHealth() << std::endl;
+			}
+		} 
+
+		if (window.keyPressed(263)) { // left arrow - boost left
+			if (StrafeCD < 1 && getHealth() > 10) {
+				modifyHealth(-10);
+				bikeBooster(0, 263);
+				StrafeCD += 60;
+				std::cout << "health: " << getHealth() << std::endl;
+			}
+		} 
+		if (window.keyPressed(262)) { // right arrow - boost right
+			if (StrafeCD < 1 && getHealth() > 10) {
+				modifyHealth(-10);
+				bikeBooster(0, 262);
+				StrafeCD += 60;
+				std::cout << "health: " << getHealth() << std::endl;
+			}
+		} 
+		
+		// down arrow - WAD
+		if (window.keyPressed(264)) { //charge WAD
+			WADCharge++;
+		} else if (window.keyReleased(264)) { // release WAD
+			
+			WADCharge = 0;
+		}
+
+		// spacebar - Forward Projector Cannon (shoot)
+		if (window.keyPressed(32)) {
+		}
+
+		// left Control - "Control" chassis to right itself
+		if (window.keyPressed(341)) {
+			bikeControl(0);
+		}
+
 	}
 };

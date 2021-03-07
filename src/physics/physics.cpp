@@ -89,6 +89,8 @@ std::vector<PxVehicleDrive4WRawInputData> inputDatas;
 
 bool gIsVehicleInAir = true;
 
+float impulseBase = 2500;
+
 PxF32 gSteerVsForwardSpeedData[2 * 8] = {0.0f,       0.75f,      5.0f,       0.75f,      30.0f,      0.125f,
 										 120.0f,     0.1f,       PX_MAX_F32, PX_MAX_F32, PX_MAX_F32, PX_MAX_F32,
 										 PX_MAX_F32, PX_MAX_F32, PX_MAX_F32, PX_MAX_F32};
@@ -407,6 +409,51 @@ void bikeReleaseAll(int i) {
 	inputDatas[i].setAnalogBrake(0.0f);
 }
 
+//bikeBooster provides a powerful impulse either to jump up, or strafe to the left or right of the bike's heading
+void bikeBooster(int bike, int keyPressed) { 
+	if (keyPressed == 265) {//up
+		physx::PxVec3 up = getBikeTransform(bike).q.getBasisVector1() * impulseBase;
+		CTbikes[bike]->getRigidDynamicActor()->addForce(up, PxForceMode::eIMPULSE);
+	}
+	else if (keyPressed == 263) {//left
+		physx::PxVec3 left;
+		if (gIsVehicleInAir) {
+			left = getBikeTransform(bike).q.getBasisVector0() * .5 * impulseBase;
+		} else {
+			left = getBikeTransform(bike).q.getBasisVector0() * 2 * impulseBase;
+		}
+		CTbikes[bike]->getRigidDynamicActor()->addForce(left, PxForceMode::eIMPULSE);
+	} 
+	else if (keyPressed == 262) {//right
+		physx::PxVec3 right;
+		if (gIsVehicleInAir) {
+			right = getBikeTransform(bike).q.getBasisVector0() * -.5 * impulseBase;
+		} else {
+			right = getBikeTransform(bike).q.getBasisVector0() * -2 * impulseBase;
+		}
+		CTbikes[bike]->getRigidDynamicActor()->addForce(right, PxForceMode::eIMPULSE);
+	}
+}
+
+/* keep bike in euler angle terms between
+-0.5 and +0.5  in the x (pitch)
+don't care about y (yaw)
+pi/3 and 2*pi/3 (roll)
+*/
+void bikeControl(int bike) { 
+	
+	//std::cout << getBikeTransform(bike).q.getBasisVector1().dot(physx::PxVec3{0,1,0}) << std::endl;
+	physx::PxTransform quat = getBikeTransform(bike);
+	//std::cout << quat.q.getAngle() << std::endl;
+	float angleRadians;
+	PxVec3 unitAxis;
+	quat.q.toRadiansAndUnitAxis(angleRadians, unitAxis);
+	std::cout << angleRadians << std::endl;
+	std::cout << unitAxis.x << " " << unitAxis.y << " " << unitAxis.z << std::endl;
+
+
+}
+
 float spawnOffset = 0.0f;
 
 void initVehicle() {
@@ -452,7 +499,7 @@ void initPhysics() {
 	gPhysics = PxCreatePhysics(PX_PHYSICS_VERSION, *gFoundation, PxTolerancesScale(), true, gPvd);
 
 	PxSceneDesc sceneDesc(gPhysics->getTolerancesScale());
-	sceneDesc.gravity = PxVec3(0.0f, -9.81f, 0.0f);
+	sceneDesc.gravity = PxVec3(0.0f, -9.81f*2, 0.0f);
 
 	PxU32 numWorkers = 1;
 	gDispatcher = PxDefaultCpuDispatcherCreate(numWorkers);

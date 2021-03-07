@@ -23,10 +23,12 @@ class Bike : public GameObject {
 	void resetCheckpoint() { checkpoint = 0; }
 	int getCheckpoint() { return checkpoint; }
 
-	void loseHealth() { health -= 10; }
+	int getHealth() { return health; }
+	void modifyHealth(int amount) { health += amount; }
 
 	void wallCollision() { 
-		loseHealth();
+		modifyHealth(-25);
+		//std::cout << "current health = " << health << std::endl;
 		//play sound?
 	}
 };

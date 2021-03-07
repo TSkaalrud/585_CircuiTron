@@ -53,7 +53,7 @@ class BikeAI : public Bike {
 				nextWaypoint++;
 			}
 		}
-		std::cout << currentWaypoint << " distance = " << (int)dist << std::endl;
+		//std::cout << currentWaypoint << " distance = " << (int)dist << std::endl;
 
 
 		if (dist > 10.0f) {
