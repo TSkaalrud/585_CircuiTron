@@ -17,9 +17,9 @@ class BikePlayer : public Bike {
 	int StrafeCD = 0;
 	int WADCharge = 0;
 
-
 	std::vector<glm::vec3> waypoints;
 	int currentWaypoint = 0, nextWaypoint = 1;
+
   public:
 	BikePlayer(Window& window, Render::Render& render, int start_place, Render::Group& group,
 			   std::vector<glm::vec3> waypoints)
@@ -39,13 +39,15 @@ class BikePlayer : public Bike {
 	void update(float deltaTime) override {
 		physx::PxTransform camera(0, 5, -20, physx::PxQuat(physx::PxPi, {0, 1, 0}) * physx::PxQuat(-0.2, {1, 0, 0}));
 
-		//reduce CD's and regenerate health ***until slipstreaming is in***
-		if (BoostCD > 0) {	BoostCD--;	}
-		if (StrafeCD > 0) {	StrafeCD--;	}
-		modifyHealth(1);
-		checkInput();
-
 		if (!getLocked()) {
+			// reduce CD's and regenerate health ***until slipstreaming is in***
+			if (BoostCD > 0) {
+				BoostCD--;
+			}
+			if (StrafeCD > 0) {
+				StrafeCD--;
+			}
+			modifyHealth(1);
 			checkInput();
 		}
 		

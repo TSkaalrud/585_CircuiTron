@@ -76,9 +76,6 @@ class BikeAI : public Bike {
 
 		float radius = (((angle - 0.0f) * radiusRange) / angleRange) - 0.0f;
 
-		std::cout << radius << std::endl;
-
-
 		if (dist > 10.0f) {
 			if (d > 0) {
 				//std::cout << "left" << std::endl;
