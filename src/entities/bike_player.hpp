@@ -4,7 +4,6 @@
 #include "window.hpp"
 #include "physics/physics.h"
 #include <string>
-#include <iostream>
 
 #include <iostream>
 
