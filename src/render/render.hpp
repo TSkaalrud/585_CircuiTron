@@ -21,7 +21,7 @@ class Render : public Core {
 	InstanceHandle skybox;
 	TextureHandle skyboxCubemap;
 
-	void render_cubemap(Shader::Type type, GLuint cubemap, int width);
+	void render_cubemap(Shader::Type type, GLuint cubemap, GLsizei width);
 
   public:
 	Render(void (*glGetProcAddr(const char*))());

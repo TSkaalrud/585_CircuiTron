@@ -72,8 +72,6 @@ MaterialHandle Render::create_pbr_material(MaterialPBR pbr) {
 		{.shader = depthShader, .uniform = 0, .textures = {}}});
 }
 
-template <class T> size_t vector_size(const std::vector<T>& vec) { return sizeof(T) * vec.size(); }
-
 Render::Render(void (*glGetProcAddr(const char*))()) : Core(glGetProcAddr) {
 	ShaderHandle skyboxShader = registerShader(Shader{
 		load_shader_program(
@@ -125,7 +123,7 @@ const glm::mat4 captureViews[] = {
 	glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)),
 	glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f))};
 
-void Render::render_cubemap(Shader::Type type, GLuint cubemap, int size) {
+void Render::render_cubemap(Shader::Type type, GLuint cubemap, GLsizei size) {
 	GLuint framebuffer, renderbuffer;
 	glCreateFramebuffers(1, &framebuffer);
 	glCreateRenderbuffers(1, &renderbuffer);

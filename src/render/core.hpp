@@ -11,6 +11,7 @@ namespace Render {
 using namespace glm;
 
 typedef unsigned int GLuint;
+typedef int GLsizei;
 
 struct MeshDef {
 	struct Vertex {
@@ -39,6 +40,8 @@ typedef uint ShaderHandle;
 
 class Core {
   protected:
+	template <class T> static size_t vector_size(const std::vector<T>& vec) { return sizeof(T) * vec.size(); }
+
 	struct Camera {
 		mat4 proj;
 		mat4 view;

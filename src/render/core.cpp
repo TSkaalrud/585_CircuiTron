@@ -10,8 +10,6 @@ Core::Core(void (*glGetProcAddr(const char*))()) {
 
 	loadDebugger();
 
-	glEnable(GL_FRAMEBUFFER_SRGB);
-
 	glCreateBuffers(1, &cameraBuffer);
 	glNamedBufferStorage(cameraBuffer, sizeof(Camera), nullptr, GL_DYNAMIC_STORAGE_BIT);
 	glBindBufferBase(GL_UNIFORM_BUFFER, 0, cameraBuffer);
@@ -24,8 +22,6 @@ Core::Core(void (*glGetProcAddr(const char*))()) {
 	glTextureParameteri(dirLightShadow, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
 	glTextureParameteri(dirLightShadow, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
 }
-
-template <class T> size_t vector_size(const std::vector<T>& vec) { return sizeof(T) * vec.size(); }
 
 uint Core::create_mesh(MeshDef def) {
 
@@ -104,6 +100,7 @@ void Core::renderScene(Shader::Type type) {
 }
 
 void Core::run() {
+	glEnable(GL_FRAMEBUFFER_SRGB);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_DEPTH_CLAMP);
 	glEnable(GL_CULL_FACE);
