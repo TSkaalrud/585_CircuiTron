@@ -44,10 +44,6 @@ vec3 colour = emissive;
 
 const float pi = 3.1415927;
 
-vec3 diffuse_brdf(vec3 wi) { // Lambert
-	return albedo.rgb / pi;
-}
-
 float alpha2 = pow(roughness, 4);
 float normal_dist(vec3 wi) { // GGX / Trowbridge-Reitz
 	vec3 h = normalize(wi + wo);
@@ -67,7 +63,7 @@ float geom_atten (vec3 wi) { // Schlick
 vec3 specular_brdf(vec3 wi) { // Cook-Torrance
 	float D = normal_dist(wi);
 	float G = geom_atten(wi);
-	return vec3((D * G) / (4 * dot(normal, wi) * dot(normal, wo)));
+	return vec3((D * G) / (4 * abs(dot(normal, wi)) * abs(dot(normal, wo))));
 }
 
 vec3 fresnel(vec3 wi, vec3 f0) { // Schlick
@@ -75,24 +71,11 @@ vec3 fresnel(vec3 wi, vec3 f0) { // Schlick
 	return f0 + (1 - f0) * pow(1 - abs(dot(wo, h)), 5);
 }
 
-vec3 fresnel_mix(vec3 wi, vec3 layer, vec3 base) {
-	return mix(base, layer, fresnel(wi, vec3(0.04)));
-}
-
-vec3 conductor_fresnel(vec3 wi, vec3 brdf, vec3 f0) {
-	return brdf * fresnel(wi, f0);
-}
-
-vec3 metal_brdf(vec3 wi) {
-	return conductor_fresnel(wi, specular_brdf(wi), albedo.rgb);
-}
-
-vec3 dielectric_brdf(vec3 wi) {
-	return fresnel_mix(wi, specular_brdf(wi), diffuse_brdf(wi));
-}
-
 vec3 pbr_brdf(vec3 wi) {
-	return mix(dielectric_brdf(wi), metal_brdf(wi), metallic);
+	vec3 F = fresnel(wi, mix(vec3(0.04), albedo.rgb, metallic));
+	vec3 specular = F * specular_brdf(wi);
+	vec3 diffuse = (1 - F) * albedo.rgb * (1 - 0.04) * (1 - metallic) / pi;
+	return diffuse + specular;
 }
 
 vec3 light(vec3 dir, vec3 colour) {
