@@ -16,12 +16,17 @@ struct MaterialPBR {
 };
 
 class Render : public Core {
-	const int skyboxSize = 8192;
+	const int skyboxSize = 4096;
 	const int irradianceSize = 64;
+	const int reflectionSize = 512;
+	const int reflectionLevels = 5;
+	const int reflectionBRDFSize = 256;
 
 	InstanceHandle skybox;
 	TextureHandle skyboxCubemap;
 	TextureHandle irradiance;
+	TextureHandle reflection;
+	TextureHandle reflectionBRDF;
 
 	void render_cubemap(Shader::Type type, GLuint cubemap, GLsizei width);
 

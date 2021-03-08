@@ -11,7 +11,6 @@ layout(std140, binding = 0) uniform Camera {
 	vec3 camPos;
 };
 
-
 struct DirLight {
 	vec3 dir;
 	vec3 colour;
@@ -21,17 +20,20 @@ layout(std430, binding = 1) readonly buffer DirLights {
 	DirLight dirLights[];
 };
 
-layout(binding = 4) uniform samplerCube irradiance;
+layout(binding = 3) uniform samplerCube irradiance;
+layout(binding = 4) uniform samplerCube reflection;
+layout(binding = 5) uniform sampler2D reflectionBRDF;
 
 layout(std140, binding = 1) uniform Material {
 	vec4 albedoFactor;
 	vec3 emissiveFactor;
 	float metalFactor;
 	float roughFactor;
+	float reflectionLevels;
 };
-layout(binding = 5) uniform sampler2D albedoTex;
-layout(binding = 6) uniform sampler2D metalRoughTex;
-layout(binding = 7) uniform sampler2D emissiveTexture;
+layout(binding = 6) uniform sampler2D albedoTex;
+layout(binding = 7) uniform sampler2D metalRoughTex;
+layout(binding = 8) uniform sampler2D emissiveTexture;
 
 out vec4 outColour;
 
@@ -86,7 +88,13 @@ vec3 light(vec3 dir, vec3 colour) {
 }
 
 vec3 enviroment() {
-	return texture(irradiance, normal).rgb * (1 - fresnel(normalize(normal + wo), mix(vec3(0.04), albedo.rgb, metallic))) * albedo.rgb * (1 - 0.04) * (1 - metallic);
+	// Code from: https://learnopengl.com/PBR/IBL/Specular-IBL
+	vec3 f0 = mix(vec3(0.04), albedo.rgb, metallic);
+	vec3 F = f0 + (max(vec3(1.0 - roughness), f0) - f0) * pow(1 - abs(dot(wo, normal)), 5);
+	vec3 diffuse = texture(irradiance, normal).rgb * (1 - F) * albedo.rgb * (1 - 0.04) * (1 - metallic);
+	vec2 envBRDF = texture(reflectionBRDF, vec2(max(dot(normal, wo), 0.0), roughness)).rg;
+	vec3 specular = textureLod(reflection, reflect(-wo, normal), roughness * reflectionLevels).rgb * (F * envBRDF.r + envBRDF.g);
+	return diffuse + specular;
 }
 
 void main() {

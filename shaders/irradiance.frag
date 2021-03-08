@@ -1,8 +1,9 @@
 #version 450 core
+// Code from: https://learnopengl.com/PBR/IBL/Diffuse-irradiance
 
 layout(location = 0) in vec3 TexCoords;
 
-layout(binding = 1) uniform samplerCube rectSkybox;
+layout(binding = 1) uniform samplerCube cubeSkybox;
 
 out vec4 outColour;
 
@@ -25,7 +26,7 @@ void main() {
 			// tangent space to world
 			vec3 sampleVec = tangentSample.x * right + tangentSample.y * up + tangentSample.z * normal; 
 
-			irradiance += texture(rectSkybox, sampleVec).rgb * cos(theta) * sin(theta);
+			irradiance += texture(cubeSkybox, sampleVec).rgb * cos(theta) * sin(theta);
 			nrSamples++;
 		}
 	}

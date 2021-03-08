@@ -41,6 +41,7 @@ struct PBR {
 	vec3 emissiveFactor;
 	float metalFactor;
 	float roughFactor;
+	float reflectionLevels;
 };
 MaterialHandle Render::create_pbr_material(MaterialPBR pbr) {
 	static ShaderHandle shader = registerShader(Shader{
@@ -57,6 +58,7 @@ MaterialHandle Render::create_pbr_material(MaterialPBR pbr) {
 		.emissiveFactor = pbr.emissiveFactor,
 		.metalFactor = pbr.metalFactor,
 		.roughFactor = pbr.roughFactor,
+		.reflectionLevels = static_cast<float>(reflectionLevels),
 	};
 	glNamedBufferStorage(uniform, sizeof(PBR), &_pbr, 0);
 
@@ -64,7 +66,11 @@ MaterialHandle Render::create_pbr_material(MaterialPBR pbr) {
 	static auto whiteTexture = create_texture(1, 1, 3, false, &white);
 
 	std::vector<TextureHandle> textures = {
-		0, irradiance, pbr.albedoTexture.value_or(whiteTexture), pbr.metalRoughTexture.value_or(whiteTexture),
+		irradiance,
+		reflection,
+		reflectionBRDF,
+		pbr.albedoTexture.value_or(whiteTexture),
+		pbr.metalRoughTexture.value_or(whiteTexture),
 		pbr.emissiveTexture.value_or(whiteTexture)};
 
 	return registerMaterial(Material{
@@ -73,17 +79,19 @@ MaterialHandle Render::create_pbr_material(MaterialPBR pbr) {
 }
 
 Render::Render(void (*glGetProcAddr(const char*))()) : Core(glGetProcAddr) {
-	ShaderHandle skyboxShader = registerShader(Shader{
-		load_shader_program(
-			{{"shaders/skybox.vert", GL_VERTEX_SHADER}, {"shaders/testSkybox.frag", GL_FRAGMENT_SHADER}}),
-		Shader::Type::Skybox});
-	MaterialHandle skyboxMaterial = registerMaterial(Material{{.shader = skyboxShader, .uniform = 0, .textures = {}}});
+	{
+		ShaderHandle skyboxShader = registerShader(Shader{
+			load_shader_program(
+				{{"shaders/skybox.vert", GL_VERTEX_SHADER}, {"shaders/testSkybox.frag", GL_FRAGMENT_SHADER}}),
+			Shader::Type::Skybox});
+		MaterialHandle skyboxMaterial =
+			registerMaterial(Material{{.shader = skyboxShader, .uniform = 0, .textures = {}}});
 
-	std::vector<vec3> verticies = {
-		{-1, -1, -1}, {-1, -1, 1}, {-1, 1, -1}, {-1, 1, 1}, {1, -1, -1}, {1, -1, 1}, {1, 1, -1}, {1, 1, 1},
-	};
+		std::vector<vec3> verticies = {
+			{-1, -1, -1}, {-1, -1, 1}, {-1, 1, -1}, {-1, 1, 1}, {1, -1, -1}, {1, -1, 1}, {1, 1, -1}, {1, 1, 1},
+		};
 
-	// clang-format off
+		// clang-format off
 	std::vector<uint32_t> indicies = {
 		2, 0, 4, 4, 6, 2,
 		1, 0, 2, 2, 3, 1,
@@ -92,30 +100,88 @@ Render::Render(void (*glGetProcAddr(const char*))()) : Core(glGetProcAddr) {
 		2, 6, 7, 7, 3, 2,
 		0, 1, 4, 4, 1, 5,
 	};
-	// clang-format on
+		// clang-format on
 
-	GLuint vertex_buffer, index_buffer, vao;
-	glCreateBuffers(1, &vertex_buffer);
-	glCreateBuffers(1, &index_buffer);
-	glCreateVertexArrays(1, &vao);
+		GLuint vertex_buffer, index_buffer, vao;
+		glCreateBuffers(1, &vertex_buffer);
+		glCreateBuffers(1, &index_buffer);
+		glCreateVertexArrays(1, &vao);
 
-	glNamedBufferStorage(vertex_buffer, vector_size(verticies), verticies.data(), 0);
-	glNamedBufferStorage(index_buffer, vector_size(indicies), indicies.data(), 0);
+		glNamedBufferStorage(vertex_buffer, vector_size(verticies), verticies.data(), 0);
+		glNamedBufferStorage(index_buffer, vector_size(indicies), indicies.data(), 0);
 
-	glVertexArrayVertexBuffer(vao, 0, vertex_buffer, 0, sizeof(vec3));
-	glEnableVertexArrayAttrib(vao, 0);
-	glVertexArrayAttribFormat(vao, 0, 3, GL_FLOAT, false, 0);
+		glVertexArrayVertexBuffer(vao, 0, vertex_buffer, 0, sizeof(vec3));
+		glEnableVertexArrayAttrib(vao, 0);
+		glVertexArrayAttribFormat(vao, 0, 3, GL_FLOAT, false, 0);
 
-	glVertexArrayElementBuffer(vao, index_buffer);
+		glVertexArrayElementBuffer(vao, index_buffer);
 
-	uint skyboxMesh = registerMesh(Mesh{.vao = vao, .count = static_cast<uint>(indicies.size())});
-	skybox = create_instance(skyboxMesh, skyboxMaterial);
+		uint skyboxMesh = registerMesh(Mesh{.vao = vao, .count = static_cast<uint>(indicies.size())});
+		skybox = create_instance(skyboxMesh, skyboxMaterial);
+	}
 
 	glCreateTextures(GL_TEXTURE_CUBE_MAP, 1, &skyboxCubemap);
 	glTextureStorage2D(skyboxCubemap, 1, GL_RGB16F, skyboxSize, skyboxSize);
 
 	glCreateTextures(GL_TEXTURE_CUBE_MAP, 1, &irradiance);
 	glTextureStorage2D(irradiance, 1, GL_RGB16F, irradianceSize, irradianceSize);
+
+	glCreateTextures(GL_TEXTURE_CUBE_MAP, 1, &reflection);
+	glTextureStorage2D(reflection, reflectionLevels, GL_RGB16F, reflectionSize, reflectionSize);
+
+	glCreateTextures(GL_TEXTURE_2D, 1, &reflectionBRDF);
+	glTextureStorage2D(reflectionBRDF, 1, GL_RG16F, reflectionBRDFSize, reflectionBRDFSize);
+	glTextureParameteri(reflectionBRDF, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTextureParameteri(reflectionBRDF, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	{
+		GLuint framebuffer;
+		glCreateFramebuffers(1, &framebuffer);
+		glNamedFramebufferTexture(framebuffer, GL_COLOR_ATTACHMENT0, reflectionBRDF, 0);
+		glViewport(0, 0, reflectionBRDFSize, reflectionBRDFSize);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+
+		static GLuint reflectionBRDFShader = load_shader_program(
+			{{"shaders/quad.vert", GL_VERTEX_SHADER}, {"shaders/reflectionBRDF.frag", GL_FRAGMENT_SHADER}});
+		glUseProgram(reflectionBRDFShader);
+		mat3 transform(1.0f);
+		glUniformMatrix3fv(0, 1, false, value_ptr(transform));
+
+		GLuint vertex_buffer, index_buffer, quadVertexArray;
+		glCreateBuffers(1, &vertex_buffer);
+		glCreateBuffers(1, &index_buffer);
+		glCreateVertexArrays(1, &quadVertexArray);
+
+		vec2 quadverts[] = {
+			{-1, -1}, {0, 0}, {-1, 1}, {0, 1}, {1, -1}, {1, 0}, {1, 1}, {1, 1},
+		};
+		int quadindicies[] = {0, 1, 2, 2, 1, 3};
+
+		glNamedBufferStorage(vertex_buffer, sizeof(quadverts), &quadverts, 0);
+		glNamedBufferStorage(index_buffer, sizeof(quadindicies), &quadindicies, 0);
+
+		glVertexArrayVertexBuffer(quadVertexArray, 0, vertex_buffer, 0, sizeof(vec2) * 2);
+		glEnableVertexArrayAttrib(quadVertexArray, 0);
+		glVertexArrayAttribFormat(quadVertexArray, 0, 2, GL_FLOAT, false, 0);
+		glVertexArrayVertexBuffer(quadVertexArray, 1, vertex_buffer, 0, sizeof(vec2) * 2);
+		glEnableVertexArrayAttrib(quadVertexArray, 1);
+		glVertexArrayAttribFormat(quadVertexArray, 1, 2, GL_FLOAT, false, sizeof(vec2));
+
+		glVertexArrayElementBuffer(quadVertexArray, index_buffer);
+
+		glBindVertexArray(quadVertexArray);
+
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		glDeleteVertexArrays(1, &quadVertexArray);
+		glDeleteBuffers(1, &vertex_buffer);
+		glDeleteBuffers(1, &index_buffer);
+
+		glDeleteProgram(reflectionBRDFShader);
+	}
 }
 
 const glm::mat4 captureViews[] = {
@@ -179,10 +245,35 @@ void Render::update_skybox() {
 		glClear(GL_COLOR_BUFFER_BIT);
 		glDrawElements(GL_TRIANGLES, meshes[skybox].count, GL_UNSIGNED_INT, 0);
 	}
+
+	static GLuint reflectionShader = load_shader_program(
+		{{"shaders/skybox.vert", GL_VERTEX_SHADER}, {"shaders/reflection.frag", GL_FRAGMENT_SHADER}});
+	glUseProgram(reflectionShader);
+	glBindTextures(1, 1, &skyboxCubemap);
+
+	for (int level = 0; level < reflectionLevels; level++) {
+		glUniform1f(1, static_cast<float>(level) / static_cast<float>(reflectionLevels - 1));
+
+		int levelSize = reflectionSize * pow(0.5, level);
+		glViewport(0, 0, levelSize, levelSize);
+		for (int i = 0; i < 6; i++) {
+			glNamedFramebufferTextureLayer(framebuffer, GL_COLOR_ATTACHMENT0, reflection, level, i);
+
+			Camera cam = {
+				.proj = infinitePerspective(glm::radians(90.0f), 1.0f, 0.1f),
+				.view = captureViews[i],
+				.camPos = vec3(0.0f)};
+			glNamedBufferSubData(cameraBuffer, 0, sizeof(Camera), &cam);
+
+			glClear(GL_COLOR_BUFFER_BIT);
+			glDrawElements(GL_TRIANGLES, meshes[skybox].count, GL_UNSIGNED_INT, 0);
+		}
+	}
+
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glDeleteFramebuffers(1, &framebuffer);
 
-	// set_skybox_cube_texture(irradiance, false);
+	// set_skybox_rect_texture(reflectionBRDF, false);
 }
 
 void Render::set_skybox_rect_texture(TextureHandle texture, bool update) {

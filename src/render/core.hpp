@@ -85,7 +85,7 @@ class Core {
 	};
 	REGISTER(Shader, shaders)
 
-	const int lightmapSize = 8192;
+	const int lightmapSize = 4096;
 	const float lightmapCoverage = 200;
 
 	struct DirLight {
