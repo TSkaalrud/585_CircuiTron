@@ -90,7 +90,7 @@ void Core::renderScene(Shader::Type type) {
 			glUseProgram(shaders[shader.shader].shader);
 
 			glBindBufferBase(GL_UNIFORM_BUFFER, 1, shader.uniform);
-			glBindTextures(5, shader.textures.size(), shader.textures.data());
+			glBindTextures(3, shader.textures.size(), shader.textures.data());
 
 			glUniformMatrix4fv(0, 1, false, value_ptr(i.trans));
 

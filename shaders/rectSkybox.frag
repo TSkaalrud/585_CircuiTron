@@ -2,7 +2,7 @@
 
 layout(location = 0) in vec3 TexCoords;
 
-layout(binding = 5) uniform sampler2D rectSkybox;
+layout(binding = 3) uniform sampler2D rectSkybox;
 
 out vec4 outColour;
 

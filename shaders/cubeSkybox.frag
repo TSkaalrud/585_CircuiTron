@@ -2,10 +2,10 @@
 
 layout(location = 0) in vec3 TexCoords;
 
-layout(binding = 5) uniform samplerCube rectSkybox;
+layout(binding = 3) uniform samplerCube cubeSkybox;
 
 out vec4 outColour;
 
 void main() {
-	outColour = texture(rectSkybox,normalize(TexCoords));
+	outColour = texture(cubeSkybox, normalize(TexCoords));
 }

@@ -11,15 +11,6 @@ layout(std140, binding = 0) uniform Camera {
 	vec3 camPos;
 };
 
-layout(std140, binding = 1) uniform Material {
-	vec4 albedoFactor;
-	vec3 emissiveFactor;
-	float metalFactor;
-	float roughFactor;
-};
-layout(binding = 5) uniform sampler2D albedoTex;
-layout(binding = 6) uniform sampler2D metalRoughTex;
-layout(binding = 7) uniform sampler2D emissiveTexture;
 
 struct DirLight {
 	vec3 dir;
@@ -29,6 +20,18 @@ struct DirLight {
 layout(std430, binding = 1) readonly buffer DirLights {
 	DirLight dirLights[];
 };
+
+layout(binding = 4) uniform samplerCube irradiance;
+
+layout(std140, binding = 1) uniform Material {
+	vec4 albedoFactor;
+	vec3 emissiveFactor;
+	float metalFactor;
+	float roughFactor;
+};
+layout(binding = 5) uniform sampler2D albedoTex;
+layout(binding = 6) uniform sampler2D metalRoughTex;
+layout(binding = 7) uniform sampler2D emissiveTexture;
 
 out vec4 outColour;
 
@@ -82,7 +85,13 @@ vec3 light(vec3 dir, vec3 colour) {
 	return pbr_brdf(dir) * colour * max(dot(dir, normal), 0.0);
 }
 
+vec3 enviroment() {
+	return texture(irradiance, normal).rgb * (1 - fresnel(normalize(normal + wo), mix(vec3(0.04), albedo.rgb, metallic))) * albedo.rgb * (1 - 0.04) * (1 - metallic);
+}
+
 void main() {
+	colour += enviroment();
+
 	for (int i = 0; i < dirLights.length(); ++i) {
 		vec4 shadowSample = (dirLights[i].shadowMapTrans * vec4(pos, 1));
 		vec3 projCoords = shadowSample.xyz / shadowSample.w;
