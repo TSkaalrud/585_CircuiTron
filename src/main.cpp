@@ -24,6 +24,12 @@ int main(int argc, char* argv[]) {
 	Window window;
 
 	Render::Render& render = window.getRender();
+	//render.set_skybox_rect_texture(importSkybox("assets/skyboxes/5TH_AVENUE.hdr", render));
+	//render.set_skybox_rect_texture(importSkybox("assets/skyboxes/BROADWAY_LAFAYETTE_STATION_2.hdr", render));
+	//render.set_skybox_rect_texture(importSkybox("assets/neurathen_rock_castle_4k.hdr", render));
+	render.set_skybox_rect_texture(importSkybox("assets/skyboxes/SPACE-1.hdr", render));
+
+
 
 	// Create entitity manager
 	EntityManager e_manager;
