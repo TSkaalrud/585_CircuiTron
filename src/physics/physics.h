@@ -13,6 +13,13 @@ struct wallSegment {
 	physx::PxTransform back;
 };
 
+struct wallSpawnInfo {
+	physx::PxF32 timer;
+	physx::PxF32 wallTime;
+	physx::PxTransform wallFront;
+	physx::PxTransform wallBack;
+};
+
 void initVehicle();
 
 int getNumBikes();
