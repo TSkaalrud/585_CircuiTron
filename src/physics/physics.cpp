@@ -434,7 +434,7 @@ void bikeBooster(int bike, int keyPressed) {
 	else if (keyPressed == 263) {//left
 		physx::PxVec3 left;
 		if (gIsVehicleInAir) {
-			left = getBikeTransform(bike).q.getBasisVector0() * .5 * impulseBase;
+			left = getBikeTransform(bike).q.getBasisVector0() * 2 * impulseBase;
 		} else {
 			left = getBikeTransform(bike).q.getBasisVector0() * 2 * impulseBase;
 		}
@@ -443,7 +443,7 @@ void bikeBooster(int bike, int keyPressed) {
 	else if (keyPressed == 262) {//right
 		physx::PxVec3 right;
 		if (gIsVehicleInAir) {
-			right = getBikeTransform(bike).q.getBasisVector0() * -.5 * impulseBase;
+			right = getBikeTransform(bike).q.getBasisVector0() * -2 * impulseBase;
 		} else {
 			right = getBikeTransform(bike).q.getBasisVector0() * -2 * impulseBase;
 		}
