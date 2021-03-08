@@ -89,8 +89,8 @@ std::vector<PxVehicleDrive4W*> CTbikes;
 std::vector<std::vector<wallSegment>> walls;
 std::vector<PxVehicleDrive4WRawInputData> inputDatas;
 std::vector<bool> isVehicleInAir;
-
-bool gIsVehicleInAir = true;
+std::vector<wallSpawnInfo> wallSpawnTimers;
+std::vector<PxTriggerPair> triggerPairs;
 
 float impulseBase = 2500;
 
@@ -298,12 +298,9 @@ void makeWallSeg(int i, PxTransform a, PxTransform b) {
 
 	// get position and rotation of wall segment
 	wallSeg.p = (a.p + b.p) / 2.0f;
-	wallSeg.q.x = (a.q.x + b.q.x) / 2.0f;
-	wallSeg.q.y = (a.q.y + b.q.y) / 2.0f;
-	wallSeg.q.z = (a.q.z + b.q.z) / 2.0f;
-	wallSeg.q.w = (a.q.w + b.q.w) / 2.0f;
-
-	// make wall segment
+	wallSeg.q = a.q;
+	
+	//make wall segment
 	PxShape* wallShape = gPhysics->createShape(PxBoxGeometry(0.1f, 0.6f, length / 2.0f), *gMaterial);
 
 	// set query filter data of the wall so that the vehicle raycasts can hit the wall
@@ -321,39 +318,43 @@ void makeWallSeg(int i, PxTransform a, PxTransform b) {
 	wallShape->setFlag(PxShapeFlag::eTRIGGER_SHAPE, true);
 
 	PxRigidStatic* aWall = gPhysics->createRigidStatic(wallSeg);
-	if (aWall != NULL) {
-		aWall->attachShape(*wallShape);
-		gScene->addActor(*aWall);
+	aWall->attachShape(*wallShape);
+	gScene->addActor(*aWall);
 
-		wallSegment segment = {i, aWall, b, a};
-		walls[i].push_back(segment);
+	wallSegment segment = {i, aWall, b, a};
+	walls[i].push_back(segment);
+
+	PxTriggerPair pair;
+
+	for (int i = 0; i < CTbikes.size(); i++) {
+		pair.triggerShape = wallShape;
+		pair.triggerActor = aWall;
+		CTbikes[i]->getRigidDynamicActor()->getShapes(&pair.otherShape, sizeof(PxShape), 4);
+		pair.otherActor = CTbikes[i]->getRigidDynamicActor();
+
+		triggerPairs.push_back(pair);
 	}
 }
-
-PxF32 timer = 0.0f;
-PxF32 wallTime = 0.25f;
-PxTransform wallFront;
-PxTransform wallBack;
 
 // basic wall generation
 void spawnWall(PxF32 timestep, int i) {
 	PxVehicleDrive4W* vehicle = CTbikes[i];
 	
-	timer += timestep;
+	wallSpawnTimers[i].timer += timestep;
 
-	if (vehicle->computeForwardSpeed() >= 15.0f && vehicle->mDriveDynData.getCurrentGear() != PxVehicleGearsData::eREVERSE) {
-		if (timer >= wallTime) {
-			if (wallFront.p.x != NULL) {
-				wallBack = wallFront;
-				wallFront = vehicle->getRigidDynamicActor()->getGlobalPose();
+	if (vehicle->computeForwardSpeed() >= 3.0f && vehicle->mDriveDynData.getCurrentGear() != PxVehicleGearsData::eREVERSE) {
+		if (wallSpawnTimers[i].timer >= wallSpawnTimers[i].wallTime) {
+			if (wallSpawnTimers[i].wallFront.p.x != NULL) {
+				wallSpawnTimers[i].wallBack = wallSpawnTimers[i].wallFront;
+				wallSpawnTimers[i].wallFront = vehicle->getRigidDynamicActor()->getGlobalPose();
 
-				makeWallSeg(i, wallBack, wallFront);
+				makeWallSeg(i, wallSpawnTimers[i].wallBack, wallSpawnTimers[i].wallFront);
 			}
-			wallFront = vehicle->getRigidDynamicActor()->getGlobalPose();
-			timer = 0.0f;
+			wallSpawnTimers[i].wallFront = vehicle->getRigidDynamicActor()->getGlobalPose();
+			wallSpawnTimers[i].timer = 0.0f;
 		}
 	} else {
-		wallFront.p.x = NULL;
+		wallSpawnTimers[i].wallFront.p.x = NULL;
 	}
 }
 
@@ -379,7 +380,6 @@ int getNumWalls(int i) { return walls[i].size(); }
 void bikeAccelerate(int i) {
 	if (CTbikes[i]->mDriveDynData.getCurrentGear() == PxVehicleGearsData::eREVERSE) {
 		CTbikes[i]->mDriveDynData.forceGearChange(PxVehicleGearsData::eFIRST);
-		std::cout << "here" << std::endl;
 	}
 	else {
 		inputDatas[i].setAnalogAccel(1.0f);
@@ -389,7 +389,6 @@ void bikeAccelerate(int i) {
 void bikeAcceleratePrecise(int i, float n) {
 	if (CTbikes[i]->mDriveDynData.getCurrentGear() == PxVehicleGearsData::eREVERSE) {
 		CTbikes[i]->mDriveDynData.forceGearChange(PxVehicleGearsData::eFIRST);
-		std::cout << "here" << std::endl;
 	} else {
 		inputDatas[i].setAnalogAccel(n);
 	}
@@ -435,7 +434,7 @@ void bikeBooster(int bike, int keyPressed) {
 	}
 	else if (keyPressed == 263) {//left
 		physx::PxVec3 left;
-		if (gIsVehicleInAir) {
+		if (isVehicleInAir[bike]) {
 			left = getBikeTransform(bike).q.getBasisVector0() * .5 * impulseBase;
 		} else {
 			left = getBikeTransform(bike).q.getBasisVector0() * 2 * impulseBase;
@@ -444,7 +443,7 @@ void bikeBooster(int bike, int keyPressed) {
 	} 
 	else if (keyPressed == 262) {//right
 		physx::PxVec3 right;
-		if (gIsVehicleInAir) {
+		if (isVehicleInAir[bike]) {
 			right = getBikeTransform(bike).q.getBasisVector0() * -.5 * impulseBase;
 		} else {
 			right = getBikeTransform(bike).q.getBasisVector0() * -2 * impulseBase;
@@ -487,6 +486,11 @@ void initVehicle() {
 	//is vehicle in air
 	bool gIsVehicleInAir = true;
 	isVehicleInAir.push_back(gIsVehicleInAir);
+
+	wallSpawnInfo wallInfo;
+	wallInfo.timer = 0.0f;
+	wallInfo.wallTime = 1.0f;
+	wallSpawnTimers.push_back(wallInfo);
 
 	PxVehicleDrive4W* gVehicle4W;
 
@@ -560,7 +564,7 @@ void initPhysics() {
 	gPhysics = PxCreatePhysics(PX_PHYSICS_VERSION, *gFoundation, PxTolerancesScale(), true, gPvd);
 
 	PxSceneDesc sceneDesc(gPhysics->getTolerancesScale());
-	sceneDesc.gravity = PxVec3(0.0f, -9.81f*2, 0.0f);
+	sceneDesc.gravity = PxVec3(0.0f, -9.81f, 0.0f);
 
 	PxU32 numWorkers = 1;
 	gDispatcher = PxDefaultCpuDispatcherCreate(numWorkers);
@@ -612,8 +616,6 @@ void initPhysics() {
 	track->attachShape(*trackShape);
 	gScene->addActor(*track);
 
-	trackTransform = track->getGlobalPose();
-
 	// Create vehicle that will drive on the plane. (This one is the player)
 	initVehicle();
 }
@@ -621,7 +623,9 @@ void initPhysics() {
 void stepPhysics() {
 	const PxF32 timestep = 1.0f / 60.0f;
 
-	spawnWall(timestep, 0);
+	for (int i = 0; i < CTbikes.size(); i++) {
+		spawnWall(timestep, i);
+	}
 
 	for (int i = 0; i < CTbikes.size(); i++) {
 		if (gMimicKeyInputs) {
