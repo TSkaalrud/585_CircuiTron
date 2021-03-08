@@ -64,6 +64,8 @@ void bikeBooster(int i, int keyPressed);
 
 void bikeControl(int i);
 
+void resetBikePos(int i);
+
 void initPhysics();
 
 void stepPhysics();

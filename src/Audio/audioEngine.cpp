@@ -60,7 +60,7 @@ bool AudioEngine::loadWavFile(const char* filename, ALuint* buffer, ALsizei* siz
 		fread(&riff_header, sizeof(RIFF_Header), 1, soundFile);
 
 		// check for RIFF and WAVE tag in memeory
-		if (_strcmp("RIFF", riff_header.chunkID) == false or _strcmp("WAVE", riff_header.format) == false)
+		if (_strcmp("RIFF", riff_header.chunkID) == false || _strcmp("WAVE", riff_header.format) == false)
 			throw("Invalid RIFF or WAVE Header");
 
 		// Read in the 2nd chunk for the wave info

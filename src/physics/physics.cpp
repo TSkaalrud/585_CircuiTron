@@ -170,7 +170,7 @@ VehicleDesc initVehicleDesc() {
 	// The moment of inertia is just the moment of inertia of a cuboid but modified for easier steering.
 	// Center of mass offset is 0.65m above the base of the chassis and 0.25m towards the front.
 	const PxF32 chassisMass = 250.0f;
-	const PxVec3 chassisDims(0.8f, 1.2f, 4.63f);
+	const PxVec3 chassisDims(1.0f, 1.2f, 4.63f);
 	const PxVec3 chassisMOI(
 		(chassisDims.y * chassisDims.y + chassisDims.z * chassisDims.z) * chassisMass / 12.0f,
 		(chassisDims.x * chassisDims.x + chassisDims.z * chassisDims.z) * 0.8f * chassisMass / 12.0f,
@@ -467,6 +467,14 @@ void bikeControl(int bike) {
 	std::cout << unitAxis.x << " " << unitAxis.y << " " << unitAxis.z << std::endl;
 }
 
+PxTransform startPos;
+
+//reset bike to start position
+void resetBikePos(int bike) { 
+	CTbikes[bike]->getRigidDynamicActor()->setGlobalPose(startPos);
+	CTbikes[bike]->setToRestState();
+}
+
 float spawnOffset = 0.0f;
 
 void initVehicle() {
@@ -495,6 +503,10 @@ void initVehicle() {
 	PxTransform startTransform(
 		PxVec3(-175.0f - spawnOffset, (vehicleDesc.chassisDims.y * 0.5f + vehicleDesc.wheelRadius + 2.0f), -120.0f),
 		PxQuat(0.0f, 0.999f, 0.0f, -0.052f));
+
+	if (CTbikes.size() == 0) {
+		startPos = startTransform;
+	}
 
 	spawnOffset += 5.0f;
 

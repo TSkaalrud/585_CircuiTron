@@ -79,6 +79,10 @@ class BikePlayer : public Bike {
 			}
 		}
 
+		if (window.keyPressed(82)) {		// r
+			resetBikePos(0);
+		} 
+
 		if (window.keyPressed(340)) {		// left shift
 			bikeBreak(0);
 		} else {
