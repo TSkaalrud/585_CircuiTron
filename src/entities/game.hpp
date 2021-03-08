@@ -10,8 +10,8 @@
 
 #include "entities/bike_player.hpp"
 #include "entities/bike_ai.hpp"
-#include "entities/checkpoint.hpp"
 #include "entities/wall.hpp"
+#include "entities/track.hpp"
 #include "render/model_import.hpp"
 #include "render/render.hpp"
 
@@ -61,7 +61,7 @@ class Game : public Entity {
 	}
 
 	void enter() override { 
-		Render::GroupInstance track(track_model);
+		e_manager.addEntity(std::make_unique<Track>(render, track_model));
 
 		std::unique_ptr<Bike> b = std::make_unique<BikePlayer>(window, render, 1, car_model, ai_waypoints[0]);
 		bikes.push_back(b.get());
@@ -138,7 +138,7 @@ class Game : public Entity {
 			v.x = scene->mMeshes[0]->mVertices[i].x;
 			v.y = scene->mMeshes[0]->mVertices[i].y;
 			v.z = scene->mMeshes[0]->mVertices[i].z;
-			map.push_back(v);
+			map.push_back(v*2.0f);	//scaled
 		}
 		//pushback the ai_map array
 		ai_waypoints.push_back(map);

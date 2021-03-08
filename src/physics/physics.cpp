@@ -355,7 +355,8 @@ void spawnWall(PxF32 timestep, int i) {
 	}
 }
 
-
+physx::PxTransform trackTransform;
+physx::PxTransform getTrackTransform() { return trackTransform; }
 
 //return number of bikes
 int getNumBikes() { return CTbikes.size(); }
@@ -490,7 +491,7 @@ void initVehicle() {
 	VehicleDesc vehicleDesc = initVehicleDesc();
 	gVehicle4W = createVehicle4W(vehicleDesc, gPhysics, gCooking);
 	PxTransform startTransform(
-		PxVec3(0.0f + spawnOffset, (vehicleDesc.chassisDims.y * 0.5f + vehicleDesc.wheelRadius + 1.0f), 0.0f), PxQuat(PxIdentity));
+		PxVec3(-90.0f + spawnOffset, (vehicleDesc.chassisDims.y * 0.5f + vehicleDesc.wheelRadius + 2.0f), -75.0f), PxQuat(PxIdentity));
 
 	spawnOffset += 5.0f;
 
@@ -518,13 +519,20 @@ physx::PxTriangleMesh* cookTrack() {
 
 	loader.LoadFile("assets/The_Coffin_cooked.obj");
 
-	std::vector<objl::Vertex> verts = loader.LoadedVertices;
-	std::vector<unsigned int> indices = loader.LoadedIndices;
+	std::vector<objl::Vertex> verts = loader.LoadedMeshes[0].Vertices;
+	std::vector<PxVec3> verts2;
+
+	for (int i = 0; i < verts.size(); i++) {
+		verts2.push_back(PxVec3(verts[i].Position.X, verts[i].Position.Y, verts[i].Position.Z) * 2.0f);
+	}
+	
+	std::vector<unsigned int> indices = loader.LoadedMeshes[0].Indices;
+	std::cout << "indices: " << indices.size() << std::endl;
 
 	PxTriangleMeshDesc meshDesc;
-	meshDesc.points.count = verts.size();
+	meshDesc.points.count = verts2.size();
 	meshDesc.points.stride = sizeof(PxVec3);
-	meshDesc.points.data = &verts[0];
+	meshDesc.points.data = &verts2[0];
 
 	meshDesc.triangles.count = indices.size();
 	meshDesc.triangles.stride = 3 * sizeof(unsigned int);
@@ -591,15 +599,18 @@ void initPhysics() {
 	PxTriangleMesh* trackMesh = cookTrack();
 	PxShape* trackShape = gPhysics->createShape(PxTriangleMeshGeometry(trackMesh), *gMaterial);
 
-	PxFilterData trackFilterData(COLLISION_FLAG_DRIVABLE_OBSTACLE, COLLISION_FLAG_DRIVABLE_OBSTACLE_AGAINST, 0, 0);
+	PxFilterData trackFilterData;
+	setupDrivableSurface(trackFilterData);
 	trackShape->setQueryFilterData(trackFilterData);
 
-	PxFilterData trackSimFilterData(COLLISION_FLAG_DRIVABLE_OBSTACLE, COLLISION_FLAG_DRIVABLE_OBSTACLE_AGAINST, 0, 0);
+	PxFilterData trackSimFilterData(COLLISION_FLAG_GROUND, COLLISION_FLAG_GROUND_AGAINST, 0, 0);
 	trackShape->setSimulationFilterData(trackSimFilterData);
 	
 	PxRigidStatic* track = gPhysics->createRigidStatic(trackShape->getLocalPose());
 	track->attachShape(*trackShape);
 	gScene->addActor(*track);
+
+	trackTransform = track->getGlobalPose();
 
 	// Create vehicle that will drive on the plane. (This one is the player)
 	initVehicle();

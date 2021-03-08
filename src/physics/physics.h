@@ -25,6 +25,8 @@ physx::PxTransform getWallFront(int i, int j);
 
 physx::PxTransform getWallBack(int i, int j);
 
+physx::PxTransform getTrackTransform();
+
 int getNumWalls(int i);
 
 int getWallOwner(int i, int j);

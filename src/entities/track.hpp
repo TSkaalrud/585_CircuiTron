@@ -8,5 +8,10 @@ class Track : public GameObject {
 	Track(Render::Render& render, Render::Group& group)
 		: GameObject(render, group){};
 
+	void enter() override { 
+		model.emplace(group);
+		model->setTransform(glm::scale(glm::mat4(1.0f), glm::vec3(2.0f)));
+	}
+
 	void update(float deltaTime) override {}
 };

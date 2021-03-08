@@ -10,6 +10,8 @@ class Wall : public GameObject {
 		: GameObject(render, group) {
 	};
 
+	void enter() override {}
+
 	void update(float deltaTime) override {
 
 		for (int i = 0; i < getNumBikes(); i++) {
