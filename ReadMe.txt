@@ -1,5 +1,5 @@
 MS3 features:
-Skybox with ambient lighting
+Skybox & image-based lighting
 Functional (though not yet competitive AI) which will carefully make its way around the track on a programmatic waypoint path.
 Improvements to the driving model
 physical track can now be driven on
@@ -9,17 +9,19 @@ Trigger Volume detection for wall segments (though not yet hooked up into other 
 
 
 Known issues:
-aWall nullptr: reproducible via various sharp changes of heading, wall objects are unable to render due to insane quaternions
-	- avoid by driving somewhat conservatively.
 "A$$ over tea kettle": if the chassis of the bike becomes inverted you can fall through terrain, ignoring collision, and falling through the "abyss"
 ***Audio: requires OpenAL installed? Not packaged in the build atm?
+Old Town Road: Driving around the corners is bumpy
+Do a Barrel Roll: Attempting to "Strafe" from a stationary position can sometimes cause a brief wild rotation.
 
 
 How to Play:
 "W"/"S" to accelerate/decelerate
 "A"/"D" to turn left/right
+"Left Shift" to brake
 "Up arrow" to "Jump" on a 1 second cooldown
 "Left arrow"/"Right arrow" to strafe left/right on a 1 second cooldown
+"R" to reset position of the bike to starting position (for testing purposes)
 Waypoints and laps update in the console currently to inform the player on their game progress
 
 Future developments:
