@@ -491,7 +491,7 @@ void initVehicle() {
 	VehicleDesc vehicleDesc = initVehicleDesc();
 	gVehicle4W = createVehicle4W(vehicleDesc, gPhysics, gCooking);
 	PxTransform startTransform(
-		PxVec3(-90.0f + spawnOffset, (vehicleDesc.chassisDims.y * 0.5f + vehicleDesc.wheelRadius + 2.0f), -75.0f), PxQuat(PxIdentity));
+		PxVec3(-175.0f - spawnOffset, (vehicleDesc.chassisDims.y * 0.5f + vehicleDesc.wheelRadius + 2.0f), -120.0f), PxQuat(0.0f, 0.999f, 0.0f, -0.052f));
 
 	spawnOffset += 5.0f;
 
