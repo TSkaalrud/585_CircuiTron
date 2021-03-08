@@ -8,9 +8,9 @@
 
 #include "entities/car.hpp"
 #include "entities/entity_manager.hpp"
+#include "entities/game.hpp"
 #include "entities/model_view.hpp"
 #include "entities/orbit_cam.hpp"
-#include "entities/wall.hpp"
 #include "physics/physics.h"
 #include "window.hpp"
 #include <chrono>
@@ -34,9 +34,6 @@ int main(int argc, char* argv[]) {
 	auto past = std::chrono::high_resolution_clock::now();
 
 	// initialize physics
-	physx::PxTransform player1;
-	physx::PxTransform wall1;
-
 	initPhysics();
 
 
@@ -44,8 +41,7 @@ int main(int argc, char* argv[]) {
 		e_manager.addEntity(std::make_unique<ModelView>(render, args.at(1)));
 		e_manager.addEntity(std::make_unique<OrbitCam>(render, window));
 	} else {
-		e_manager.addEntity(std::make_unique<Car>(render, 1, player1));
-		e_manager.addEntity(std::make_unique<Wall>(render, wall1));
+		e_manager.addEntity(std::make_unique<Game>(window, render, 2, e_manager));
 	}
 
 	//initialize audio
@@ -73,7 +69,7 @@ int main(int argc, char* argv[]) {
 			past = now;
 		}
 		// simulate();
-		// stepPhysics(window, player1, wall1);
+		 stepPhysics();
 
 		time += timestep;
 

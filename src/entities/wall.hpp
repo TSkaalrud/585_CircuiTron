@@ -4,18 +4,21 @@
 
 class Wall : public GameObject {
   private:
-
+	int numWalls[4] {0, 0, 0, 0};
   public:
-	// change assets/test.glb to car model path
-	Wall(Render::Render& render, physx::PxTransform& pt)
-		: GameObject(render, "assets/Wall_blob.glb", pt) {};
+	Wall(Render::Render& render, Render::Group& group)
+		: GameObject(render, group) {
+	};
 
-	void enter() override {
-		Render::Group group = importModel("assets/Wall_blob.glb", render);
-		model.emplace(group);
-	}
+	void enter() override {}
 
-	void update(float deltaTime) override { 
-		model->setTransform(convertTransform(transform));
+	void update(float deltaTime) override {
+		for (int i = 0; i < getNumBikes(); i++) {
+			if (numWalls[i] < getNumWalls(i)) {
+				Render::GroupInstance newWall(group);
+				newWall.setTransform(convertTransform(getWallPos(i, getNumWalls(i)-1)));
+				numWalls[i]++;
+			}
+		}
 	}
 };

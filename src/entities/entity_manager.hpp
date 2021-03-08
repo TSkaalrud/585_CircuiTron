@@ -1,3 +1,5 @@
+#pragma once
+
 #include "entity.hpp"
 #include <memory>
 #include <vector>
