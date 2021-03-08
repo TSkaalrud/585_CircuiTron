@@ -292,40 +292,42 @@ void releaseAllControls() {
 void makeWallSeg(int i, PxTransform a, PxTransform b) { 
 	PxTransform wallSeg;
 
-	//get length of wall segment
-	PxVec3 aTob = b.p - a.p; 
+	// get length of wall segment
+	PxVec3 aTob = b.p - a.p;
 	float length = aTob.magnitude();
 
-	//get position and rotation of wall segment
+	// get position and rotation of wall segment
 	wallSeg.p = (a.p + b.p) / 2.0f;
 	wallSeg.q.x = (a.q.x + b.q.x) / 2.0f;
 	wallSeg.q.y = (a.q.y + b.q.y) / 2.0f;
 	wallSeg.q.z = (a.q.z + b.q.z) / 2.0f;
 	wallSeg.q.w = (a.q.w + b.q.w) / 2.0f;
-	
-	//make wall segment
+
+	// make wall segment
 	PxShape* wallShape = gPhysics->createShape(PxBoxGeometry(0.1f, 0.6f, length / 2.0f), *gMaterial);
-	
+
 	// set query filter data of the wall so that the vehicle raycasts can hit the wall
 	PxFilterData qryFilterData(COLLISION_FLAG_OBSTACLE, COLLISION_FLAG_OBSTACLE_AGAINST, 0, 0);
 	wallShape->setQueryFilterData(qryFilterData);
-	
+
 	// set simulation filter data of the wall so that the vehicle collides with the wall
 	PxFilterData wallSimFilterData(COLLISION_FLAG_OBSTACLE, COLLISION_FLAG_OBSTACLE_AGAINST, 0, 0);
 	wallShape->setSimulationFilterData(wallSimFilterData);
 
-	//turn off simulation for walls (disable collisions)
+	// turn off simulation for walls (disable collisions)
 	wallShape->setFlag(PxShapeFlag::eSIMULATION_SHAPE, false);
 
-	//make walls trigger volumes
+	// make walls trigger volumes
 	wallShape->setFlag(PxShapeFlag::eTRIGGER_SHAPE, true);
 
 	PxRigidStatic* aWall = gPhysics->createRigidStatic(wallSeg);
-	aWall->attachShape(*wallShape);
-	gScene->addActor(*aWall);
+	if (aWall != NULL) {
+		aWall->attachShape(*wallShape);
+		gScene->addActor(*aWall);
 
-	wallSegment segment = {i, aWall, b, a};
-	walls[i].push_back(segment);
+		wallSegment segment = {i, aWall, b, a};
+		walls[i].push_back(segment);
+	}
 }
 
 PxF32 timer = 0.0f;
