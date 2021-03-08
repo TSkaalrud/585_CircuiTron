@@ -7,17 +7,13 @@
 //#include "../../out/build/x64-Debug (default)/_deps/openal-src/include/AL/alc.h"
 
 #include "entities/car.hpp"
-#include "entities/entity.hpp"
 #include "entities/entity_manager.hpp"
+#include "entities/model_view.hpp"
+#include "entities/orbit_cam.hpp"
 #include "entities/wall.hpp"
 #include "physics/physics.h"
-#include "render/render.hpp"
-#include "render/render_test.hpp"
-#include <GLFW/glfw3.h>
+#include "window.hpp"
 #include <chrono>
-#include <imgui.h>
-#include <imgui_impl_glfw.h>
-#include <imgui_impl_opengl3.h>
 #include <iostream>
 
 int main(int argc, char* argv[]) {
@@ -25,62 +21,9 @@ int main(int argc, char* argv[]) {
 	std::vector<std::string> args;
 	args.assign(argv, argv + argc);
 
-	// GLFW Init
-	// Print GLFW errors
-	glfwSetErrorCallback([](int, const char* description) { fprintf(stderr, "Error: %s\n", description); });
+	Window window;
 
-	if (!glfwInit())
-		exit(EXIT_FAILURE);
-
-	// I need OpenGL 4.6 Core
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-	// This supposedly enables sRGB, but sRGB is enabled without it?
-	glfwWindowHint(GLFW_SRGB_CAPABLE, true);
-
-	// MSAA x8 (If I implement post-processing, I'll do AA there, so this could be removed in the future)
-	glfwWindowHint(GLFW_SAMPLES, 64);
-
-	// Debug Contexts are helpful but slow; Only enable in debug builds
-#ifndef NDEBUG
-	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
-#endif
-
-	GLFWwindow* window = glfwCreateWindow(1280, 720, "CircuiTron", NULL, NULL);
-	if (!window) {
-		glfwTerminate();
-		exit(EXIT_FAILURE);
-	}
-	glfwMakeContextCurrent(window);
-	// Uncomment to disable v-sync
-	// glfwSwapInterval(0);
-
-	Render::Render render(glfwGetProcAddress);
-	{
-		// Render needs to be resized before it can be used
-		int width, height;
-		glfwGetFramebufferSize(window, &width, &height);
-		render.resize(width, height);
-	}
-
-	// Resize render on window resize
-	// My callback uses the userpoint to store render
-	// This may need to be reworked as we may need the user pointer for other things as well.
-	glfwSetWindowUserPointer(window, &render);
-	auto resizeCallback = [](GLFWwindow* window, int width, int height) {
-		Render::Render* render = static_cast<Render::Render*>(glfwGetWindowUserPointer(window));
-		render->resize(width, height);
-	};
-	glfwSetFramebufferSizeCallback(window, resizeCallback);
-
-	// Init imgui
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImGui::StyleColorsDark();
-	ImGui_ImplGlfw_InitForOpenGL(window, true);
-	ImGui_ImplOpenGL3_Init(NULL);
+	Render::Render& render = window.getRender();
 
 	// Create entitity manager
 	EntityManager e_manager;
@@ -96,8 +39,10 @@ int main(int argc, char* argv[]) {
 
 	initPhysics();
 
-	if (args.size() > 1 && args.at(1) == "view") {
-		e_manager.addEntity(std::make_unique<Render::RenderTest>(render));
+
+	if (args.size() > 1) {
+		e_manager.addEntity(std::make_unique<ModelView>(render, args.at(1)));
+		e_manager.addEntity(std::make_unique<OrbitCam>(render, window));
 	} else {
 		e_manager.addEntity(std::make_unique<Car>(render, 1, player1));
 		e_manager.addEntity(std::make_unique<Wall>(render, wall1));
@@ -116,16 +61,10 @@ int main(int argc, char* argv[]) {
 
 	// Loop will continue until "X" on window is clicked.
 	// We may want more complex closing behaviour
-	while (!glfwWindowShouldClose(window)) {
+	while (!window.shouldClose()) {
+		window.beginFrame();
 
-		// This is probably part of input()
-		glfwPollEvents(); // This has to happen before ImGui::NewFrame()
-		// input();
-
-		// All imgui commands must happen after here
-		ImGui_ImplOpenGL3_NewFrame();
-		ImGui_ImplGlfw_NewFrame();
-		ImGui::NewFrame();
+		e_manager.addEntitiesAfterFrame();
 
 		// 1 for variable, 0 for fixed
 		if (1) {
@@ -134,9 +73,7 @@ int main(int argc, char* argv[]) {
 			past = now;
 		}
 		// simulate();
-		stepPhysics(window, player1, wall1);
-
-		//
+		// stepPhysics(window, player1, wall1);
 
 		time += timestep;
 
@@ -146,9 +83,10 @@ int main(int argc, char* argv[]) {
 
 		// sound();
 
+
 		
 
-
+/*
 		// Probably want to combine all this into a render()
 		render.run();
 		// To actually draw something with the render:
@@ -179,10 +117,10 @@ int main(int argc, char* argv[]) {
 		// Swap the render buffers and wait for the next frame
 		// Should probably be the last thing in the game loop
 		glfwSwapBuffers(window);
-	}
+*/
+		window.endFrame();
 
-	glfwDestroyWindow(window);
-	glfwTerminate();
+	}
 
 	return 0;
 }

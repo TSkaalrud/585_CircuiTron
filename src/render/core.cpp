@@ -5,17 +5,10 @@
 
 namespace Render {
 
-struct Camera {
-	mat4 camMat;
-	vec3 camPos;
-};
-
 Core::Core(void (*glGetProcAddr(const char*))()) {
 	loadGL(glGetProcAddr);
 
 	loadDebugger();
-
-	glEnable(GL_FRAMEBUFFER_SRGB);
 
 	glCreateBuffers(1, &cameraBuffer);
 	glNamedBufferStorage(cameraBuffer, sizeof(Camera), nullptr, GL_DYNAMIC_STORAGE_BIT);
@@ -29,8 +22,6 @@ Core::Core(void (*glGetProcAddr(const char*))()) {
 	glTextureParameteri(dirLightShadow, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
 	glTextureParameteri(dirLightShadow, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
 }
-
-template <class T> size_t vector_size(const std::vector<T>& vec) { return sizeof(T) * vec.size(); }
 
 uint Core::create_mesh(MeshDef def) {
 
@@ -54,9 +45,7 @@ uint Core::create_mesh(MeshDef def) {
 
 	glVertexArrayElementBuffer(vao, index_buffer);
 
-	uint handle = meshes.size();
-	meshes.push_back(Mesh{.vao = vao, .count = static_cast<uint>(def.indicies.size())});
-	return handle;
+	return registerMesh(Mesh{.vao = vao, .count = static_cast<uint>(def.indicies.size())});
 }
 
 uint Core::create_texture(int width, int height, int channels, bool srgb, void* data) {
@@ -88,51 +77,58 @@ uint Core::create_texture(int width, int height, int channels, bool srgb, void* 
 	return texture;
 }
 
-void Core::renderScene() {
+void Core::renderScene(Shader::Type type) {
 	for (auto& i : instances) {
-		glUseProgram(shaders[materials[i.mat].shader].shader);
+		if (i.mat < 0)
+			continue;
+
 		glBindVertexArray(meshes[i.model].vao);
+		for (auto& shader : materials[i.mat]) {
+			if ((shaders[shader.shader].type & type) == 0)
+				continue;
 
-		auto material = materials[i.mat];
-		glBindBufferBase(GL_UNIFORM_BUFFER, 1, material.uniform);
-		glBindTextures(4, material.textures.size(), material.textures.data());
+			glUseProgram(shaders[shader.shader].shader);
 
-		glUniformMatrix4fv(0, 1, false, value_ptr(i.trans));
+			glBindBufferBase(GL_UNIFORM_BUFFER, 1, shader.uniform);
+			glBindTextures(3, shader.textures.size(), shader.textures.data());
 
-		glDrawElements(GL_TRIANGLES, meshes[i.model].count, GL_UNSIGNED_INT, 0);
+			glUniformMatrix4fv(0, 1, false, value_ptr(i.trans));
+
+			glDrawElements(GL_TRIANGLES, meshes[i.model].count, GL_UNSIGNED_INT, 0);
+		}
 	}
 }
 
 void Core::run() {
-	glClearColor(0, 0.2, 0.5, 1.0);
-
+	glEnable(GL_FRAMEBUFFER_SRGB);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_DEPTH_CLAMP);
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+	glDepthFunc(GL_LEQUAL);
 
 	glNamedBufferData(dirLightBuffer, vector_size(dirLights), dirLights.data(), GL_DYNAMIC_DRAW);
 
+	GLuint framebuffer;
+	glCreateFramebuffers(1, &framebuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 	for (size_t i = 0; i < dirLights.size(); i++) {
-		GLuint framebuffer;
-		glCreateFramebuffers(1, &framebuffer);
 		glNamedFramebufferTextureLayer(framebuffer, GL_DEPTH_ATTACHMENT, dirLightShadow, 0, i);
-		glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 
-		Camera cam = {.camMat = dirLights[i].shadowMapTrans, .camPos = dirLights[i].dir};
+		Camera cam = {.proj = mat4(1.0f), .view = dirLights[i].shadowMapTrans, .camPos = dirLights[i].dir};
 		glNamedBufferSubData(cameraBuffer, 0, sizeof(Camera), &cam);
 
 		glViewport(0, 0, lightmapSize, lightmapSize);
 		glClear(GL_DEPTH_BUFFER_BIT);
 		glCullFace(GL_FRONT);
-		renderScene();
-
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glDeleteFramebuffers(1, &framebuffer);
+		renderScene(Shader::Type::Shadow);
 	}
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glDeleteFramebuffers(1, &framebuffer);
 
 	Camera cam = {
-		.camMat = infinitePerspective(fov, static_cast<float>(width) / static_cast<float>(height), 0.1f) * cameraPos,
+		.proj = infinitePerspective(fov, static_cast<float>(width) / static_cast<float>(height), 0.1f),
+		.view = cameraPos,
 		.camPos = vec3(inverse(cameraPos) * vec4{0, 0, 0, 1})};
 	glNamedBufferSubData(cameraBuffer, 0, sizeof(Camera), &cam);
 
@@ -142,7 +138,7 @@ void Core::run() {
 
 	glBindTextures(0, 1, &dirLightShadow);
 	glCullFace(GL_BACK);
-	renderScene();
+	renderScene(Shader::Type::Opaque | Shader::Type::Skybox);
 }
 
 } // namespace Render
