@@ -501,7 +501,7 @@ void initVehicle() {
 	VehicleDesc vehicleDesc = initVehicleDesc();
 	gVehicle4W = createVehicle4W(vehicleDesc, gPhysics, gCooking);
 	PxTransform startTransform(
-		PxVec3(-175.0f - spawnOffset, (vehicleDesc.chassisDims.y * 0.5f + vehicleDesc.wheelRadius + 3.0f), -120.0f),
+		PxVec3(-175.0f - spawnOffset, (vehicleDesc.chassisDims.y * 0.5f + vehicleDesc.wheelRadius + 3.0f), -110.0f),
 		PxQuat(0.0f, 0.999f, 0.0f, -0.052f));
 
 	if (CTbikes.size() == 0) {

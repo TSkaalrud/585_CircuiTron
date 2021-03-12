@@ -155,7 +155,7 @@ class BikePlayer : public Bike {
 			}
 
 			std::cout << "Current Lap: " << getLap() << std::endl;
-			std::cout << "Current Waypoint: " << getWaypoint() << std::endl;
+			//std::cout << "Current Waypoint: " << getWaypoint() << std::endl;
 		}
 	}
 };

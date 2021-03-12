@@ -44,7 +44,7 @@ class BikeAI : public Bike {
 		float dist = glm::sqrt(glm::pow(target.x - ai_pos.x, 2) + glm::pow(target.z - ai_pos.z, 2));
 		
 		//update to next WP if distance is less than 10 -- play with this number for feel
-		if (dist < 10) {
+		if (dist < 25) {
 			currentWaypoint = nextWaypoint;
 			if (nextWaypoint == waypoints.size()) {
 				currentWaypoint = 0;
@@ -75,22 +75,24 @@ class BikeAI : public Bike {
 		float radiusRange = (1.0f - 0.0f);
 
 		float radius = (((angle - 0.0f) * radiusRange) / angleRange) - 0.0f;
+		std::cout << radius << std::endl;
 
-		if (dist > 10.0f) {
+
+		if (dist > 25.0f) {
 			if (d > 0) {
 				//std::cout << "left" << std::endl;
 
 				bikeReleaseSteer(getId());
-				bikeTurnPrecise(getId(), radius);
+				bikeTurnPrecise(getId(), 2*radius);
 				//bikeTurnLeft(getId());
-				bikeAcceleratePrecise(getId(), 0.5f);
+				bikeAcceleratePrecise(getId(), 0.75f);
 			} else if (d < 0) {
 				//std::cout << "right" << std::endl;
 
 				bikeReleaseSteer(getId());
-				bikeTurnPrecise(getId(), -radius);
+				bikeTurnPrecise(getId(), -2*radius);
 				//bikeTurnRight(getId());
-				bikeAcceleratePrecise(getId(), 0.5f);
+				bikeAcceleratePrecise(getId(), 0.75f);
 			} else {
 				//std::cout << "on" << std::endl;
 				bikeReleaseSteer(getId());
