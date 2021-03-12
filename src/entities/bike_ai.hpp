@@ -75,7 +75,7 @@ class BikeAI : public Bike {
 		float radiusRange = (1.0f - 0.0f);
 
 		float radius = (((angle - 0.0f) * radiusRange) / angleRange) - 0.0f;
-		std::cout << radius << std::endl;
+		//std::cout << radius << std::endl;
 
 
 		if (dist > 25.0f) {
@@ -83,14 +83,14 @@ class BikeAI : public Bike {
 				//std::cout << "left" << std::endl;
 
 				bikeReleaseSteer(getId());
-				bikeTurnPrecise(getId(), 2*radius);
+				bikeTurnPrecise(getId(), glm::min(2*radius,1.f));
 				//bikeTurnLeft(getId());
 				bikeAcceleratePrecise(getId(), 0.75f);
 			} else if (d < 0) {
 				//std::cout << "right" << std::endl;
 
 				bikeReleaseSteer(getId());
-				bikeTurnPrecise(getId(), -2*radius);
+				bikeTurnPrecise(getId(), glm::max(-2*radius,-1.f));
 				//bikeTurnRight(getId());
 				bikeAcceleratePrecise(getId(), 0.75f);
 			} else {

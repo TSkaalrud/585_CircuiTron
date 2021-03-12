@@ -67,7 +67,7 @@ class BikePlayer : public Bike {
 			bikeReverse(0);
 		} else {
 			if (!window.keyPressed(87)) {
-				bikeReleaseGas(0);
+				bikeReleaseBrake(0);
 			}
 		}
 		
@@ -84,9 +84,9 @@ class BikePlayer : public Bike {
 		} 
 
 		if (window.keyPressed(340)) {		// left shift
-			bikeBreak(0);
+			bikeHandbrake(0);
 		} else {
-			bikeReleaseBrake(0);
+			bikeReleaseHandbrake(0);
 		}
 
 		//bike Booster (jump) functions use glfw keyboard #defines @ https://www.glfw.org/docs/3.3/group__keys.html
@@ -141,7 +141,7 @@ class BikePlayer : public Bike {
 		float dist = glm::sqrt(glm::pow(target.x - player.x, 2) + glm::pow(target.z - player.z, 2));
 
 		//this radius might need to be tweaked
-		if (dist < 20.0f) {
+		if (dist < 25.0f) {
 			currentWaypoint = nextWaypoint;
 			if (nextWaypoint == waypoints.size()) {
 				currentWaypoint = 0;
