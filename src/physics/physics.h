@@ -44,6 +44,8 @@ void bikeAcceleratePrecise(int i, float n);
 
 void bikeReverse(int i);
 
+void bikeHandbrake(int i);
+
 void bikeBreak(int i);
 
 void bikeTurnRight(int i);
@@ -57,6 +59,8 @@ void bikeReleaseGas(int i);
 void bikeReleaseSteer(int i);
 
 void bikeReleaseBrake(int i);
+
+void bikeReleaseHandbrake(int i);
 
 void bikeReleaseAll(int i);
 

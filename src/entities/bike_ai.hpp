@@ -29,12 +29,12 @@ class BikeAI : public Bike {
 			buffer--;
 		}
 		
-		model->setTransform(convertTransform(getBikeTransform(1)) * glm::scale(glm::mat4(1.0f), glm::vec3(2.0f)));
+		model->setTransform(convertTransform(getBikeTransform(getId())) * glm::scale(glm::mat4(1.0f), glm::vec3(2.0f)));
 	}
 
 	void followWaypoint() { 
 		glm::vec3 target = waypoints[currentWaypoint];
-		physx::PxTransform ai = getBikeTransform(1);
+		physx::PxTransform ai = getBikeTransform(getId());
 
 		physx::PxVec3 heading = ai.q.getBasisVector2() + ai.p;
 
@@ -44,7 +44,7 @@ class BikeAI : public Bike {
 		float dist = glm::sqrt(glm::pow(target.x - ai_pos.x, 2) + glm::pow(target.z - ai_pos.z, 2));
 		
 		//update to next WP if distance is less than 10 -- play with this number for feel
-		if (dist < 10) {
+		if (dist < 25) {
 			currentWaypoint = nextWaypoint;
 			if (nextWaypoint == waypoints.size()) {
 				currentWaypoint = 0;
@@ -75,22 +75,24 @@ class BikeAI : public Bike {
 		float radiusRange = (1.0f - 0.0f);
 
 		float radius = (((angle - 0.0f) * radiusRange) / angleRange) - 0.0f;
+		//std::cout << radius << std::endl;
 
-		if (dist > 10.0f) {
+
+		if (dist > 25.0f) {
 			if (d > 0) {
 				//std::cout << "left" << std::endl;
 
 				bikeReleaseSteer(getId());
-				bikeTurnPrecise(getId(), radius);
+				bikeTurnPrecise(getId(), glm::min(2*radius,1.f));
 				//bikeTurnLeft(getId());
-				bikeAcceleratePrecise(getId(), 0.5f);
+				bikeAcceleratePrecise(getId(), 0.75f);
 			} else if (d < 0) {
 				//std::cout << "right" << std::endl;
 
 				bikeReleaseSteer(getId());
-				bikeTurnPrecise(getId(), -radius);
+				bikeTurnPrecise(getId(), glm::max(-2*radius,-1.f));
 				//bikeTurnRight(getId());
-				bikeAcceleratePrecise(getId(), 0.5f);
+				bikeAcceleratePrecise(getId(), 0.75f);
 			} else {
 				//std::cout << "on" << std::endl;
 				bikeReleaseSteer(getId());

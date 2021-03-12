@@ -58,6 +58,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <vector>
+#include <glm/common.hpp>
 
 using namespace physx;
 using namespace snippetvehicle;
@@ -168,14 +169,14 @@ bool gMimicKeyInputs = false;
 VehicleDesc initVehicleDesc() {
 	// Set up the chassis mass, dimensions, moment of inertia, and center of mass offset.
 	// The moment of inertia is just the moment of inertia of a cuboid but modified for easier steering.
-	// Center of mass offset is 0.65m above the base of the chassis and 0.25m towards the front.
+	// Center of mass offset is 0.65m above the base of the chassis and 0.55m towards the front.
 	const PxF32 chassisMass = 250.0f;
 	const PxVec3 chassisDims(1.0f, 1.2f, 4.63f);
 	const PxVec3 chassisMOI(
 		(chassisDims.y * chassisDims.y + chassisDims.z * chassisDims.z) * chassisMass / 12.0f,
 		(chassisDims.x * chassisDims.x + chassisDims.z * chassisDims.z) * 0.8f * chassisMass / 12.0f,
 		(chassisDims.x * chassisDims.x + chassisDims.y * chassisDims.y) * chassisMass / 12.0f);
-	const PxVec3 chassisCMOffset(0.0f, -chassisDims.y * 0.5f + 0.65f, 0.25f);
+	const PxVec3 chassisCMOffset(0.0f, -chassisDims.y * 0.5f + 0.65f, 0.55f);
 
 	// Set up the wheel mass, radius, width, moment of inertia, and number of wheels.
 	// Moment of inertia is just the moment of inertia of a cylinder.
@@ -396,6 +397,11 @@ void bikeAcceleratePrecise(int i, float n) {
 
 // reverse function used for input
 void bikeReverse(int i) {
+	//if (CTbikes[i]->mDriveDynData.getCurrentGear() != PxVehicleGearsData::eREVERSE &&
+	//	CTbikes[i]->computeForwardSpeed() > 0.f) {
+	//	bikeBreak(i);
+	//}
+	//else 
 	if (CTbikes[i]->mDriveDynData.getCurrentGear() != PxVehicleGearsData::eREVERSE) {
 		CTbikes[i]->mDriveDynData.forceGearChange(PxVehicleGearsData::eREVERSE);
 	} else {
@@ -406,10 +412,13 @@ void bikeReverse(int i) {
 // brake function for input
 void bikeBreak(int i) { inputDatas[i].setAnalogBrake(1.0f); }
 
-// turn functions used for input
-void bikeTurnRight(int i) { inputDatas[i].setAnalogSteer(-1.0f); }
+// handbrake function for input
+void bikeHandbrake(int i) { inputDatas[i].setAnalogHandbrake(0.5f); }
 
-void bikeTurnLeft(int i) { inputDatas[i].setAnalogSteer(1.0f); }
+// turn functions used for input
+void bikeTurnRight(int i) { inputDatas[i].setAnalogSteer(glm::max(inputDatas[i].getAnalogSteer()-0.05f,-1.0f)); }
+
+void bikeTurnLeft(int i) { inputDatas[i].setAnalogSteer(glm::min(inputDatas[i].getAnalogSteer()+.05f, 1.f)); }
 
 void bikeTurnPrecise(int i, float n) { inputDatas[i].setAnalogSteer(n); }
 
@@ -420,11 +429,15 @@ void bikeReleaseSteer(int i) { inputDatas[i].setAnalogSteer(0.0f); }
 
 void bikeReleaseBrake(int i) { inputDatas[i].setAnalogBrake(0.0f); }
 
+void bikeReleaseHandbrake(int i) { inputDatas[i].setAnalogHandbrake(0.f); }
+
 void bikeReleaseAll(int i) {
 	inputDatas[i].setAnalogAccel(0.0f);
 	inputDatas[i].setAnalogSteer(0.0f);
 	inputDatas[i].setAnalogBrake(0.0f);
+	inputDatas[i].setAnalogHandbrake(0.0f);
 }
+
 
 // bikeBooster provides a powerful impulse either to jump up, or strafe to the left or right of the bike's heading
 void bikeBooster(int bike, int keyPressed) {
@@ -501,7 +514,7 @@ void initVehicle() {
 	VehicleDesc vehicleDesc = initVehicleDesc();
 	gVehicle4W = createVehicle4W(vehicleDesc, gPhysics, gCooking);
 	PxTransform startTransform(
-		PxVec3(-175.0f - spawnOffset, (vehicleDesc.chassisDims.y * 0.5f + vehicleDesc.wheelRadius + 2.0f), -120.0f),
+		PxVec3(-175.0f - spawnOffset, (vehicleDesc.chassisDims.y * 1.f + vehicleDesc.wheelRadius + 3.0f), -110.0f),
 		PxQuat(0.0f, 0.999f, 0.0f, -0.052f));
 
 	if (CTbikes.size() == 0) {
@@ -549,7 +562,7 @@ physx::PxTriangleMesh* cookTrack() {
 	meshDesc.points.stride = sizeof(PxVec3);
 	meshDesc.points.data = &verts2[0];
 
-	meshDesc.triangles.count = indices.size();
+	meshDesc.triangles.count = indices.size()/3;
 	meshDesc.triangles.stride = 3 * sizeof(unsigned int);
 	meshDesc.triangles.data = &indices[0];
 
@@ -587,7 +600,7 @@ void initPhysics() {
 		pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_CONTACTS, true);
 		pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_SCENEQUERIES, true);
 	}
-	gMaterial = gPhysics->createMaterial(0.5f, 0.5f, 0.6f);
+	gMaterial = gPhysics->createMaterial(0.25f, 0.25f, 0.6f);
 
 	gCooking = PxCreateCooking(PX_PHYSICS_VERSION, *gFoundation, PxCookingParams(PxTolerancesScale()));
 
