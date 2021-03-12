@@ -2,6 +2,8 @@
 
 #include "game_object.hpp"
 #include "physics/physics.h"
+#include "Audio/audioEngine.h"
+#include "Audio/audioInstance.h"
 
 class Bike : public GameObject {
   private:
@@ -12,9 +14,13 @@ class Bike : public GameObject {
 	int id;
 	bool locked = false;
 
+
   public:
-	Bike(Render::Render& render, int start_place, Render::Group& group)
-		: GameObject(render, group), place(start_place), id(start_place-1){};
+	Audio::AudioEngine& stereo;
+	AudioInstance* engineAudio = new AudioInstance();
+
+	Bike(Render::Render& render, int start_place, Render::Group& group, Audio::AudioEngine& audio)
+		: GameObject(render, group), place(start_place), id(start_place-1), stereo(audio){};
 
 	int getId() { return id; }
 

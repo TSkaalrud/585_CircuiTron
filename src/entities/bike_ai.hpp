@@ -10,7 +10,7 @@ class BikeAI : public Bike {
 	bool left = false;
 	bool right = false;
 	//timer before AI bikes will start driving
-	int buffer = 120;
+	int buffer = 60;
 	//AI waypoint list, current target, and next target
 	std::vector<glm::vec3> waypoints;
 	int currentWaypoint = 0, nextWaypoint = 1;
@@ -18,8 +18,9 @@ class BikeAI : public Bike {
 
   public:
 	BikeAI(
-		Render::Render& render, int start_place, Render::Group& group, std::vector<glm::vec3> waypoints)
-		: Bike(render, start_place, group), waypoints(waypoints) {};
+		Render::Render& render, int start_place, Render::Group& group, std::vector<glm::vec3> waypoints,
+		Audio::AudioEngine& audio)
+		: Bike(render, start_place, group, audio), waypoints(waypoints) {};
 
 	void update(float deltaTime) override {
 		if (!getLocked()) {

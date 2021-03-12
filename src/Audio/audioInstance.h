@@ -2,8 +2,9 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include <AL/al.h>
 #include <AL/alc.h>
-//#include "../../out/build/x64-Debug (default)/_deps/openal-src/include/AL/al.h"
-//#include "../../out/build/x64-Debug (default)/_deps/openal-src/include/AL/alc.h"
+#include "../../out/build/x64-Debug (default)/_deps/openal-src/include/AL/al.h"
+#include "../../out/build/x64-Debug (default)/_deps/openal-src/include/AL/alc.h"
+#include <iostream>
 
 
 class AudioInstance {
@@ -26,23 +27,24 @@ class AudioInstance {
 	  void initialize() { ;
 	  };
 	  void playSound(const ALuint& sound_ID){ 
-		  if (sound_ID != buffer) {
-			  buffer = sound_ID;
-			  alSourcei(source, AL_BUFFER, buffer);
-		  }
-		  alSourcePlay(source);
+			  if (sound_ID != buffer) {
+				  buffer = sound_ID;
+				  alSourcei(source, AL_BUFFER, buffer);
+			  }
+
+			  alGetSourcei(source, AL_SOURCE_STATE, &source_state);
+			  //alSourcePlay(source);
+			  alGetSourcei(source, AL_SOURCE_STATE, &source_state);
+
 	  };
-	  void stopSound(){
-	  };
-	  bool isSoundPlaying(){
-	  };
-	  void cleanup(){
-	  };
+	  void stopSound(){};
+	  bool isSoundPlaying() { return AL_SOURCE_STATE == AL_PLAYING; }
+	  void cleanup(){};
 	
 	//source holds the source audio
 	ALuint source;
 	//holds the state of the source audio
-	ALint source_state;
+	ALint source_state = 0;
 
 	float pitch = 1.f;
 	float gain = 1.f;

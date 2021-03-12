@@ -20,9 +20,12 @@ class BikePlayer : public Bike {
 	int currentWaypoint = 0, nextWaypoint = 1;
 
   public:
-	BikePlayer(Window& window, Render::Render& render, int start_place, Render::Group& group,
-			   std::vector<glm::vec3> waypoints)
-		: Bike(render, start_place, group), window(window), waypoints(waypoints) {};
+	BikePlayer(Window& window, Render::Render& render, int start_place, Render::Group& group, std::vector<glm::vec3> waypoints,
+		Audio::AudioEngine& audio)
+		: Bike(render, start_place, group, audio), window(window), waypoints(waypoints) 
+	{
+		engineAudio->loop = true;
+	};
 
 	void update(float deltaTime) override {
 		physx::PxTransform camera(0, 5, -20, physx::PxQuat(physx::PxPi, {0, 1, 0}) * physx::PxQuat(-0.2, {1, 0, 0}));
@@ -37,6 +40,7 @@ class BikePlayer : public Bike {
 			}
 			modifyHealth(1);
 			checkInput();
+			engineAudio->playSound(stereo.buffer[Audio::SOUND_FILE_GUN_IMPACT_SFX]); // random sound effect example
 		}
 		
 		updateWaypoint();

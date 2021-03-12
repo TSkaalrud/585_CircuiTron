@@ -20,6 +20,9 @@
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 
+#include "Audio/audioEngine.h"
+#include "Audio/audioInstance.h"
+
 struct {
 	bool operator()(Bike* a, Bike* b) const {
 		if (a->getLap() != b->getLap())
@@ -45,14 +48,17 @@ class Game : public Entity {
 	Render::Render& render;
 	EntityManager& e_manager;
 
+	Audio::AudioEngine& stereo;
+
 	bool gameover = false;
 
   public:
-	Game(Window& window, Render::Render& render, int players, EntityManager& em)
+	Game(Window& window, Render::Render& render, int players, EntityManager& em, Audio::AudioEngine& audio)
 		: window(window), render(render), e_manager(em), players(players),
 		  car_model(importModel("assets/Bike_Final.glb", render)),
 		  wall_model(importModel("assets/Wall_blob.glb", render)),
-		  track_model(importModel("assets/The_Coffin_render.glb", render))
+		  track_model(importModel("assets/The_Coffin_render.glb", render)), 
+		  stereo(audio)
 		  {
 		//loading in the AI waypoint vertices with a dummy variable 0 for the player bike id
 		//std::vector<glm::vec3> map;
@@ -63,14 +69,14 @@ class Game : public Entity {
 	void enter() override { 
 		e_manager.addEntity(std::make_unique<Track>(render, track_model));
 
-		std::unique_ptr<Bike> b = std::make_unique<BikePlayer>(window, render, 1, car_model, ai_waypoints[0]);
+		std::unique_ptr<Bike> b = std::make_unique<BikePlayer>(window, render, 1, car_model, ai_waypoints[0], stereo);
 		bikes.push_back(b.get());
 		e_manager.addEntity(std::move(b));
 
 		for (int i = 0; i < players - 1; i++) {
 			initVehicle();
 
-			std::unique_ptr<Bike> b = std::make_unique<BikeAI>(render, i+2, car_model, ai_waypoints[0]);
+			std::unique_ptr<Bike> b = std::make_unique<BikeAI>(render, i+2, car_model, ai_waypoints[0], stereo);
 			bikes.push_back(b.get());
 			e_manager.addEntity(std::move(b));
 		}
