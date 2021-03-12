@@ -12,9 +12,10 @@ class Camera : public Entity {
 	Render::Render& render;
 
 	glm::vec3 pos = glm::vec3(0.0f, 0.0f, 0.0f);
-	float smooth_spd = 0.125f;
+	float smooth_spd = 0.050f;
 
 	int view_state = 0;
+	bool switched = true;
   public:
 	Camera(Window& window, Render::Render& render) : Entity(), window(window), render(render){};
 
@@ -27,13 +28,13 @@ class Camera : public Entity {
 		checkInput();
 
 		if (view_state == 0) {
-			behindBike(0);
+			behindBike(0, switched);
 		} else {
 			frontBike(0);
 		}
 	}
 
-	void behindBike(int i) {
+	void behindBike(int i, bool switch_flag) {
 		//physx::PxTransform camera(0, 5, -20, physx::PxQuat(physx::PxPi, {0, 1, 0}) * physx::PxQuat(-0.2, {1, 0, 0}));
 		//render.camera_set_pos(convertTransform(getBikeTransform(i).transform(camera)));
 
@@ -48,8 +49,13 @@ class Camera : public Entity {
 		glm::vec3 u = glm::normalize(bike_heading);
 		glm::vec3 desired_pos = bike_pos - u * 20.0f + offset;
 		
-		//glm::vec3 smoothed_pos = lerp(pos, desired_pos, smooth_spd);
-		pos = desired_pos;
+		if (switch_flag) {
+			pos = desired_pos;
+			switched = false;
+		} else {
+			glm::vec3 smoothed_pos = lerp(pos, desired_pos, smooth_spd);
+			pos = smoothed_pos;
+		}
 
 		glm::mat4 view = glm::lookAt(
 			pos,
@@ -59,6 +65,7 @@ class Camera : public Entity {
 		render.camera_set_pos(glm::inverse(view));
 	}
 
+	//same as behind bike but a positive u
 	void frontBike(int i) {
 		glm::vec3 bike_pos(getBikeTransform(i).p.x, getBikeTransform(i).p.y, getBikeTransform(i).p.z);
 		glm::vec3 offset(0.0f, 5.0f, 0.0f);
@@ -68,9 +75,9 @@ class Camera : public Entity {
 			getBikeTransform(i).q.getBasisVector2().z);
 
 		glm::vec3 u = glm::normalize(bike_heading);
-		glm::vec3 desired_pos = bike_pos + u * 20.0f + offset;
-
-		//glm::vec3 smoothed_pos = lerp(pos, desired_pos, smooth_spd);
+		glm::vec3 desired_pos = bike_pos + u * 20.0f + offset;		//the difference
+		
+		//also no lerping
 		pos = desired_pos;
 
 		glm::mat4 view = glm::lookAt(pos, bike_pos, glm::vec3(0.0f, 1.0f, 0.0f));
@@ -89,6 +96,7 @@ class Camera : public Entity {
 	void checkInput() {
 		if (window.keyPressed(86)) { // v
 			view_state = 1;
+			switched = true;
 		} else {
 			view_state = 0;
 		}
