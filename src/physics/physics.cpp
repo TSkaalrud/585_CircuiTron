@@ -562,7 +562,7 @@ physx::PxTriangleMesh* cookTrack() {
 	meshDesc.points.stride = sizeof(PxVec3);
 	meshDesc.points.data = &verts2[0];
 
-	meshDesc.triangles.count = indices.size();
+	meshDesc.triangles.count = indices.size()/3;
 	meshDesc.triangles.stride = 3 * sizeof(unsigned int);
 	meshDesc.triangles.data = &indices[0];
 
