@@ -105,7 +105,7 @@ class Game : public Entity {
 
 	void checkWin() {
 		// currently 1 lap to win  CHANGE TO 3 LATER
-		if (bikes[0]->getLap()-1 == 1) {
+		if (bikes[0]->getLap()-1 == 3) {
 			if (bikes[0]->getId() == 0) {
 				std::cout << "Player Wins!" << std::endl;
 			} else {
