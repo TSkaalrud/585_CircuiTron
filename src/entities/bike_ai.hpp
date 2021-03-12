@@ -29,12 +29,12 @@ class BikeAI : public Bike {
 			buffer--;
 		}
 		
-		model->setTransform(convertTransform(getBikeTransform(1)) * glm::scale(glm::mat4(1.0f), glm::vec3(2.0f)));
+		model->setTransform(convertTransform(getBikeTransform(getId())) * glm::scale(glm::mat4(1.0f), glm::vec3(2.0f)));
 	}
 
 	void followWaypoint() { 
 		glm::vec3 target = waypoints[currentWaypoint];
-		physx::PxTransform ai = getBikeTransform(1);
+		physx::PxTransform ai = getBikeTransform(getId());
 
 		physx::PxVec3 heading = ai.q.getBasisVector2() + ai.p;
 

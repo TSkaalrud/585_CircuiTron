@@ -70,7 +70,7 @@ class Game : public Entity {
 		for (int i = 0; i < players - 1; i++) {
 			initVehicle();
 
-			std::unique_ptr<Bike> b = std::make_unique<BikeAI>(render, i+2, car_model, ai_waypoints[i]);
+			std::unique_ptr<Bike> b = std::make_unique<BikeAI>(render, i+2, car_model, ai_waypoints[0]);
 			bikes.push_back(b.get());
 			e_manager.addEntity(std::move(b));
 		}
