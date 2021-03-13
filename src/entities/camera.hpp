@@ -12,7 +12,7 @@ class Camera : public Entity {
 	Render::Render& render;
 
 	glm::vec3 pos = glm::vec3(0.0f, 0.0f, 0.0f);
-	float smooth_spd = 0.050f;
+	float smooth_spd = 0.05f;
 
 	int view_state = 0;
 	bool switched = true;
@@ -49,6 +49,7 @@ class Camera : public Entity {
 		glm::vec3 u = glm::normalize(bike_heading);
 		glm::vec3 desired_pos = bike_pos - u * 20.0f + offset;
 		
+		//so that front view doesnt lerp
 		if (switch_flag) {
 			pos = desired_pos;
 			switched = false;
@@ -57,10 +58,7 @@ class Camera : public Entity {
 			pos = smoothed_pos;
 		}
 
-		glm::mat4 view = glm::lookAt(
-			pos,
-			bike_pos,
-			glm::vec3(0.0f, 1.0f, 0.0f));
+		glm::mat4 view = glm::lookAt(pos, bike_pos, glm::vec3(0.0f, 1.0f, 0.0f));
 
 		render.camera_set_pos(glm::inverse(view));
 	}
