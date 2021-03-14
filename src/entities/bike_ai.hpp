@@ -28,6 +28,8 @@ class BikeAI : public Bike {
 			}
 			buffer--;
 		}
+
+		spawnWall(deltaTime, getId());
 		
 		model->setTransform(convertTransform(getBikeTransform(getId())) * glm::scale(glm::mat4(1.0f), glm::vec3(2.0f)));
 	}

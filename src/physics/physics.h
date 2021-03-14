@@ -24,6 +24,12 @@ void initVehicle();
 
 int getNumBikes();
 
+physx::PxVehicleDrive4W* getVehicle(int i);
+
+wallSpawnInfo getWallInfo(int i);
+
+void makeWallSeg(int i, physx::PxTransform a, physx::PxTransform b);
+
 physx::PxTransform getBikeTransform(int i);
 
 physx::PxTransform getWallPos(int i, int j);

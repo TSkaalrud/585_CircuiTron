@@ -43,4 +43,27 @@ class Bike : public GameObject {
 		//std::cout << "current health = " << health << std::endl;
 		//play sound?
 	}
+	
+	void spawnWall(float timestep, int i) {
+		physx::PxVehicleDrive4W* vehicle = getVehicle(i);
+		wallSpawnInfo wall = getWallInfo(i);
+
+		wall.timer += timestep;
+
+		if (vehicle->computeForwardSpeed() >= 3.0f &&
+			vehicle->mDriveDynData.getCurrentGear() != physx::PxVehicleGearsData::eREVERSE) {
+			if (wall.timer >= wall.wallTime) {
+				if (wall.wallFront.p.x != NULL) {
+					wall.wallBack = wall.wallFront;
+					wall.wallFront = vehicle->getRigidDynamicActor()->getGlobalPose();
+
+					makeWallSeg(i, wall.wallBack, wall.wallFront);
+				}
+				wall.wallFront = vehicle->getRigidDynamicActor()->getGlobalPose();
+				wall.timer = 0.0f;
+			}
+		} else {
+			wall.wallFront.p.x = NULL;
+		}
+	}
 };

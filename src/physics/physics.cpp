@@ -366,6 +366,10 @@ physx::PxTransform getTrackTransform() { return trackTransform; }
 // return number of bikes
 int getNumBikes() { return CTbikes.size(); }
 
+PxVehicleDrive4W* getVehicle(int i) { return CTbikes[i]; }
+
+wallSpawnInfo getWallInfo(int i) { return wallSpawnTimers[i]; }
+
 // get bike transforms (i = bike number)
 PxTransform getBikeTransform(int i) { return CTbikes[i]->getRigidDynamicActor()->getGlobalPose(); }
 
@@ -646,7 +650,7 @@ void stepPhysics() {
 	const PxF32 timestep = 1.0f / 60.0f;
 
 	for (int i = 0; i < CTbikes.size(); i++) {
-		spawnWall(timestep, i);
+		//spawnWall(timestep, i);
 	}
 
 	for (int i = 0; i < CTbikes.size(); i++) {
