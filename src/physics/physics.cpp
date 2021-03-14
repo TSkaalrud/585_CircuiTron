@@ -337,29 +337,6 @@ void makeWallSeg(int i, PxTransform a, PxTransform b) {
 	}
 }
 
-// basic wall generation
-void spawnWall(PxF32 timestep, int i) {
-	PxVehicleDrive4W* vehicle = CTbikes[i];
-
-	wallSpawnTimers[i].timer += timestep;
-
-	if (vehicle->computeForwardSpeed() >= 3.0f &&
-		vehicle->mDriveDynData.getCurrentGear() != PxVehicleGearsData::eREVERSE) {
-		if (wallSpawnTimers[i].timer >= wallSpawnTimers[i].wallTime) {
-			if (wallSpawnTimers[i].wallFront.p.x != NULL) {
-				wallSpawnTimers[i].wallBack = wallSpawnTimers[i].wallFront;
-				wallSpawnTimers[i].wallFront = vehicle->getRigidDynamicActor()->getGlobalPose();
-
-				makeWallSeg(i, wallSpawnTimers[i].wallBack, wallSpawnTimers[i].wallFront);
-			}
-			wallSpawnTimers[i].wallFront = vehicle->getRigidDynamicActor()->getGlobalPose();
-			wallSpawnTimers[i].timer = 0.0f;
-		}
-	} else {
-		wallSpawnTimers[i].wallFront.p.x = NULL;
-	}
-}
-
 physx::PxTransform trackTransform;
 physx::PxTransform getTrackTransform() { return trackTransform; }
 
@@ -510,7 +487,7 @@ void initVehicle() {
 
 	wallSpawnInfo wallInfo;
 	wallInfo.timer = 0.0f;
-	wallInfo.wallTime = 2.0f;
+	wallInfo.wallTime = 0.25f;
 	wallSpawnTimers.push_back(wallInfo);
 
 	PxVehicleDrive4W* gVehicle4W;
@@ -646,12 +623,8 @@ void initPhysics() {
 	initVehicle();
 }
 
-void stepPhysics() {
-	const PxF32 timestep = 1.0f / 60.0f;
-
-	for (int i = 0; i < CTbikes.size(); i++) {
-		//spawnWall(timestep, i);
-	}
+void stepPhysics(float timestep) {
+	//const PxF32 timestep = 1.0f / 60.0f;
 
 	for (int i = 0; i < CTbikes.size(); i++) {
 		if (gMimicKeyInputs) {

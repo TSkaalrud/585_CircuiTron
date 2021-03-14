@@ -78,6 +78,6 @@ void resetBikePos(int i);
 
 void initPhysics();
 
-void stepPhysics();
+void stepPhysics(float timestep);
 
 void cleanupPhysics();
