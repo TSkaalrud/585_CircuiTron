@@ -46,24 +46,24 @@ class Bike : public GameObject {
 	
 	void spawnWall(float timestep, int i) {
 		physx::PxVehicleDrive4W* vehicle = getVehicle(i);
-		wallSpawnInfo wall = getWallInfo(i);
+		wallSpawnInfo* wall = getWallInfo(i);
 
-		wall.timer += timestep;
+		wall->timer += timestep;
 
-		if (vehicle->computeForwardSpeed() >= 3.0f &&
+		if (vehicle->computeForwardSpeed() >= 10.0f &&
 			vehicle->mDriveDynData.getCurrentGear() != physx::PxVehicleGearsData::eREVERSE) {
-			if (wall.timer >= wall.wallTime) {
-				if (wall.wallFront.p.x != NULL) {
-					wall.wallBack = wall.wallFront;
-					wall.wallFront = vehicle->getRigidDynamicActor()->getGlobalPose();
+			if (wall->timer >= wall->wallTime) {
+				if (wall->wallFront.p.x != NULL) {
+					wall->wallBack = wall->wallFront;
+					wall->wallFront = vehicle->getRigidDynamicActor()->getGlobalPose();
 
-					makeWallSeg(i, wall.wallBack, wall.wallFront);
+					makeWallSeg(i, wall->wallBack, wall->wallFront);
 				}
-				wall.wallFront = vehicle->getRigidDynamicActor()->getGlobalPose();
-				wall.timer = 0.0f;
+				wall->wallFront = vehicle->getRigidDynamicActor()->getGlobalPose();
+				wall->timer = 0.0f;
 			}
 		} else {
-			wall.wallFront.p.x = NULL;
+			wall->wallFront.p.x = NULL;
 		}
 	}
 };

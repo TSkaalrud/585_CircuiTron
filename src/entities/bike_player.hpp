@@ -41,11 +41,11 @@ class BikePlayer : public Bike {
 		
 		updateWaypoint();
 
-		spawnWall(deltaTime, 0);
-
 		render.camera_set_pos(convertTransform(getBikeTransform(0).transform(camera)));
 
 		model->setTransform(convertTransform(getBikeTransform(0)) * glm::scale(glm::mat4(1.0f), glm::vec3(2.0f)));
+
+		spawnWall(deltaTime, 0);
 	}
 
 	void checkInput() {

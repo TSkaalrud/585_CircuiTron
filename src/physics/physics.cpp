@@ -368,7 +368,7 @@ int getNumBikes() { return CTbikes.size(); }
 
 PxVehicleDrive4W* getVehicle(int i) { return CTbikes[i]; }
 
-wallSpawnInfo getWallInfo(int i) { return wallSpawnTimers[i]; }
+wallSpawnInfo* getWallInfo(int i) { return &wallSpawnTimers[i]; }
 
 // get bike transforms (i = bike number)
 PxTransform getBikeTransform(int i) { return CTbikes[i]->getRigidDynamicActor()->getGlobalPose(); }
@@ -510,7 +510,7 @@ void initVehicle() {
 
 	wallSpawnInfo wallInfo;
 	wallInfo.timer = 0.0f;
-	wallInfo.wallTime = 1.0f;
+	wallInfo.wallTime = 2.0f;
 	wallSpawnTimers.push_back(wallInfo);
 
 	PxVehicleDrive4W* gVehicle4W;
