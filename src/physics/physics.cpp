@@ -423,6 +423,12 @@ void initVehicle() {
 	bool gIsVehicleInAir = true;
 	isVehicleInAir.push_back(gIsVehicleInAir);
 
+
+	wallSpawnInfo wallInfo;
+	wallInfo.timer = 0.0f;
+	wallInfo.wallTime = 0.5f;
+	wallSpawnTimers.push_back(wallInfo);
+
 	PxVehicleDrive4W* gVehicle4W;
 
 	VehicleDesc vehicleDesc = initVehicleDesc();
