@@ -12,6 +12,7 @@
 #include "entities/bike_ai.hpp"
 #include "entities/wall.hpp"
 #include "entities/track.hpp"
+#include "entities/camera.hpp"
 #include "render/model_import.hpp"
 #include "render/render.hpp"
 
@@ -82,6 +83,8 @@ class Game : public Entity {
 		}
 
 		e_manager.addEntity(std::make_unique<Wall>(render, wall_model));
+
+		e_manager.addEntity(std::make_unique<Camera>(window, render));
 	}
 
 	void update(float deltaTime) override { 
