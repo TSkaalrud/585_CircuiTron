@@ -40,7 +40,7 @@ class BikePlayer : public Bike {
 			}
 			modifyHealth(1);
 			checkInput();
-			engineAudio->playSound(stereo.buffer[Audio::SOUND_FILE_GUN_IMPACT_SFX]); // random sound effect example
+			engineAudio->playSound(stereo.buffer[Audio::SOUND_FILE_REV_STEADY_SFX]); // random sound effect example
 		}
 		
 		updateWaypoint();

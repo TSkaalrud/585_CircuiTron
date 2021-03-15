@@ -31,14 +31,18 @@ class AudioInstance {
 				  buffer = sound_ID;
 				  alSourcei(source, AL_BUFFER, buffer);
 			  }
+			  alGetSourcei(source, AL_SOURCE_STATE, &source_state);
 
-			  alGetSourcei(source, AL_SOURCE_STATE, &source_state);
-			  //alSourcePlay(source);
-			  alGetSourcei(source, AL_SOURCE_STATE, &source_state);
+			  while (!isSoundPlaying()) {
+				  alGetSourcei(source, AL_SOURCE_STATE, &source_state);
+
+				  alSourcePlay(source);
+			  }
+			  //alGetSourcei(source, AL_SOURCE_STATE, &source_state);
 
 	  };
 	  void stopSound(){};
-	  bool isSoundPlaying() { return AL_SOURCE_STATE == AL_PLAYING; }
+	  bool isSoundPlaying() { return source_state == AL_PLAYING; }
 	  void cleanup(){};
 	
 	//source holds the source audio
