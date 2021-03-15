@@ -1,6 +1,7 @@
 #pragma once
 
 #include "game_object.hpp"
+#include "wall_manager.hpp"
 #include "physics/physics.h"
 
 class Bike : public GameObject {
@@ -12,9 +13,11 @@ class Bike : public GameObject {
 	int id;
 	bool locked = false;
 
+	WallManager* wm;
+
   public:
-	Bike(Render::Render& render, int start_place, Render::Group& group)
-		: GameObject(render, group), place(start_place), id(start_place-1){};
+	Bike(Render::Render& render, int start_place, Render::Group& group, WallManager* wm)
+		: GameObject(render, group), place(start_place), id(start_place-1), wm(wm){};
 
 	int getId() { return id; }
 
@@ -58,6 +61,7 @@ class Bike : public GameObject {
 					wall->wallFront = vehicle->getRigidDynamicActor()->getGlobalPose();
 
 					makeWallSeg(i, wall->wallBack, wall->wallFront);
+					wm->addWall();
 				}
 				wall->wallFront = vehicle->getRigidDynamicActor()->getGlobalPose();
 				wall->timer = 0.0f;

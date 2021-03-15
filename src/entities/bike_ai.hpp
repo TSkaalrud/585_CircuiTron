@@ -18,8 +18,9 @@ class BikeAI : public Bike {
 
   public:
 	BikeAI(
-		Render::Render& render, int start_place, Render::Group& group, std::vector<glm::vec3> waypoints)
-		: Bike(render, start_place, group), waypoints(waypoints) {};
+		Render::Render& render, int start_place, Render::Group& group, std::vector<glm::vec3> waypoints,
+		WallManager* wm)
+		: Bike(render, start_place, group, wm), waypoints(waypoints) {};
 
 	void update(float deltaTime) override {
 		if (!getLocked()) {

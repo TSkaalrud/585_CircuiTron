@@ -21,8 +21,8 @@ class BikePlayer : public Bike {
 
   public:
 	BikePlayer(Window& window, Render::Render& render, int start_place, Render::Group& group,
-			   std::vector<glm::vec3> waypoints)
-		: Bike(render, start_place, group), window(window), waypoints(waypoints) {};
+			   std::vector<glm::vec3> waypoints, WallManager* wm)
+		: Bike(render, start_place, group, wm), window(window), waypoints(waypoints) {};
 
 	void update(float deltaTime) override {
 		physx::PxTransform camera(0, 5, -20, physx::PxQuat(physx::PxPi, {0, 1, 0}) * physx::PxQuat(-0.2, {1, 0, 0}));
