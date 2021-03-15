@@ -52,6 +52,8 @@ class BikePlayer : public Bike {
 					engineAudio->changePitch(1);
 					gearAudio->changePitch(1);
 					engineAudio->playSound(stereo.buffer[Audio::SOUND_FILE_IDLE_WUB_SFX]);
+					gearAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_REV_DOWN2_SFX]);
+
 				} else {
 
 					float delta = 0.1f;
@@ -66,6 +68,7 @@ class BikePlayer : public Bike {
 					} else if (currentGear > gear && gear != 1) {
 						// decrease pitch (decelerating) (min 0.5)
 						delta = delta * (currentGear - gear);
+						std::cout << currentGear << " " << gear << std::endl;
 
 						engineAudio->changePitch(1 - delta);
 						gearAudio->changePitch(1 - delta);
