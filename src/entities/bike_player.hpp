@@ -15,6 +15,8 @@ class BikePlayer : public Bike {
 	int BoostCD = 0;
 	int StrafeCD = 0;
 	int WADCharge = 0;
+	
+	int currentGear = 2;
 
 	std::vector<glm::vec3> waypoints;
 	int currentWaypoint = 0, nextWaypoint = 1;
@@ -25,6 +27,7 @@ class BikePlayer : public Bike {
 		: Bike(render, start_place, group, audio), window(window), waypoints(waypoints) 
 	{
 		engineAudio->loop = true;
+		gearAudio->loop = false;
 	};
 
 	void update(float deltaTime) override {
@@ -40,7 +43,44 @@ class BikePlayer : public Bike {
 			}
 			modifyHealth(1);
 			checkInput();
-			engineAudio->playSound(stereo.buffer[Audio::SOUND_FILE_REV_STEADY_SFX]); // random sound effect example
+			
+			//Audio
+			//Rev check
+			int gear = getBikeGear(0);
+			if (currentGear != gear) {
+				if (gear == 0) { //reset audio levels when reversing (first gear is used during gear shifts)
+					engineAudio->changePitch(1);
+					gearAudio->changePitch(1);
+					engineAudio->playSound(stereo.buffer[Audio::SOUND_FILE_IDLE_WUB_SFX]);
+				} else {
+
+					float delta = 0.1f;
+					if (currentGear < gear && gear != 1) {
+						// increase pitch (accelerating) (max 2.0)
+						delta = delta * (gear - currentGear);
+
+						engineAudio->changePitch(1 + delta);
+						gearAudio->changePitch(1 + delta);
+
+						gearAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_REV_UP2_SFX]);
+					} else if (currentGear > gear && gear != 1) {
+						// decrease pitch (decelerating) (min 0.5)
+						delta = delta * (currentGear - gear);
+
+						engineAudio->changePitch(1 - delta);
+						gearAudio->changePitch(1 - delta);
+
+						gearAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_REV_DOWN2_SFX]);
+					}
+				}
+			}
+			// Play pitch corrected revs (on loop)
+			engineAudio->playSound(stereo.buffer[Audio::SOUND_FILE_REV_STEADY_SFX]);
+			currentGear = gear;
+			//std::cout << currentGear << " " << gear << std::endl;
+
+
+		
 		}
 		
 		updateWaypoint();
@@ -99,7 +139,10 @@ class BikePlayer : public Bike {
 				modifyHealth(-10);
 				bikeBooster(0, 265);
 				BoostCD += 60;
+				JumpAudio->playSound(stereo.buffer[Audio::SOUND_FILE_SIZZLE_SFX]);
+
 				std::cout << "health: " << getHealth() << std::endl;
+
 			}
 		} 
 
@@ -108,6 +151,8 @@ class BikePlayer : public Bike {
 				modifyHealth(-10);
 				bikeBooster(0, 263);
 				StrafeCD += 60;
+				StrafeAudio->playSound(stereo.buffer[Audio::SOUND_FILE_SIZZLE_SFX]);
+
 				std::cout << "health: " << getHealth() << std::endl;
 			}
 		} 
@@ -116,6 +161,8 @@ class BikePlayer : public Bike {
 				modifyHealth(-10);
 				bikeBooster(0, 262);
 				StrafeCD += 60;
+				StrafeAudio->playSound(stereo.buffer[Audio::SOUND_FILE_SIZZLE_SFX]);
+
 				std::cout << "health: " << getHealth() << std::endl;
 			}
 		} 

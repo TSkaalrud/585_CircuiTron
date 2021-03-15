@@ -18,6 +18,10 @@ class Bike : public GameObject {
   public:
 	Audio::AudioEngine& stereo;
 	AudioInstance* engineAudio = new AudioInstance();
+	AudioInstance* gearAudio = new AudioInstance();
+	AudioInstance* JumpAudio = new AudioInstance();
+	AudioInstance* StrafeAudio = new AudioInstance();
+
 
 	Bike(Render::Render& render, int start_place, Render::Group& group, Audio::AudioEngine& audio)
 		: GameObject(render, group), place(start_place), id(start_place-1), stereo(audio){};

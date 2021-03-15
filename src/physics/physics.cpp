@@ -488,6 +488,12 @@ void resetBikePos(int bike) {
 	CTbikes[bike]->setToRestState();
 }
 
+//fetch bike gear
+PxU32 getBikeGear(int bike) {
+	//std::cout << PxVehicleGearsData::eGEARSRATIO_COUNT << std::endl;
+	//std::cout << CTbikes[bike]->mDriveDynData.getCurrentGear() << std::endl;
+	return CTbikes[bike]->mDriveDynData.getCurrentGear(); }
+
 float spawnOffset = 0.0f;
 
 void initVehicle() {

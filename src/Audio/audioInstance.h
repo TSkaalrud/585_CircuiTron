@@ -26,21 +26,36 @@ class AudioInstance {
 	  };
 	  void initialize() { ;
 	  };
+
+	  //use when you want to use looping sounds
 	  void playSound(const ALuint& sound_ID){ 
 			  if (sound_ID != buffer) {
+				  alSourceStop(source);
 				  buffer = sound_ID;
 				  alSourcei(source, AL_BUFFER, buffer);
 			  }
+			  
 			  alGetSourcei(source, AL_SOURCE_STATE, &source_state);
-
-			  while (!isSoundPlaying()) {
+			  while (!isSoundPlaying()) {//if the sound isn't playing, play it
 				  alGetSourcei(source, AL_SOURCE_STATE, &source_state);
-
 				  alSourcePlay(source);
 			  }
-			  //alGetSourcei(source, AL_SOURCE_STATE, &source_state);
 
 	  };
+	  //use when you want to immediately replace a currently playing sound
+	  void playSoundOverride(const ALuint& sound_ID){
+		  if (sound_ID != buffer) {
+			  alSourceStop(source);
+			  buffer = sound_ID;
+			  alSourcei(source, AL_BUFFER, buffer);
+		  }
+
+		  alGetSourcei(source, AL_SOURCE_STATE, &source_state);
+		  alSourcePlay(source);
+		  
+	  };
+
+	  void changePitch(float desiredValue) { alSourcef(source, AL_PITCH, desiredValue);  }
 	  void stopSound(){};
 	  bool isSoundPlaying() { return source_state == AL_PLAYING; }
 	  void cleanup(){};

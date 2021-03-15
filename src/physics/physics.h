@@ -70,6 +70,8 @@ void bikeControl(int i);
 
 void resetBikePos(int i);
 
+physx::PxU32 getBikeGear(int bike);
+
 void initPhysics();
 
 void stepPhysics();
