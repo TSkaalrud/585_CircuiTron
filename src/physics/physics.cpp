@@ -46,6 +46,7 @@
 #include "CTVehicleTireFriction.h"
 #include "physics.h"
 #include "vehicle/PxVehicleUtil.h"
+#include "CTColliderCallback.h"
 
 #include "CTPVD.h"
 #include "CTPrint.h"
@@ -59,6 +60,7 @@
 #include <stdio.h>
 #include <vector>
 #include <glm/common.hpp>
+#include <string>
 
 using namespace physx;
 using namespace snippetvehicle;
@@ -84,14 +86,12 @@ PxBatchQuery* gBatchQuery = NULL;
 PxVehicleDrivableSurfaceToTireFrictionPairs* gFrictionPairs = NULL;
 
 PxRigidStatic* gGroundPlane = NULL;
-// PxVehicleDrive4W* gVehicle4W = NULL;
 
 std::vector<PxVehicleDrive4W*> CTbikes;
 std::vector<std::vector<wallSegment>> walls;
 std::vector<PxVehicleDrive4WRawInputData> inputDatas;
 std::vector<bool> isVehicleInAir;
 std::vector<wallSpawnInfo> wallSpawnTimers;
-std::vector<PxTriggerPair> triggerPairs;
 
 float impulseBase = 2500;
 
@@ -320,21 +320,20 @@ void makeWallSeg(int i, PxTransform a, PxTransform b) {
 
 	PxRigidStatic* aWall = gPhysics->createRigidStatic(wallSeg);
 	aWall->attachShape(*wallShape);
+
+	//create a string and a char array of i 
+	std::string bikeIDString = std::to_string(i);
+	char* bikeIDArray = new char[bikeIDString.length() + 1];
+	strcpy(bikeIDArray, bikeIDString.c_str());
+
+	//set the actor name to its bike ID
+	aWall->setName(bikeIDArray);
+
+	//add actor to scene
 	gScene->addActor(*aWall);
 
 	wallSegment segment = {i, aWall, b, a};
 	walls[i].push_back(segment);
-
-	PxTriggerPair pair;
-
-	for (int i = 0; i < CTbikes.size(); i++) {
-		pair.triggerShape = wallShape;
-		pair.triggerActor = aWall;
-		CTbikes[i]->getRigidDynamicActor()->getShapes(&pair.otherShape, sizeof(PxShape), 4);
-		pair.otherActor = CTbikes[i]->getRigidDynamicActor();
-
-		triggerPairs.push_back(pair);
-	}
 }
 
 // basic wall generation
@@ -343,7 +342,7 @@ void spawnWall(PxF32 timestep, int i) {
 
 	wallSpawnTimers[i].timer += timestep;
 
-	if (vehicle->computeForwardSpeed() >= 3.0f &&
+	if (vehicle->computeForwardSpeed() >= 10.0f &&
 		vehicle->mDriveDynData.getCurrentGear() != PxVehicleGearsData::eREVERSE) {
 		if (wallSpawnTimers[i].timer >= wallSpawnTimers[i].wallTime) {
 			if (wallSpawnTimers[i].wallFront.p.x != NULL) {
@@ -534,6 +533,14 @@ void initVehicle() {
 
 	gVehicle4W->getRigidDynamicActor()->setGlobalPose(startTransform);
 
+	// create a string and a char array of the bike ID
+	std::string bikeIDString = std::to_string(CTbikes.size() - 1);
+	char* bikeIDArray = new char[bikeIDString.length() + 1];
+	strcpy(bikeIDArray, bikeIDString.c_str());
+
+	//set the actor name to its bike ID
+	gVehicle4W->getRigidDynamicActor()->setName(bikeIDArray);
+
 	gScene->addActor(*gVehicle4W->getRigidDynamicActor());
 
 	// Set the vehicle to rest in first gear.
@@ -599,6 +606,10 @@ void initPhysics() {
 	gDispatcher = PxDefaultCpuDispatcherCreate(numWorkers);
 	sceneDesc.cpuDispatcher = gDispatcher;
 	sceneDesc.filterShader = VehicleFilterShader;
+
+	//set collision callback in order to use trigger volumes
+	CTColliderCallback* colliderCallback = new CTColliderCallback();
+	sceneDesc.simulationEventCallback = colliderCallback;
 
 	gScene = gPhysics->createScene(sceneDesc);
 	PxPvdSceneClient* pvdClient = gScene->getScenePvdClient();
