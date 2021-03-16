@@ -201,7 +201,7 @@ VehicleDesc initVehicleDesc() {
 	vehicleDesc.wheelMOI = wheelMOI;
 	vehicleDesc.numWheels = nbWheels;
 	vehicleDesc.wheelMaterial = gMaterial;
-	vehicleDesc.chassisSimFilterData = PxFilterData(COLLISION_FLAG_WHEEL, COLLISION_FLAG_WHEEL_AGAINST, 0, 0);
+	vehicleDesc.wheelSimFilterData = PxFilterData(COLLISION_FLAG_WHEEL, COLLISION_FLAG_WHEEL_AGAINST, 0, 0);
 
 	return vehicleDesc;
 }

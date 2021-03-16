@@ -251,6 +251,7 @@ PxVehicleDrive4W* createVehicle4W(const VehicleDesc& vehicle4WDesc, PxPhysics* p
 			wheelCenterActorOffsets, vehicle4WDesc.chassisCMOffset, vehicle4WDesc.chassisMass, wheelsSimData);
 	}
 
+
 	// Set up the sim data for the vehicle drive model.
 	PxVehicleDriveSimData4W driveSimData;
 	{
