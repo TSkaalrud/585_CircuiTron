@@ -10,8 +10,9 @@ class Wall : public GameObject {
 		: GameObject(render, group) {
 	};
 
-	void update(float deltaTime) override {
+	void enter() override {}
 
+	void update(float deltaTime) override {
 		for (int i = 0; i < getNumBikes(); i++) {
 			if (numWalls[i] < getNumWalls(i)) {
 				Render::GroupInstance newWall(group);

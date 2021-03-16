@@ -11,6 +11,7 @@ namespace Render {
 using namespace glm;
 
 typedef unsigned int GLuint;
+typedef int GLsizei;
 
 struct MeshDef {
 	struct Vertex {
@@ -39,6 +40,14 @@ typedef uint ShaderHandle;
 
 class Core {
   protected:
+	template <class T> static size_t vector_size(const std::vector<T>& vec) { return sizeof(T) * vec.size(); }
+
+	struct Camera {
+		mat4 proj;
+		mat4 view;
+		vec3 camPos;
+	};
+
 	int width, height;
 
 	GLuint cameraBuffer;
@@ -58,19 +67,25 @@ class Core {
 	};
 	REGISTER(Mesh, meshes)
 
-	struct Material {
+	struct ShaderConfig {
 		uint shader;
 		GLuint uniform;
 		std::vector<TextureHandle> textures;
 	};
+	typedef std::vector<ShaderConfig> Material;
 	REGISTER(Material, materials)
 
 	struct Shader {
 		GLuint shader;
+		enum Type { Opaque = 1 << 0, Depth = 1 << 1, Shadow = 1 << 2, Skybox = 1 << 4 };
+		friend inline Type operator|(const Type lhs, const Type rhs) {
+			return static_cast<Type>(static_cast<int>(lhs) | static_cast<int>(rhs));
+		}
+		Type type;
 	};
 	REGISTER(Shader, shaders)
 
-	const int lightmapSize = 8192;
+	const int lightmapSize = 4096;
 	const float lightmapCoverage = 200;
 
 	struct DirLight {
@@ -83,7 +98,7 @@ class Core {
 	REGISTER(DirLight, dirLights)
 	GLuint dirLightBuffer, dirLightShadow;
 
-	void renderScene();
+	void renderScene(Shader::Type type);
 
   public:
 	Core(void (*(const char*))());

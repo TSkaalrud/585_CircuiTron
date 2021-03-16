@@ -13,6 +13,13 @@ struct wallSegment {
 	physx::PxTransform back;
 };
 
+struct wallSpawnInfo {
+	physx::PxF32 timer;
+	physx::PxF32 wallTime;
+	physx::PxTransform wallFront;
+	physx::PxTransform wallBack;
+};
+
 void initVehicle();
 
 int getNumBikes();
@@ -25,13 +32,19 @@ physx::PxTransform getWallFront(int i, int j);
 
 physx::PxTransform getWallBack(int i, int j);
 
+physx::PxTransform getTrackTransform();
+
 int getNumWalls(int i);
 
 int getWallOwner(int i, int j);
 
 void bikeAccelerate(int i);
 
+void bikeAcceleratePrecise(int i, float n);
+
 void bikeReverse(int i);
+
+void bikeHandbrake(int i);
 
 void bikeBreak(int i);
 
@@ -39,13 +52,25 @@ void bikeTurnRight(int i);
 
 void bikeTurnLeft(int i);
 
+void bikeTurnPrecise(int i, float n);
+
 void bikeReleaseGas(int i);
 
 void bikeReleaseSteer(int i);
 
 void bikeReleaseBrake(int i);
 
+void bikeReleaseHandbrake(int i);
+
 void bikeReleaseAll(int i);
+
+void bikeBooster(int i, int keyPressed);
+
+void bikeControl(int i);
+
+void resetBikePos(int i);
+
+physx::PxU32 getBikeGear(int bike);
 
 void initPhysics();
 

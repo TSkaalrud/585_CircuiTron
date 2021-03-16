@@ -4,6 +4,7 @@
 #include <assimp/pbrmaterial.h>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
+#include <gl.hpp>
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
@@ -52,6 +53,7 @@ loadTexture(aiMaterial* material, aiTextureType type, unsigned int index, const 
 	}
 	const aiTexture* texture = scene->GetEmbeddedTexture(texturePath.data);
 	assert(texture);
+
 	int x, y, channels;
 	auto data =
 		stbi_load_from_memory(reinterpret_cast<stbi_uc*>(texture->pcData), texture->mWidth, &x, &y, &channels, 0);
@@ -124,6 +126,24 @@ Group importModel(std::string filename, Render& render) {
 	process_node(scene, scene->mRootNode, group, mat4(1.0f), meshes, materials);
 
 	return group;
+}
+
+TextureHandle importSkybox(std::string filename, Render&) {
+	int width, height;
+	float* data = stbi_loadf(filename.c_str(), &width, &height, nullptr, 3);
+
+	GLuint texture;
+
+	glCreateTextures(GL_TEXTURE_2D, 1, &texture);
+	glTextureStorage2D(texture, 1, GL_RGB16F, width, height);
+	glTextureParameteri(texture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTextureParameteri(texture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTextureParameteri(texture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTextureSubImage2D(texture, 0, 0, 0, width, height, GL_RGB, GL_FLOAT, data);
+
+	stbi_image_free(data);
+
+	return texture;
 }
 
 } // namespace Render

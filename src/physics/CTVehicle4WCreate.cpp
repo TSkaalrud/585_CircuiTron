@@ -110,7 +110,7 @@ void setupWheelsSimulationData(
 
 		// Set the suspension data.
 		for (PxU32 i = 0; i < numWheels; i++) {
-			suspensions[i].mMaxCompression = 0.3f;
+			suspensions[i].mMaxCompression = 0.5f;
 			suspensions[i].mMaxDroop = 0.1f;
 			suspensions[i].mSpringStrength = 35000.0f;
 			suspensions[i].mSpringDamperRate = 4500.0f;
@@ -251,6 +251,7 @@ PxVehicleDrive4W* createVehicle4W(const VehicleDesc& vehicle4WDesc, PxPhysics* p
 			wheelCenterActorOffsets, vehicle4WDesc.chassisCMOffset, vehicle4WDesc.chassisMass, wheelsSimData);
 	}
 
+
 	// Set up the sim data for the vehicle drive model.
 	PxVehicleDriveSimData4W driveSimData;
 	{
@@ -272,7 +273,7 @@ PxVehicleDrive4W* createVehicle4W(const VehicleDesc& vehicle4WDesc, PxPhysics* p
 
 		// Clutch
 		PxVehicleClutchData clutch;
-		clutch.mStrength = 10.0f;
+		clutch.mStrength = 20.0f;
 		driveSimData.setClutchData(clutch);
 
 		// Ackermann steer accuracy
