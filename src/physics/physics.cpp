@@ -483,9 +483,10 @@ void bikeControl(int bike) {
 PxTransform startPos;
 
 //reset bike to start position
-void resetBikePos(int bike) { 
-	CTbikes[bike]->getRigidDynamicActor()->setGlobalPose(startPos);
+void resetBikePos(int bike, PxTransform location) { 
+	CTbikes[bike]->getRigidDynamicActor()->setGlobalPose(location);
 	CTbikes[bike]->setToRestState();
+	
 }
 
 //fetch bike gear

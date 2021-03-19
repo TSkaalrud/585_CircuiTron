@@ -132,7 +132,19 @@ class BikePlayer : public Bike {
 		}
 
 		if (window.keyPressed(82)) {		// r
-			resetBikePos(0);
+			physx::PxTransform resetLocation = getBikeTransform(getId());
+			int waypoint = 0;
+			int waypointOffset = 5;
+			//waypointOffset is used to manage the fact that we hit waypoints within a certain radius of us.
+			if (currentWaypoint < waypointOffset) {
+				waypoint = waypoints.size() - (waypointOffset - currentWaypoint);
+			} else {
+				waypoint = currentWaypoint - waypointOffset;
+			}
+			resetLocation.p.x = waypoints[waypoint].x;
+			resetLocation.p.y = waypoints[waypoint].y + 5;
+			resetLocation.p.z = waypoints[waypoint].z;
+			resetBikePos(0, resetLocation);
 		} 
 
 		if (window.keyPressed(340)) {		// left shift
