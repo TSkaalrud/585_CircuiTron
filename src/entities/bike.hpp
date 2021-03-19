@@ -1,6 +1,7 @@
 #pragma once
 
 #include "game_object.hpp"
+#include "wall_manager.hpp"
 #include "physics/physics.h"
 #include "Audio/audioEngine.h"
 #include "Audio/audioInstance.h"
@@ -14,6 +15,7 @@ class Bike : public GameObject {
 	int id;
 	bool locked = false;
 
+	WallManager* wm;
 
   public:
 	Audio::AudioEngine& stereo;
@@ -26,14 +28,10 @@ class Bike : public GameObject {
 	AudioInstance* chassisAudio = new AudioInstance();
 
 
-
-
-
-	Bike(Render::Render& render, int start_place, Render::Group& group, Audio::AudioEngine& audio)
-		: GameObject(render, group), place(start_place), id(start_place-1), stereo(audio)
+	Bike(Render::Render& render, int start_place, Render::Group& group, Audio::AudioEngine& audio, WallManager* wm)
+		: GameObject(render, group), place(start_place), id(start_place-1), stereo(audio), wm(wm)
 	{
 		FRAGAudio->gain = 1.f;
-		
 	};
 
 	int getId() { return id; }
@@ -65,5 +63,29 @@ class Bike : public GameObject {
 
 		//std::cout << "current health = " << health << std::endl;
 		//play sound?
+	}
+	
+	void spawnWall(float timestep, int i) {
+		physx::PxVehicleDrive4W* vehicle = getVehicle(i);
+		wallSpawnInfo* wall = getWallInfo(i);
+
+		wall->timer += timestep;
+
+		if (vehicle->computeForwardSpeed() >= 10.0f &&
+			vehicle->mDriveDynData.getCurrentGear() != physx::PxVehicleGearsData::eREVERSE) {
+			if (wall->timer >= wall->wallTime) {
+				if (wall->wallFront.p.x != NULL) {
+					wall->wallBack = wall->wallFront;
+					wall->wallFront = vehicle->getRigidDynamicActor()->getGlobalPose();
+
+					makeWallSeg(i, wall->wallBack, wall->wallFront);
+					wm->addWall();
+				}
+				wall->wallFront = vehicle->getRigidDynamicActor()->getGlobalPose();
+				wall->timer = 0.0f;
+			}
+		} else {
+			wall->wallFront.p.x = NULL;
+		}
 	}
 };

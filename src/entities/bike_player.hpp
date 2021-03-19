@@ -26,8 +26,8 @@ class BikePlayer : public Bike {
 
   public:
 	BikePlayer(Window& window, Render::Render& render, int start_place, Render::Group& group, std::vector<glm::vec3> waypoints,
-		Audio::AudioEngine& audio)
-		: Bike(render, start_place, group, audio), window(window), waypoints(waypoints) 
+		Audio::AudioEngine& audio, WallManager* wm)
+		: Bike(render, start_place, group, audio, wm), window(window), waypoints(waypoints) 
 	{
 		engineAudio->loop = true;
 		gearAudio->loop = false;
@@ -109,6 +109,8 @@ class BikePlayer : public Bike {
 		render.camera_set_pos(convertTransform(getBikeTransform(0).transform(camera)));
 
 		model->setTransform(convertTransform(getBikeTransform(0)) * glm::scale(glm::mat4(1.0f), glm::vec3(2.0f)));
+
+		spawnWall(deltaTime, 0);
 	}
 
 	void checkInput() {

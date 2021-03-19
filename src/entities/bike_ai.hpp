@@ -19,8 +19,8 @@ class BikeAI : public Bike {
   public:
 	BikeAI(
 		Render::Render& render, int start_place, Render::Group& group, std::vector<glm::vec3> waypoints,
-		Audio::AudioEngine& audio)
-		: Bike(render, start_place, group, audio), waypoints(waypoints) {};
+		Audio::AudioEngine& audio, WallManager* wm)
+		: Bike(render, start_place, group, audio, wm), waypoints(waypoints) {};
 
 	void update(float deltaTime) override {
 		if (!getLocked()) {
@@ -31,6 +31,8 @@ class BikeAI : public Bike {
 		}
 		
 		model->setTransform(convertTransform(getBikeTransform(getId())) * glm::scale(glm::mat4(1.0f), glm::vec3(2.0f)));
+
+		spawnWall(deltaTime, getId());
 	}
 
 	void followWaypoint() { 

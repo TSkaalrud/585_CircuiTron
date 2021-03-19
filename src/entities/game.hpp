@@ -10,7 +10,7 @@
 
 #include "entities/bike_player.hpp"
 #include "entities/bike_ai.hpp"
-#include "entities/wall.hpp"
+#include "entities/wall_manager.hpp"
 #include "entities/track.hpp"
 #include "entities/camera.hpp"
 #include "render/model_import.hpp"
@@ -70,19 +70,27 @@ class Game : public Entity {
 	void enter() override { 
 		e_manager.addEntity(std::make_unique<Track>(render, track_model));
 
-		std::unique_ptr<Bike> b = std::make_unique<BikePlayer>(window, render, 1, car_model, ai_waypoints[0], stereo);
+		std::unique_ptr<WallManager> wm = std::make_unique<WallManager>(render, wall_model, 0);
+
+		std::unique_ptr<Bike> b = std::make_unique<BikePlayer>(window, render, 1, car_model, ai_waypoints[0], stereo, wm.get());
 		bikes.push_back(b.get());
+
+		e_manager.addEntity(std::move(wm));
 		e_manager.addEntity(std::move(b));
 
 		for (int i = 0; i < players - 1; i++) {
 			initVehicle();
 
-			std::unique_ptr<Bike> b = std::make_unique<BikeAI>(render, i+2, car_model, ai_waypoints[0], stereo);
+			std::unique_ptr<WallManager> wm = std::make_unique<WallManager>(render, wall_model, i+1);
+
+			std::unique_ptr<Bike> b = std::make_unique<BikeAI>(render, i+2, car_model, ai_waypoints[0], stereo, wm.get());
 			bikes.push_back(b.get());
+
+			e_manager.addEntity(std::move(wm));
 			e_manager.addEntity(std::move(b));
 		}
 
-		e_manager.addEntity(std::make_unique<Wall>(render, wall_model));
+		//e_manager.addEntity(std::make_unique<Wall>(render, wall_model));
 
 		e_manager.addEntity(std::make_unique<Camera>(window, render));
 	}

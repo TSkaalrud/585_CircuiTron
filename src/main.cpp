@@ -59,19 +59,19 @@ int main(int argc, char* argv[]) {
 		e_manager.addEntitiesAfterFrame();
 
 		// 1 for variable, 0 for fixed
-		if (1) {
+		if (0) {
 			auto now = std::chrono::high_resolution_clock::now();
 			timestep = std::chrono::duration_cast<std::chrono::duration<float>>(now - past).count();
 			past = now;
 		}
 		// simulate();
-		stepPhysics();
+		stepPhysics(timestep);
 
 		time += timestep;
 
 		// Calls the update function all of the entities added to the manager
 		// Maybe not needed for now
-		e_manager.update(time);
+		e_manager.update(timestep);
 
 		// sound();
 

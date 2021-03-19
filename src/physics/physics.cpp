@@ -336,34 +336,15 @@ void makeWallSeg(int i, PxTransform a, PxTransform b) {
 	walls[i].push_back(segment);
 }
 
-// basic wall generation
-void spawnWall(PxF32 timestep, int i) {
-	PxVehicleDrive4W* vehicle = CTbikes[i];
-
-	wallSpawnTimers[i].timer += timestep;
-
-	if (vehicle->computeForwardSpeed() >= 10.0f &&
-		vehicle->mDriveDynData.getCurrentGear() != PxVehicleGearsData::eREVERSE) {
-		if (wallSpawnTimers[i].timer >= wallSpawnTimers[i].wallTime) {
-			if (wallSpawnTimers[i].wallFront.p.x != NULL) {
-				wallSpawnTimers[i].wallBack = wallSpawnTimers[i].wallFront;
-				wallSpawnTimers[i].wallFront = vehicle->getRigidDynamicActor()->getGlobalPose();
-
-				makeWallSeg(i, wallSpawnTimers[i].wallBack, wallSpawnTimers[i].wallFront);
-			}
-			wallSpawnTimers[i].wallFront = vehicle->getRigidDynamicActor()->getGlobalPose();
-			wallSpawnTimers[i].timer = 0.0f;
-		}
-	} else {
-		wallSpawnTimers[i].wallFront.p.x = NULL;
-	}
-}
-
 physx::PxTransform trackTransform;
 physx::PxTransform getTrackTransform() { return trackTransform; }
 
 // return number of bikes
 int getNumBikes() { return CTbikes.size(); }
+
+PxVehicleDrive4W* getVehicle(int i) { return CTbikes[i]; }
+
+wallSpawnInfo* getWallInfo(int i) { return &wallSpawnTimers[i]; }
 
 // get bike transforms (i = bike number)
 PxTransform getBikeTransform(int i) { return CTbikes[i]->getRigidDynamicActor()->getGlobalPose(); }

@@ -24,6 +24,10 @@ void initVehicle();
 
 int getNumBikes();
 
+physx::PxVehicleDrive4W* getVehicle(int i);
+
+wallSpawnInfo* getWallInfo(int i);
+
 void makeWallSeg(int i, physx::PxTransform a, physx::PxTransform b);
 
 physx::PxTransform getBikeTransform(int i);
@@ -76,6 +80,6 @@ physx::PxU32 getBikeGear(int bike);
 
 void initPhysics();
 
-void stepPhysics();
+void stepPhysics(float timestep);
 
 void cleanupPhysics();
