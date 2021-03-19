@@ -289,7 +289,7 @@ class BikePlayer : public Bike {
 	}
 
 	int slipstreams(int bike) {
-		int slipstreamCount;
+		int slipstreamCount = 0;
 		return slipstreamCount;
 	}
 
