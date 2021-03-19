@@ -646,8 +646,8 @@ void initPhysics() {
 
 int caster = 0;
 
-void stepPhysics() {
-	const PxF32 timestep = 1.0f / 60.0f;
+void stepPhysics(float timestep) {
+	//const PxF32 timestep = 1.0f / 60.0f;
 
 	if (caster++ == 60) {
 		// do raycast
@@ -683,10 +683,6 @@ void stepPhysics() {
 		}
 
 		caster = 0;
-	}
-
-	for (int i = 0; i < CTbikes.size(); i++) {
-		spawnWall(timestep, i);
 	}
 
 	for (int i = 0; i < CTbikes.size(); i++) {
