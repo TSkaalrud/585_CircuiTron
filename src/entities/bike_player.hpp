@@ -16,6 +16,8 @@ class BikePlayer : public Bike {
 	int StrafeCD = 0;
 	int FRAGCD = 0;
 	int WADCharge = 0;
+	int SlipstreamCD = 30;
+	int Slipstreams = 0;
 	
 	int currentGear = 2;
 
@@ -37,15 +39,21 @@ class BikePlayer : public Bike {
 
 		if (!getLocked()) {
 			// reduce CD's and regenerate health ***until slipstreaming is in***
-			if (BoostCD > 0) {
-				BoostCD--;
-			}
-			if (StrafeCD > 0) {
-				StrafeCD--;
-			}
-			if (FRAGCD > 0) {
-				FRAGCD--;
-			}
+			if (BoostCD > 0) {	BoostCD--;	}
+			if (StrafeCD > 0) {	StrafeCD--;	}
+			if (FRAGCD > 0) {	FRAGCD--;	}
+
+			//Slipstreaming
+			Slipstreams = slipstreams(getId());
+			if (Slipstreams > 0) {
+				if (SlipstreamCD > 0) {
+					SlipstreamCD--;
+				} else {
+					modifyHealth(0.5);
+					//slipstreaming code here. get the bike's physics model and apply increasing force to it's -z basis vector
+				}
+			} else if (SlipstreamCD < 30) {	SlipstreamCD++;	}
+
 			modifyHealth(1);
 			checkInput();
 
@@ -211,6 +219,7 @@ class BikePlayer : public Bike {
 
 			WADAudio->loop = false;
 			WADAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_SIZZLE_SFX]);
+			modifyHealth(-WADCharge / 10);
 			WADCharge = 0;
 		}
 
@@ -219,6 +228,7 @@ class BikePlayer : public Bike {
 			if (FRAGCD < 1) {
 				FRAGCD += 30;
 				FRAGAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_GUN_IMPACT2_SFX]);
+				modifyHealth(-20);
 			} 
 			
 		}
@@ -276,6 +286,11 @@ class BikePlayer : public Bike {
 		resetLocation.q.z = 0;
 		resetLocation.q.w = cos(rads / 2);
 		resetBikePos(getId(), resetLocation);
+	}
+
+	int slipstreams(int bike) {
+		int slipstreamCount;
+		return slipstreamCount;
 	}
 
 };

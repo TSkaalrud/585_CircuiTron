@@ -38,9 +38,11 @@ int main(int argc, char* argv[]) {
 	Audio::AudioEngine stereo = Audio::AudioEngine();
 	stereo.initialize();
 	AudioInstance* bgm = new AudioInstance();
-	// bgm->playSound(stereo.buffer[Audio::SOUND_FILE_CYBERSONG_BGM]); // Song
-	AudioInstance* sfx_1 = new AudioInstance();
-	sfx_1->playSound(stereo.buffer[Audio::SOUND_FILE_AMBIENCE_BGM]); // ambient environment sounds
+	bgm->gain = 0.01;
+	bgm->playSound(stereo.buffer[Audio::SOUND_FILE_CYBERSONG_BGM]); // Song
+	AudioInstance* ambiance = new AudioInstance();
+	ambiance->gain = 0.01;
+	ambiance->playSound(stereo.buffer[Audio::SOUND_FILE_AMBIENCE_BGM]); // ambient environment sounds
 
 	if (args.size() > 1) {
 		e_manager.addEntity(std::make_unique<ModelView>(render, args.at(1)));

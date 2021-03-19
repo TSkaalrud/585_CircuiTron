@@ -10,7 +10,7 @@ class Bike : public GameObject {
 	int lap = 1;
 	int waypoint = 0;
 	int place;
-	int health = 100;
+	float health = 100;
 	int id;
 	bool locked = false;
 
@@ -30,7 +30,11 @@ class Bike : public GameObject {
 
 
 	Bike(Render::Render& render, int start_place, Render::Group& group, Audio::AudioEngine& audio)
-		: GameObject(render, group), place(start_place), id(start_place-1), stereo(audio){};
+		: GameObject(render, group), place(start_place), id(start_place-1), stereo(audio)
+	{
+		FRAGAudio->gain = 1.f;
+		
+	};
 
 	int getId() { return id; }
 
