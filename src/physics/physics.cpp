@@ -40,13 +40,13 @@
 
 #include "PxPhysicsAPI.h"
 
+#include "CTColliderCallback.h"
 #include "CTVehicleCreate.h"
 #include "CTVehicleFilterShader.h"
 #include "CTVehicleSceneQuery.h"
 #include "CTVehicleTireFriction.h"
 #include "physics.h"
 #include "vehicle/PxVehicleUtil.h"
-#include "CTColliderCallback.h"
 
 #include "CTPVD.h"
 #include "CTPrint.h"
@@ -55,12 +55,12 @@
 
 #include "OBJ_Loader.h"
 
+#include <glm/common.hpp>
 #include <iostream>
 #include <math.h>
 #include <stdio.h>
-#include <vector>
-#include <glm/common.hpp>
 #include <string>
+#include <vector>
 
 using namespace physx;
 using namespace snippetvehicle;
@@ -321,15 +321,15 @@ void makeWallSeg(int i, PxTransform a, PxTransform b) {
 	PxRigidStatic* aWall = gPhysics->createRigidStatic(wallSeg);
 	aWall->attachShape(*wallShape);
 
-	//create a string and a char array of i 
+	// create a string and a char array of i
 	std::string bikeIDString = std::to_string(i);
 	char* bikeIDArray = new char[bikeIDString.length() + 1];
 	strcpy(bikeIDArray, bikeIDString.c_str());
 
-	//set the actor name to its bike ID
+	// set the actor name to its bike ID
 	aWall->setName(bikeIDArray);
 
-	//add actor to scene
+	// add actor to scene
 	gScene->addActor(*aWall);
 
 	wallSegment segment = {i, aWall, b, a};
@@ -396,11 +396,11 @@ void bikeAcceleratePrecise(int i, float n) {
 
 // reverse function used for input
 void bikeReverse(int i) {
-	//if (CTbikes[i]->mDriveDynData.getCurrentGear() != PxVehicleGearsData::eREVERSE &&
+	// if (CTbikes[i]->mDriveDynData.getCurrentGear() != PxVehicleGearsData::eREVERSE &&
 	//	CTbikes[i]->computeForwardSpeed() > 0.f) {
 	//	bikeBreak(i);
 	//}
-	//else 
+	// else
 	if (CTbikes[i]->mDriveDynData.getCurrentGear() != PxVehicleGearsData::eREVERSE) {
 		CTbikes[i]->mDriveDynData.forceGearChange(PxVehicleGearsData::eREVERSE);
 	} else {
@@ -415,9 +415,9 @@ void bikeBreak(int i) { inputDatas[i].setAnalogBrake(1.0f); }
 void bikeHandbrake(int i) { inputDatas[i].setAnalogHandbrake(0.5f); }
 
 // turn functions used for input
-void bikeTurnRight(int i) { inputDatas[i].setAnalogSteer(glm::max(inputDatas[i].getAnalogSteer()-0.05f,-1.0f)); }
+void bikeTurnRight(int i) { inputDatas[i].setAnalogSteer(glm::max(inputDatas[i].getAnalogSteer() - 0.05f, -1.0f)); }
 
-void bikeTurnLeft(int i) { inputDatas[i].setAnalogSteer(glm::min(inputDatas[i].getAnalogSteer()+.05f, 1.f)); }
+void bikeTurnLeft(int i) { inputDatas[i].setAnalogSteer(glm::min(inputDatas[i].getAnalogSteer() + .05f, 1.f)); }
 
 void bikeTurnPrecise(int i, float n) { inputDatas[i].setAnalogSteer(n); }
 
@@ -436,7 +436,6 @@ void bikeReleaseAll(int i) {
 	inputDatas[i].setAnalogBrake(0.0f);
 	inputDatas[i].setAnalogHandbrake(0.0f);
 }
-
 
 // bikeBooster provides a powerful impulse either to jump up, or strafe to the left or right of the bike's heading
 void bikeBooster(int bike, int keyPressed) {
@@ -481,17 +480,18 @@ void bikeControl(int bike) {
 
 PxTransform startPos;
 
-//reset bike to start position
-void resetBikePos(int bike) { 
+// reset bike to start position
+void resetBikePos(int bike) {
 	CTbikes[bike]->getRigidDynamicActor()->setGlobalPose(startPos);
 	CTbikes[bike]->setToRestState();
 }
 
-//fetch bike gear
+// fetch bike gear
 PxU32 getBikeGear(int bike) {
-	//std::cout << PxVehicleGearsData::eGEARSRATIO_COUNT << std::endl;
-	//std::cout << CTbikes[bike]->mDriveDynData.getCurrentGear() << std::endl;
-	return CTbikes[bike]->mDriveDynData.getCurrentGear(); }
+	// std::cout << PxVehicleGearsData::eGEARSRATIO_COUNT << std::endl;
+	// std::cout << CTbikes[bike]->mDriveDynData.getCurrentGear() << std::endl;
+	return CTbikes[bike]->mDriveDynData.getCurrentGear();
+}
 
 float spawnOffset = 0.0f;
 
@@ -538,7 +538,7 @@ void initVehicle() {
 	char* bikeIDArray = new char[bikeIDString.length() + 1];
 	strcpy(bikeIDArray, bikeIDString.c_str());
 
-	//set the actor name to its bike ID
+	// set the actor name to its bike ID
 	gVehicle4W->getRigidDynamicActor()->setName(bikeIDArray);
 
 	gScene->addActor(*gVehicle4W->getRigidDynamicActor());
@@ -576,7 +576,7 @@ physx::PxTriangleMesh* cookTrack() {
 	meshDesc.points.stride = sizeof(PxVec3);
 	meshDesc.points.data = &verts2[0];
 
-	meshDesc.triangles.count = indices.size()/3;
+	meshDesc.triangles.count = indices.size() / 3;
 	meshDesc.triangles.stride = 3 * sizeof(unsigned int);
 	meshDesc.triangles.data = &indices[0];
 
@@ -607,7 +607,7 @@ void initPhysics() {
 	sceneDesc.cpuDispatcher = gDispatcher;
 	sceneDesc.filterShader = VehicleFilterShader;
 
-	//set collision callback in order to use trigger volumes
+	// set collision callback in order to use trigger volumes
 	CTColliderCallback* colliderCallback = new CTColliderCallback();
 	sceneDesc.simulationEventCallback = colliderCallback;
 
@@ -639,6 +639,7 @@ void initPhysics() {
 	// Create a plane to drive on.
 	PxFilterData groundPlaneSimFilterData(COLLISION_FLAG_GROUND, COLLISION_FLAG_GROUND_AGAINST, 0, 0);
 	gGroundPlane = createDrivablePlane(groundPlaneSimFilterData, gMaterial, gPhysics);
+	gGroundPlane->setName("Ground Plane");
 	gScene->addActor(*gGroundPlane);
 
 	// Cook track
@@ -653,6 +654,7 @@ void initPhysics() {
 	trackShape->setSimulationFilterData(trackSimFilterData);
 
 	PxRigidStatic* track = gPhysics->createRigidStatic(trackShape->getLocalPose());
+	track->setName("Track");
 	track->attachShape(*trackShape);
 	gScene->addActor(*track);
 
@@ -660,8 +662,46 @@ void initPhysics() {
 	initVehicle();
 }
 
+int caster = 0;
+
 void stepPhysics() {
 	const PxF32 timestep = 1.0f / 60.0f;
+
+	if (caster++ == 60) {
+		// do raycast
+
+		PxU32 maxHits = 1;
+		PxHitFlags hitFlags = PxHitFlag::ePOSITION | PxHitFlag::eNORMAL | PxHitFlag::eUV;
+
+		physx::PxVehicleDrive4W* player = CTbikes[0];
+		auto origin = player->getRigidDynamicActor()->getGlobalPose().p;
+		auto quat = player->getRigidDynamicActor()->getGlobalPose().q;
+
+		// You can replpace this with basis vectors I think (i forgot about them)
+		// https://www.gamedev.net/forums/topic/56471-extracting-direction-vectors-from-quaternion/1273785
+		float x = 2 * (quat.x * quat.z + quat.w * quat.y);
+		float y = 2 * (quat.y * quat.z - quat.w * quat.x);
+		float z = 1 - 2 * (quat.x * quat.x + quat.y * quat.y);
+
+		physx::PxVec3 unitDir(x, y, z);
+		unitDir.normalize();
+
+		const PxU32 bufferSize = 5;                 // [in] size of 'hitBuffer'
+		PxRaycastHit hitBuffer[bufferSize];         // [out] User provided buffer for results
+		PxRaycastBuffer buf(hitBuffer, bufferSize); // [out] Blocking and touching hits stored here
+
+		gScene->raycast(origin, unitDir, 100, buf);
+
+		/*
+		https://gameworksdocs.nvidia.com/PhysX/4.1/documentation/physxguide/Manual/SceneQueries.html?highlight=ray#multiple-hits
+		*/
+
+		for (PxU32 i = 0; i < buf.nbTouches; i++) {
+			std::cout << "RAY CAST RESULTS ON OBJECT: " << buf.touches[i].actor->getName() << "\n";
+		}
+
+		caster = 0;
+	}
 
 	for (int i = 0; i < CTbikes.size(); i++) {
 		spawnWall(timestep, i);
