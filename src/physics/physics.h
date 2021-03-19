@@ -24,6 +24,8 @@ void initVehicle();
 
 int getNumBikes();
 
+float getSpeed(int i);
+
 physx::PxTransform getBikeTransform(int i);
 
 physx::PxTransform getWallPos(int i, int j);

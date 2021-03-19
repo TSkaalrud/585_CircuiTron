@@ -5,6 +5,8 @@
 #include "physics/physics.h"
 #include "window.hpp"
 
+#include <iostream>
+
 
 class Camera : public Entity {
   private:
@@ -16,11 +18,15 @@ class Camera : public Entity {
 
 	int view_state = 0;
 	bool switched = true;
+
+	int fov = 50;
+	float u_dist = 20.0f;
+
   public:
 	Camera(Window& window, Render::Render& render) : Entity(), window(window), render(render){};
 
 	void enter() override {
-		render.camera_set_fov(50);
+		render.camera_set_fov(fov);
 	}  
 
 	void update(float deltaTime) override { 
@@ -47,20 +53,26 @@ class Camera : public Entity {
 			getBikeTransform(i).q.getBasisVector2().z);
 
 		glm::vec3 u = glm::normalize(bike_heading);
-		glm::vec3 desired_pos = bike_pos - u * 20.0f + offset;
+
+		//updateOffset();
+
+		glm::vec3 desired_pos = bike_pos - u * u_dist + offset;
 		
 		//so that front view doesnt lerp
 		if (switch_flag) {
 			pos = desired_pos;
 			switched = false;
 		} else {
+			updateFOV();
 			glm::vec3 smoothed_pos = lerp(pos, desired_pos, smooth_spd);
 			pos = smoothed_pos;
 		}
 
 		glm::mat4 view = glm::lookAt(pos, bike_pos, glm::vec3(0.0f, 1.0f, 0.0f));
 
+		//render.camera_set_fov(fov);
 		render.camera_set_pos(glm::inverse(view));
+		
 	}
 
 	//same as behind bike but a positive u
@@ -100,6 +112,29 @@ class Camera : public Entity {
 		}
 	}
 
+	void updateFOV() { 
+		float s = getSpeed(0);
+
+		float speedRange = (45.0f - 0.0f);
+		float fovRange = (40.0f - 60.0f);
+		float newFOV = (((s - 0.0f) * fovRange) / speedRange) + 60.0f;
+
+		fov = newFOV;
+
+		std::cout << fov << std::endl;
+	}
+
+	void updateOffset() {
+		float s = getSpeed(0);
+
+		float speedRange = (45.0f - 0.0f);
+		float offsetRange = (12.0f - 20.0f);
+		float newOffset = (((s - 0.0f) * offsetRange) / speedRange) + 20.0f;
+
+		u_dist = newOffset;
+
+		std::cout << u_dist << std::endl;
+	}
 
 	glm::vec3 lerp(glm::vec3 x, glm::vec3 y, float t) { return x * (1.f - t) + y * t; }
 };

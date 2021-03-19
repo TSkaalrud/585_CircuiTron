@@ -363,6 +363,8 @@ void spawnWall(PxF32 timestep, int i) {
 physx::PxTransform trackTransform;
 physx::PxTransform getTrackTransform() { return trackTransform; }
 
+float getSpeed(int i) { return CTbikes[i]->computeForwardSpeed(); }
+
 // return number of bikes
 int getNumBikes() { return CTbikes.size(); }
 
