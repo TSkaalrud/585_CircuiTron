@@ -19,7 +19,7 @@ class Camera : public Entity {
 	int view_state = 0;
 	bool switched = true;
 
-	int fov = 50;
+	float fov = 50.0f;
 	float u_dist = 20.0f;
 
   public:
@@ -70,7 +70,7 @@ class Camera : public Entity {
 
 		glm::mat4 view = glm::lookAt(pos, bike_pos, glm::vec3(0.0f, 1.0f, 0.0f));
 
-		//render.camera_set_fov(fov);
+		render.camera_set_fov(fov);
 		render.camera_set_pos(glm::inverse(view));
 		
 	}
