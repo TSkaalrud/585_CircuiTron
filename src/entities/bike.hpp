@@ -21,6 +21,12 @@ class Bike : public GameObject {
 	AudioInstance* gearAudio = new AudioInstance();
 	AudioInstance* JumpAudio = new AudioInstance();
 	AudioInstance* StrafeAudio = new AudioInstance();
+	AudioInstance* WADAudio = new AudioInstance();
+	AudioInstance* FRAGAudio = new AudioInstance();
+	AudioInstance* chassisAudio = new AudioInstance();
+
+
+
 
 
 	Bike(Render::Render& render, int start_place, Render::Group& group, Audio::AudioEngine& audio)
@@ -31,6 +37,7 @@ class Bike : public GameObject {
 	void lockBike() { 
 		locked = true;
 		bikeReleaseAll(id);
+		engineAudio->playSound(stereo.buffer[Audio::SOUND_FILE_DESPAWN_SFX]);
 	}
 	void unlockBike() { locked = false; }
 	bool getLocked() { return locked; }
@@ -50,6 +57,8 @@ class Bike : public GameObject {
 
 	void wallCollision() { 
 		modifyHealth(-25);
+		chassisAudio->playSound(stereo.buffer[Audio::SOUND_FILE_BIKE_IMPACT_SFX]);
+
 		//std::cout << "current health = " << health << std::endl;
 		//play sound?
 	}

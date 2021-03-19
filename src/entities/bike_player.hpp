@@ -14,6 +14,7 @@ class BikePlayer : public Bike {
 	//CD = cooldowns for abilities
 	int BoostCD = 0;
 	int StrafeCD = 0;
+	int FRAGCD = 0;
 	int WADCharge = 0;
 	
 	int currentGear = 2;
@@ -28,6 +29,7 @@ class BikePlayer : public Bike {
 	{
 		engineAudio->loop = true;
 		gearAudio->loop = false;
+		FRAGAudio->loop = false;
 	};
 
 	void update(float deltaTime) override {
@@ -40,6 +42,9 @@ class BikePlayer : public Bike {
 			}
 			if (StrafeCD > 0) {
 				StrafeCD--;
+			}
+			if (FRAGCD > 0) {
+				FRAGCD--;
 			}
 			modifyHealth(1);
 			checkInput();
@@ -142,7 +147,7 @@ class BikePlayer : public Bike {
 				modifyHealth(-10);
 				bikeBooster(0, 265);
 				BoostCD += 60;
-				JumpAudio->playSound(stereo.buffer[Audio::SOUND_FILE_SIZZLE_SFX]);
+				JumpAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_BOOST_SFX]);
 
 				std::cout << "health: " << getHealth() << std::endl;
 
@@ -154,7 +159,7 @@ class BikePlayer : public Bike {
 				modifyHealth(-10);
 				bikeBooster(0, 263);
 				StrafeCD += 60;
-				StrafeAudio->playSound(stereo.buffer[Audio::SOUND_FILE_SIZZLE_SFX]);
+				StrafeAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_BOOST_SFX]);
 
 				std::cout << "health: " << getHealth() << std::endl;
 			}
@@ -164,7 +169,7 @@ class BikePlayer : public Bike {
 				modifyHealth(-10);
 				bikeBooster(0, 262);
 				StrafeCD += 60;
-				StrafeAudio->playSound(stereo.buffer[Audio::SOUND_FILE_SIZZLE_SFX]);
+				StrafeAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_BOOST_SFX]);
 
 				std::cout << "health: " << getHealth() << std::endl;
 			}
@@ -173,13 +178,23 @@ class BikePlayer : public Bike {
 		// down arrow - WAD
 		if (window.keyPressed(264)) { //charge WAD
 			WADCharge++;
-		} else if (window.keyReleased(264)) { // release WAD
+			WADAudio->loop = true;
+			WADAudio->playSound(stereo.buffer[Audio::SOUND_FILE_WAD_SFX]);
+		} else if (WADCharge > 0 && window.keyReleased(264)) { // release charged WAD
 			
+			
+			WADAudio->loop = false;
+			WADAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_SIZZLE_SFX]);
 			WADCharge = 0;
 		}
 
 		// spacebar - Forward Projector Cannon (shoot)
 		if (window.keyPressed(32)) {
+			if (FRAGCD < 1) {
+				FRAGCD += 30;
+				FRAGAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_GUN_IMPACT2_SFX]);
+			} 
+			
 		}
 
 		// left Control - "Control" chassis to right itself
