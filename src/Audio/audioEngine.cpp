@@ -191,6 +191,8 @@ void AudioEngine::initialize() {
 	CheckError();
 	loadWavFile("assets/audio/burr.wav", buffer + 24, &size, &freq, &format);
 	CheckError();
+	loadWavFile("assets/audio/Boost.wav", buffer + 25, &size, &freq, &format);
+	CheckError();
 
 	// alSourcef(source[1], AL_PITCH, 1.0f);
 	// alSourcef(source[1], AL_GAIN, 1.0f);

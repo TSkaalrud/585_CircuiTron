@@ -14,7 +14,10 @@ class BikePlayer : public Bike {
 	//CD = cooldowns for abilities
 	int BoostCD = 0;
 	int StrafeCD = 0;
+	int FRAGCD = 0;
 	int WADCharge = 0;
+	int SlipstreamCD = 30;
+	int Slipstreams = 0;
 	
 	int currentGear = 2;
 
@@ -28,6 +31,7 @@ class BikePlayer : public Bike {
 	{
 		engineAudio->loop = true;
 		gearAudio->loop = false;
+		FRAGAudio->loop = false;
 	};
 
 	void update(float deltaTime) override {
@@ -35,14 +39,28 @@ class BikePlayer : public Bike {
 
 		if (!getLocked()) {
 			// reduce CD's and regenerate health ***until slipstreaming is in***
-			if (BoostCD > 0) {
-				BoostCD--;
-			}
-			if (StrafeCD > 0) {
-				StrafeCD--;
-			}
+			if (BoostCD > 0) {	BoostCD--;	}
+			if (StrafeCD > 0) {	StrafeCD--;	}
+			if (FRAGCD > 0) {	FRAGCD--;	}
+
+			//Slipstreaming
+			Slipstreams = slipstreams(getId());
+			if (Slipstreams > 0) {
+				if (SlipstreamCD > 0) {
+					SlipstreamCD--;
+				} else {
+					modifyHealth(0.5);
+					//slipstreaming code here. get the bike's physics model and apply increasing force to it's -z basis vector
+				}
+			} else if (SlipstreamCD < 30) {	SlipstreamCD++;	}
+
 			modifyHealth(1);
 			checkInput();
+
+			if (getBikeTransform(getId()).p.y < 0) {
+				resetBike();
+				
+			}
 			
 			//Audio
 			//Rev check
@@ -127,7 +145,19 @@ class BikePlayer : public Bike {
 		}
 
 		if (window.keyPressed(82)) {		// r
-			resetBikePos(0);
+			physx::PxTransform resetLocation = getBikeTransform(getId());
+			int waypoint = 0;
+			int waypointOffset = 5;
+			//waypointOffset is used to manage the fact that we hit waypoints within a certain radius of us.
+			if (currentWaypoint < waypointOffset) {
+				waypoint = waypoints.size() - (waypointOffset - currentWaypoint);
+			} else {
+				waypoint = currentWaypoint - waypointOffset;
+			}
+			resetLocation.p.x = waypoints[waypoint].x;
+			resetLocation.p.y = waypoints[waypoint].y + 5;
+			resetLocation.p.z = waypoints[waypoint].z;
+			resetBikePos(getId(), resetLocation);
 		} 
 
 		if (window.keyPressed(340)) {		// left shift
@@ -142,7 +172,7 @@ class BikePlayer : public Bike {
 				modifyHealth(-10);
 				bikeBooster(0, 265);
 				BoostCD += 60;
-				JumpAudio->playSound(stereo.buffer[Audio::SOUND_FILE_SIZZLE_SFX]);
+				JumpAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_BOOST_SFX]);
 
 				std::cout << "health: " << getHealth() << std::endl;
 
@@ -154,7 +184,7 @@ class BikePlayer : public Bike {
 				modifyHealth(-10);
 				bikeBooster(0, 263);
 				StrafeCD += 60;
-				StrafeAudio->playSound(stereo.buffer[Audio::SOUND_FILE_SIZZLE_SFX]);
+				StrafeAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_BOOST_SFX]);
 
 				std::cout << "health: " << getHealth() << std::endl;
 			}
@@ -164,7 +194,7 @@ class BikePlayer : public Bike {
 				modifyHealth(-10);
 				bikeBooster(0, 262);
 				StrafeCD += 60;
-				StrafeAudio->playSound(stereo.buffer[Audio::SOUND_FILE_SIZZLE_SFX]);
+				StrafeAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_BOOST_SFX]);
 
 				std::cout << "health: " << getHealth() << std::endl;
 			}
@@ -173,13 +203,37 @@ class BikePlayer : public Bike {
 		// down arrow - WAD
 		if (window.keyPressed(264)) { //charge WAD
 			WADCharge++;
-		} else if (window.keyReleased(264)) { // release WAD
+			WADAudio->loop = true;
+			WADAudio->playSound(stereo.buffer[Audio::SOUND_FILE_WAD_SFX]);
+		} else if (WADCharge > 0 && window.keyReleased(264)) { // release charged WAD
+			physx::PxTransform start = getBikeTransform(getId());
+			physx::PxTransform end = getBikeTransform(getId());
+			//origin behind the bike's +Z then, with a length based on WADcharge, 
+			//extend out +/- x-axes of the bike to create the start and end points
+			physx::PxVec3 z = -start.q.getBasisVector2();
+			physx::PxVec3 x = start.q.getBasisVector0();
+			physx::PxVec3 wallCentre = start.p + 3 * z;
 			
+			start.q *= physx::PxQuat(0,-1,0,0);
+
+			start.p = wallCentre + 0.5 * x * WADCharge;
+			end.p = wallCentre + -0.5 * x * WADCharge;
+			makeWallSeg(0, start, end);
+
+			WADAudio->loop = false;
+			WADAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_SIZZLE_SFX]);
+			modifyHealth(-WADCharge / 10);
 			WADCharge = 0;
 		}
 
 		// spacebar - Forward Projector Cannon (shoot)
 		if (window.keyPressed(32)) {
+			if (FRAGCD < 1) {
+				FRAGCD += 30;
+				FRAGAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_GUN_IMPACT2_SFX]);
+				modifyHealth(-20);
+			} 
+			
 		}
 
 		// left Control - "Control" chassis to right itself
@@ -212,4 +266,34 @@ class BikePlayer : public Bike {
 			//std::cout << "Current Waypoint: " << getWaypoint() << std::endl;
 		}
 	}
+
+	void resetBike() {
+		physx::PxTransform resetLocation = getBikeTransform(getId());
+		int waypoint = 0;
+		int waypointOffset = 5;
+		// waypointOffset is used to manage the fact that we hit waypoints within a certain radius of us.
+		if (currentWaypoint < waypointOffset) {
+			waypoint = waypoints.size() - (waypointOffset - currentWaypoint);
+		} else {
+			waypoint = currentWaypoint - waypointOffset;
+		}
+		
+		resetLocation.p.x = waypoints[waypoint].x;
+		resetLocation.p.y = waypoints[waypoint].y + 5; //drop me in to avoid clipping
+		resetLocation.p.z = waypoints[waypoint].z;
+		float rads;
+		physx::PxVec3 axis;
+		resetLocation.q.toRadiansAndUnitAxis(rads, axis);
+		resetLocation.q.x = 0;
+		resetLocation.q.y = sin(rads / 2);
+		resetLocation.q.z = 0;
+		resetLocation.q.w = cos(rads / 2);
+		resetBikePos(getId(), resetLocation);
+	}
+
+	int slipstreams(int bike) {
+		int slipstreamCount = 0;
+		return slipstreamCount;
+	}
+
 };

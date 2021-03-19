@@ -24,6 +24,8 @@ void initVehicle();
 
 int getNumBikes();
 
+void makeWallSeg(int i, physx::PxTransform a, physx::PxTransform b);
+
 physx::PxTransform getBikeTransform(int i);
 
 physx::PxTransform getWallPos(int i, int j);
@@ -68,7 +70,7 @@ void bikeBooster(int i, int keyPressed);
 
 void bikeControl(int i);
 
-void resetBikePos(int i);
+void resetBikePos(int i, physx::PxTransform position);
 
 physx::PxU32 getBikeGear(int bike);
 
