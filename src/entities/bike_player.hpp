@@ -181,8 +181,17 @@ class BikePlayer : public Bike {
 			WADAudio->loop = true;
 			WADAudio->playSound(stereo.buffer[Audio::SOUND_FILE_WAD_SFX]);
 		} else if (WADCharge > 0 && window.keyReleased(264)) { // release charged WAD
-			
-			
+			physx::PxTransform start = getBikeTransform(getId());
+			physx::PxTransform end = getBikeTransform(getId());
+			//origin behind the bike's +Z then, with a length based on WADcharge, 
+			//extend out +/- x-axes of the bike to create the start and end points
+			physx::PxVec3 z = -start.q.getBasisVector2();
+			physx::PxVec3 x = start.q.getBasisVector0();
+			physx::PxVec3 wallCentre = start.p + 3 * z;
+			start.p = wallCentre + 0.5 * x * WADCharge;
+			end.p = wallCentre + -0.5 * x * WADCharge;
+			makeWallSeg(0, start, end);
+
 			WADAudio->loop = false;
 			WADAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_SIZZLE_SFX]);
 			WADCharge = 0;

@@ -24,6 +24,8 @@ void initVehicle();
 
 int getNumBikes();
 
+void makeWallSeg(int i, physx::PxTransform a, physx::PxTransform b);
+
 physx::PxTransform getBikeTransform(int i);
 
 physx::PxTransform getWallPos(int i, int j);
