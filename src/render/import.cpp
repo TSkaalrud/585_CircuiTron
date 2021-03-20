@@ -27,20 +27,20 @@ glm::vec4 convert(const aiColor4D& col) { return glm::vec4{col.r, col.g, col.b, 
 
 // clang-format off
 void process_node(
-	const aiScene* scene, const aiNode* node, Group& group, mat4 parentTransform,
+	const aiScene* scene, const aiNode* node, Model& model, mat4 parentTransform,
 	std::vector<MeshHandle>& meshes, std::vector<MaterialHandle>& materials) {
 	// clang-format on
 
 	mat4 transform = parentTransform * convert(node->mTransformation);
 
 	for (uint m = 0; m < node->mNumMeshes; m++) {
-		group.surfaces.push_back(Group::Surface{
+		model.surfaces.push_back(Model::Surface{
 			.mesh = meshes[node->mMeshes[m]],
 			.material = materials[scene->mMeshes[node->mMeshes[m]]->mMaterialIndex],
 			.transform = transform});
 	}
 	for (uint c = 0; c < node->mNumChildren; c++) {
-		process_node(scene, node->mChildren[c], group, transform, meshes, materials);
+		process_node(scene, node->mChildren[c], model, transform, meshes, materials);
 	}
 }
 
@@ -63,7 +63,7 @@ loadTexture(aiMaterial* material, aiTextureType type, unsigned int index, const 
 	return tex;
 }
 
-Group importModel(std::string filename, Render& render) {
+Model importModel(std::string filename, Render& render) {
 	Assimp::Importer importer;
 	const aiScene* scene =
 		importer.ReadFile(filename, aiProcess_Triangulate | aiProcess_OptimizeMeshes | aiProcess_FlipUVs);
@@ -121,11 +121,11 @@ Group importModel(std::string filename, Render& render) {
 			.emissiveTexture = emissiveTexture});
 	}
 
-	Group group{.render = render};
+	Model model{.render = render};
 
-	process_node(scene, scene->mRootNode, group, mat4(1.0f), meshes, materials);
+	process_node(scene, scene->mRootNode, model, mat4(1.0f), meshes, materials);
 
-	return group;
+	return model;
 }
 
 TextureHandle importSkybox(std::string filename, Render&) {

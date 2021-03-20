@@ -59,7 +59,9 @@ class Core {
 		uint mat;
 		mat4 trans;
 	};
-	REGISTER(Instance, instances)
+	// REGISTER(Instance, instances)
+	std::vector<Instance> instances;
+	std::vector<uint> recycled_instances;
 
 	struct Mesh {
 		GLuint vao;
@@ -111,7 +113,14 @@ class Core {
 
 	MeshHandle create_mesh(MeshDef);
 	InstanceHandle create_instance(MeshHandle mesh, MaterialHandle mat, mat4 trans = mat4(1.0f)) {
-		InstanceHandle instance = registerInstance(Instance{});
+		InstanceHandle instance;
+		if (recycled_instances.empty()) {
+			instance = instances.size();
+			instances.push_back(Instance{});
+		} else {
+			instance = recycled_instances.back();
+			recycled_instances.pop_back();
+		}
 		instance_set_mesh(instance, mesh);
 		instance_set_material(instance, mat);
 		instance_set_trans(instance, trans);
@@ -120,6 +129,10 @@ class Core {
 	void instance_set_mesh(InstanceHandle instance, MeshHandle mesh) { instances[instance].model = mesh; }
 	void instance_set_material(InstanceHandle instance, MaterialHandle mat) { instances[instance].mat = mat; }
 	void instance_set_trans(InstanceHandle instance, mat4 trans) { instances[instance].trans = trans; }
+	void delete_instance(InstanceHandle instance) {
+		instance_set_material(instance, -1);
+		recycled_instances.push_back(instance);
+	}
 
 	void camera_set_pos(mat4 pos) { cameraPos = glm::inverse(pos); }
 	void camera_set_fov(float degrees) { fov = radians(degrees); }

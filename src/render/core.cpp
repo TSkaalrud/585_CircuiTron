@@ -79,7 +79,7 @@ uint Core::create_texture(int width, int height, int channels, bool srgb, void* 
 
 void Core::renderScene(Shader::Type type) {
 	for (auto& i : instances) {
-		if (i.mat < 0)
+		if (i.mat == -1)
 			continue;
 
 		glBindVertexArray(meshes[i.model].vao);
