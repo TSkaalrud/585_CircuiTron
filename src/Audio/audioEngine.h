@@ -41,10 +41,11 @@ namespace Audio {
 	const int SOUND_FILE_WAD_SFX = 22;
 	const int SOUND_FILE_WUBWUB_SFX = 23;
 	const int SOUND_FILE_BURR_SFX = 24;
+	const int SOUND_FILE_BOOST_SFX = 25;
 
 
-	#define NUM_BUFFERS 25
-	#define NUM_SOURCES 25
+	#define NUM_BUFFERS 50
+	#define NUM_SOURCES 50
 	#define NUM_ENVIRONMENTS 2
 
 	/*

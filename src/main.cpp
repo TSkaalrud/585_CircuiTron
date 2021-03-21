@@ -34,22 +34,22 @@ int main(int argc, char* argv[]) {
 	// initialize physics
 	initPhysics();
 
+		// initialize audio
+	Audio::AudioEngine stereo = Audio::AudioEngine();
+	stereo.initialize();
+	AudioInstance* bgm = new AudioInstance();
+	bgm->gain = 0.0;
+	bgm->playSound(stereo.buffer[Audio::SOUND_FILE_CYBERSONG_BGM]); // Song
+	AudioInstance* ambiance = new AudioInstance();
+	ambiance->gain = 0.0;
+	ambiance->playSound(stereo.buffer[Audio::SOUND_FILE_AMBIENCE_BGM]); // ambient environment sounds
+
 	if (args.size() > 1) {
 		e_manager.addEntity(std::make_unique<ModelView>(render, args.at(1)));
 		e_manager.addEntity(std::make_unique<OrbitCam>(render, window));
 	} else {
-		e_manager.addEntity(std::make_unique<Game>(window, render, 2, e_manager));
+		e_manager.addEntity(std::make_unique<Game>(window, render, 2, e_manager, stereo));
 	}
-
-	// initialize audio
-	Audio::AudioEngine stereo = Audio::AudioEngine();
-	stereo.initialize();
-	AudioInstance* bgm = new AudioInstance();
-	//bgm->playSound(stereo.buffer[Audio::SOUND_FILE_CYBERSONG_BGM]); // Song
-	AudioInstance* sfx_1 = new AudioInstance();
-	sfx_1->playSound(stereo.buffer[Audio::SOUND_FILE_AMBIENCE_BGM]); // ambient environment sounds
-	AudioInstance* sfx_2 = new AudioInstance();
-	sfx_2->playSound(stereo.buffer[Audio::SOUND_FILE_GUN_IMPACT_SFX]); // random sound effect example
 
 	// Loop will continue until "X" on window is clicked.
 	// We may want more complex closing behaviour
@@ -59,19 +59,19 @@ int main(int argc, char* argv[]) {
 		e_manager.addEntitiesAfterFrame();
 
 		// 1 for variable, 0 for fixed
-		if (1) {
+		if (0) {
 			auto now = std::chrono::high_resolution_clock::now();
 			timestep = std::chrono::duration_cast<std::chrono::duration<float>>(now - past).count();
 			past = now;
 		}
 		// simulate();
-		stepPhysics();
+		stepPhysics(timestep);
 
 		time += timestep;
 
 		// Calls the update function all of the entities added to the manager
 		// Maybe not needed for now
-		e_manager.update(time);
+		e_manager.update(timestep);
 
 		// sound();
 
