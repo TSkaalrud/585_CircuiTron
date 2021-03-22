@@ -173,9 +173,9 @@ VehicleDesc initVehicleDesc() {
 	const PxF32 chassisMass = 250.0f;
 	const PxVec3 chassisDims(1.0f, 1.2f, 4.63f);
 	const PxVec3 chassisMOI(
-		(chassisDims.y * chassisDims.y + chassisDims.z * chassisDims.z) * chassisMass / 12.0f,
-		(chassisDims.x * chassisDims.x + chassisDims.z * chassisDims.z) * 0.8f * chassisMass / 12.0f,
-		(chassisDims.x * chassisDims.x + chassisDims.y * chassisDims.y) * chassisMass / 12.0f);
+		(chassisDims.y * chassisDims.y + chassisDims.z * chassisDims.z) * 1.f * chassisMass / 12.0f,
+		(chassisDims.x * chassisDims.x + chassisDims.z * chassisDims.z) * 1.2f * chassisMass / 12.0f,
+		(chassisDims.x * chassisDims.x + chassisDims.y * chassisDims.y) * 1.f * chassisMass / 12.0f);
 	const PxVec3 chassisCMOffset(0.0f, -chassisDims.y * 0.5f + 0.65f, 0.55f);
 
 	// Set up the wheel mass, radius, width, moment of inertia, and number of wheels.
@@ -183,7 +183,7 @@ VehicleDesc initVehicleDesc() {
 	const PxF32 wheelMass = 15.0f;
 	const PxF32 wheelRadius = 0.3f;
 	const PxF32 wheelWidth = 0.3f;
-	const PxF32 wheelMOI = 0.5f * wheelMass * wheelRadius * wheelRadius;
+	const PxF32 wheelMOI = 1.f * wheelMass * wheelRadius * wheelRadius;
 	const PxU32 nbWheels = 4;
 
 	VehicleDesc vehicleDesc;
