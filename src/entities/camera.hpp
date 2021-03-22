@@ -20,6 +20,10 @@ class Camera : public Entity {
 	bool switched = true;
 
 	float fov = 50.0f;
+	float desired_fov = 50.0f;
+	
+	float last_speed = 0.0f;
+
 	float u_dist = 20.0f;
 
   public:
@@ -72,7 +76,6 @@ class Camera : public Entity {
 
 		render.camera_set_fov(fov);
 		render.camera_set_pos(glm::inverse(view));
-		
 	}
 
 	//same as behind bike but a positive u
@@ -92,6 +95,8 @@ class Camera : public Entity {
 
 		glm::mat4 view = glm::lookAt(pos, bike_pos, glm::vec3(0.0f, 1.0f, 0.0f));
 
+		updateFOV();
+		render.camera_set_fov(50.0f);
 		render.camera_set_pos(glm::inverse(view));
 	}
 
@@ -113,23 +118,30 @@ class Camera : public Entity {
 	}
 
 	void updateFOV() { 
-		float s = getSpeed(0);
+		physx::PxF32 g = getBikeGear(0);
+		float gearRange = (6.0f - 1.0f);
 
-		float speedRange = (45.0f - 0.0f);
 		float fovRange = (40.0f - 60.0f);
-		float newFOV = (((s - 0.0f) * fovRange) / speedRange) + 60.0f;
+		//float newFOV = (((s - 0.0f) * fovRange) / speedRange) + 60.0f;
+		if (g != 1.0f) {
+			desired_fov = (((g - 1.0f) * fovRange) / gearRange) + 60.0f;
+		}
 
-		fov = newFOV;
+		fov = lerp(fov, desired_fov, 0.01);
 
-		std::cout << fov << std::endl;
+		//std::cout << fov << std::endl;
 	}
 
 	void updateOffset() {
-		float s = getSpeed(0);
+		physx::PxF32 g = getBikeGear(0);
+		float gearRange = (6.0f - 1.0f);
 
-		float speedRange = (45.0f - 0.0f);
-		float offsetRange = (12.0f - 20.0f);
-		float newOffset = (((s - 0.0f) * offsetRange) / speedRange) + 20.0f;
+		float newOffset = 20.0f;
+
+		if (g != 1.0f) {
+			float offsetRange = (17.0f - 20.0f);
+			newOffset = (((g - 1.0f) * offsetRange) / gearRange) + 20.0f;
+		}
 
 		u_dist = newOffset;
 
@@ -137,4 +149,6 @@ class Camera : public Entity {
 	}
 
 	glm::vec3 lerp(glm::vec3 x, glm::vec3 y, float t) { return x * (1.f - t) + y * t; }
+
+	float lerp(float a, float b, float t) { return a + t * (b - a); }
 };
