@@ -120,13 +120,15 @@ class Camera : public Entity {
 	void updateFOV() { 
 		physx::PxF32 g = getBikeGear(0);
 		float gearRange = (6.0f - 1.0f);
-
+		
+		// min - max -- use to modify how much fov changes
 		float fovRange = (40.0f - 60.0f);
-		//float newFOV = (((s - 0.0f) * fovRange) / speedRange) + 60.0f;
+
 		if (g != 1.0f) {
 			desired_fov = (((g - 1.0f) * fovRange) / gearRange) + 60.0f;
 		}
-
+		
+		// modify the last float (0 - 1) to change how smoothly the fovs change
 		fov = lerp(fov, desired_fov, 0.01);
 
 		//std::cout << fov << std::endl;
