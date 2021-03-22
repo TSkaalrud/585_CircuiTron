@@ -321,19 +321,24 @@ void makeWallSeg(int i, PxTransform a, PxTransform b) {
 	PxRigidStatic* aWall = gPhysics->createRigidStatic(wallSeg);
 	aWall->attachShape(*wallShape);
 
-	// create a string and a char array of i
-	std::string bikeIDString = std::to_string(i);
-	char* bikeIDArray = new char[bikeIDString.length() + 1];
-	strcpy(bikeIDArray, bikeIDString.c_str());
+	// set the actor name
+	aWall->setName("wall");
 
-	// set the actor name to its bike ID
-	aWall->setName(bikeIDArray);
+	//wall segment data
+	wallSegment segment = {i, aWall, b, a};
+	walls[i].push_back(segment);
+
+	//wall user data
+	wallUserData* wallData = new wallUserData{segment,(int) walls[i].size() - 1, (int)0};
+	aWall->userData = wallData;
 
 	// add actor to scene
 	gScene->addActor(*aWall);
+}
 
-	wallSegment segment = {i, aWall, b, a};
-	walls[i].push_back(segment);
+void deleteWallSeg(int i, int j) { 
+	walls[i][j].wall->release(); 
+	walls[i].erase(walls[i].begin() + j);
 }
 
 // basic wall generation
@@ -358,6 +363,8 @@ void spawnWall(PxF32 timestep, int i) {
 		wallSpawnTimers[i].wallFront.p.x = NULL;
 	}
 }
+
+
 
 physx::PxTransform trackTransform;
 physx::PxTransform getTrackTransform() { return trackTransform; }
@@ -533,14 +540,9 @@ void initVehicle() {
 	CTbikes.push_back(gVehicle4W);
 
 	gVehicle4W->getRigidDynamicActor()->setGlobalPose(startTransform);
-
-	// create a string and a char array of the bike ID
-	std::string bikeIDString = std::to_string(CTbikes.size() - 1);
-	char* bikeIDArray = new char[bikeIDString.length() + 1];
-	strcpy(bikeIDArray, bikeIDString.c_str());
-
-	// set the actor name to its bike ID
-	gVehicle4W->getRigidDynamicActor()->setName(bikeIDArray);
+	
+	// set the actor name
+	gVehicle4W->getRigidDynamicActor()->setName("bike");
 
 	gScene->addActor(*gVehicle4W->getRigidDynamicActor());
 

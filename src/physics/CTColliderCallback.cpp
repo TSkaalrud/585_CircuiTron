@@ -13,17 +13,19 @@ void CTColliderCallback::onTrigger(PxTriggerPair* pairs, PxU32 count) {
 		if (pairs[i].flags & (PxTriggerPairFlag::eREMOVED_SHAPE_TRIGGER | PxTriggerPairFlag::eREMOVED_SHAPE_OTHER))
 			continue;
 
-		for (int j = 0; j < getNumBikes(); j++) {
-			std::string numIDString = std::to_string(j);
-			char* numIDArray = new char[numIDString.length() + 1];
-			strcpy(numIDArray, numIDString.c_str());
+		if (strcmp(pairs[i].otherActor->getName(), "bike") == 0 && 
+			strcmp(pairs[i].triggerActor->getName(), "wall") == 0) {
 
-			if (strcmp(pairs[i].otherActor->getName(), numIDArray) == 0 &&
-				strcmp(pairs[i].triggerActor->getName(), numIDArray) != 0) {
+			wallUserData* w = (wallUserData*)pairs[i].triggerActor->userData;
 
-				std::cout << "Bike " << numIDString << " has hit another racers wall!\n" << std::endl;
-			
+			if (w->collisions < 5) {	//bike triggers wall up to 4 times on bike creation so this is just to ignore that
+				w->collisions++;
+			} else {					//if wall is triggered otherwise, do this stuff
+				std::cout << "bike #" << w->segmentInfo.bikeNumber << " wall #" << w->wallIndex << " broken!"
+						  << std::endl;
+				//deleteWallSeg(w->segmentInfo.bikeNumber, w->wallIndex);
 			}
+
 		}
 	}
 }
