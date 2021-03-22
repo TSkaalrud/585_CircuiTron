@@ -88,7 +88,7 @@ class Core {
 	REGISTER(Shader, shaders)
 
 	const int lightmapSize = 4096;
-	const float lightmapCoverage = 200;
+	const float lightmapCoverage = 300;
 
 	struct DirLight {
 		vec3 dir;
