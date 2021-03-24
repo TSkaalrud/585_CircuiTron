@@ -11,6 +11,7 @@ Rev-down -- Spaceship Engine Landing - StormKat2035
 Rev-steady -- Spacecraft Engine Loop 01.wav -- Tim_Verberne
 Healing -- LUSSEAU_Jordan_2015_2016_ForceField.wav -- univ_lyon3
 Gun_Impact -- Mecha - Effects - Elements - Impact 01 -- GregorQuendel
+Gun_Impact2 -- Epic Effects » Power Up Charge [Remix of LegoLunatic's Charged laser 151243] -- qubodup
 Rev-down2 -- UFO Slowdown.wav -- sonicboom_sfx
 Apprehension -- Sci-Fi Sub Bass Scanner -- _MC5_
 Rev-up2 -- Spaceship whoosh 1 -- steshystesh
@@ -26,5 +27,7 @@ Slipstream2 -- 01820 futuristic space foley.wav -- Robinhood76
 Bike_Impact -- Sci-Fi Force Field Impact 15.wav -- StormwaveAudio
 Idle_Wub -- CorentinANDRE_SpacePodThrusters3-002.wav -- SeaLionStudios
 Despawn -- Sci-fi Engine Startup -- JapanYoshiTheGamer
+Boost -- Boost.wav -- Eponn
+
 
 Skybox -- FREE HQ SPACE 360 I -- ERA-7 -- https://cubebrush.co/era7/products/1mx7w/free-hq-space-360-i
