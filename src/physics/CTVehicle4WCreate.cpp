@@ -262,8 +262,9 @@ PxVehicleDrive4W* createVehicle4W(const VehicleDesc& vehicle4WDesc, PxPhysics* p
 
 		// Engine
 		PxVehicleEngineData engine;
+		engine.mMOI = 0.8f;
 		engine.mPeakTorque = 500.0f;
-		engine.mMaxOmega = 600.0f; // approx 6000 rpm
+		engine.mMaxOmega = 1000.0f; // approx 6000 rpm
 		driveSimData.setEngineData(engine);
 
 		// Gears

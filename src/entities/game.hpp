@@ -65,6 +65,10 @@ class Game : public Entity {
 		//std::vector<glm::vec3> map;
 		//ai_waypoints.push_back(map);
 		uploadMap("assets/AI_waypoints_1.obj");
+		uploadMap("assets/AI_waypoints_2.obj");
+		uploadMap("assets/AI_waypoints_3.obj");
+		
+		
 	}
 
 	void enter() override { 
@@ -72,7 +76,7 @@ class Game : public Entity {
 
 		std::unique_ptr<WallManager> wm = std::make_unique<WallManager>(render, wall_model, 0);
 
-		std::unique_ptr<Bike> b = std::make_unique<BikePlayer>(window, render, 1, car_model, ai_waypoints[0], stereo, wm.get());
+		std::unique_ptr<Bike> b = std::make_unique<BikePlayer>(window, render, 1, car_model, ai_waypoints[1], stereo, wm.get());
 		bikes.push_back(b.get());
 
 		e_manager.addEntity(std::move(wm));
@@ -83,7 +87,7 @@ class Game : public Entity {
 
 			std::unique_ptr<WallManager> wm = std::make_unique<WallManager>(render, wall_model, i+1);
 
-			std::unique_ptr<Bike> b = std::make_unique<BikeAI>(render, i+2, car_model, ai_waypoints[0], stereo, wm.get());
+			std::unique_ptr<Bike> b = std::make_unique<BikeAI>(render, i+2, car_model, ai_waypoints, stereo, wm.get());
 			bikes.push_back(b.get());
 
 			e_manager.addEntity(std::move(wm));

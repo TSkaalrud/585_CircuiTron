@@ -59,7 +59,7 @@ class BikePlayer : public Bike {
 
 			if (getBikeTransform(getId()).p.y < 0) {
 				resetBike();
-				
+
 			}
 			
 			//Audio
@@ -160,6 +160,7 @@ class BikePlayer : public Bike {
 			resetLocation.p.y = waypoints[waypoint].y + 5;
 			resetLocation.p.z = waypoints[waypoint].z;
 			resetBikePos(getId(), resetLocation);
+			modifyHealth(-10);
 		} 
 
 		if (window.keyPressed(340)) {		// left shift

@@ -180,7 +180,7 @@ void customizeVehicleToLengthScale(
 			PxVehicleWheelData wheelData = wheelsSimData->getWheelData(i);
 			wheelData.mRadius *= lengthScale;
 			wheelData.mWidth *= lengthScale;
-			wheelData.mDampingRate *= lengthScale * lengthScale;
+			wheelData.mDampingRate *= lengthScale * lengthScale / 3;//editted
 			wheelData.mMaxBrakeTorque *= lengthScale * lengthScale;
 			wheelData.mMaxHandBrakeTorque *= lengthScale * lengthScale;
 			wheelData.mMOI *= lengthScale * lengthScale;
