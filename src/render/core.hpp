@@ -38,7 +38,10 @@ typedef uint DirLightHandle;
 typedef uint TextureHandle;
 typedef uint ShaderHandle;
 
+class Wall;
 class Core {
+	friend Wall;
+
   protected:
 	template <class T> static size_t vector_size(const std::vector<T>& vec) { return sizeof(T) * vec.size(); }
 
