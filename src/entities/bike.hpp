@@ -1,10 +1,10 @@
 #pragma once
 
-#include "game_object.hpp"
-#include "wall_manager.hpp"
-#include "physics/physics.h"
 #include "Audio/audioEngine.h"
 #include "Audio/audioInstance.h"
+#include "game_object.hpp"
+#include "physics/physics.h"
+#include "render/wall.hpp"
 
 class Bike : public GameObject {
   private:
@@ -15,7 +15,7 @@ class Bike : public GameObject {
 	int id;
 	bool locked = false;
 
-	WallManager* wm;
+	Render::Wall wall;
 
   public:
 	Audio::AudioEngine& stereo;
@@ -27,16 +27,22 @@ class Bike : public GameObject {
 	AudioInstance* FRAGAudio = new AudioInstance();
 	AudioInstance* chassisAudio = new AudioInstance();
 
-
-	Bike(Render::Render& render, int start_place, Render::Group& group, Audio::AudioEngine& audio, WallManager* wm)
-		: GameObject(render, group), place(start_place), id(start_place-1), stereo(audio), wm(wm)
-	{
+	Bike(Render::Render& render, int start_place, Render::Group& group, Audio::AudioEngine& audio)
+		: GameObject(render, group), place(start_place), id(start_place - 1), stereo(audio), wall(render) {
 		FRAGAudio->gain = 1.f;
 	};
 
 	int getId() { return id; }
 
-	void lockBike() { 
+	virtual void update(float deltaTime) override {
+		model->setTransform(convertTransform(getBikeTransform(getId())) * glm::scale(glm::mat4(1.0f), glm::vec3(2.0f)));
+
+		this->wall.append_wall(convertTransform(getBikeTransform(getId())), {0, 0, -3}, {0.1, 1});
+
+		spawnWall(deltaTime, getId());
+	}
+
+	void lockBike() {
 		locked = true;
 		bikeReleaseAll(id);
 		engineAudio->playSound(stereo.buffer[Audio::SOUND_FILE_DESPAWN_SFX]);
@@ -57,14 +63,14 @@ class Bike : public GameObject {
 	int getHealth() { return health; }
 	void modifyHealth(int amount) { health += amount; }
 
-	void wallCollision() { 
+	void wallCollision() {
 		modifyHealth(-25);
 		chassisAudio->playSound(stereo.buffer[Audio::SOUND_FILE_BIKE_IMPACT_SFX]);
 
-		//std::cout << "current health = " << health << std::endl;
-		//play sound?
+		// std::cout << "current health = " << health << std::endl;
+		// play sound?
 	}
-	
+
 	void spawnWall(float timestep, int i) {
 		physx::PxVehicleDrive4W* vehicle = getVehicle(i);
 		wallSpawnInfo* wall = getWallInfo(i);
@@ -79,7 +85,6 @@ class Bike : public GameObject {
 					wall->wallFront = vehicle->getRigidDynamicActor()->getGlobalPose();
 
 					makeWallSeg(i, wall->wallBack, wall->wallFront);
-					wm->addWall();
 				}
 				wall->wallFront = vehicle->getRigidDynamicActor()->getGlobalPose();
 				wall->timer = 0.0f;
