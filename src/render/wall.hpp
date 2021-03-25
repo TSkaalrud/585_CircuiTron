@@ -11,6 +11,9 @@ class Wall {
 	const int alloc_wall_count = 1000;
 	int current_wall_count = 0;
 
+	const int frame_delay = 10;
+	int frame = 0;
+
 	// struct Vertex {
 	// 	vec3 pos, normal;
 	// };
@@ -29,6 +32,10 @@ class Wall {
 	Wall(Wall& wall) = delete;
 
 	void append_wall(mat4 bikeTransform, vec3 position, vec2 scale) {
+		if (frame++ < frame_delay)
+			return;
+		frame = 0;
+
 		vec3 points[] = {
 			{-scale.x, -scale.y, 0.0}, {-scale.x, scale.y, 0.0}, {scale.x, scale.y, 0.0}, {scale.x, -scale.y, 0.0}};
 
