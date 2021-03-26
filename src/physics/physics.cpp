@@ -303,8 +303,8 @@ void makeWallSeg(int i, PxTransform a, PxTransform b) {
 	float length = dir.magnitude();
 
 	// calculate matrix for conversion to quaternion
-	PxVec3 sid = dir.cross(up);
-	PxVec3 nup = sid.cross(dir);
+	PxVec3 sid = up.cross(dir);
+	PxVec3 nup = dir.cross(sid);
 
 	nup.normalize();
 	dir.normalize();
@@ -312,11 +312,7 @@ void makeWallSeg(int i, PxTransform a, PxTransform b) {
 
 	PxMat33 rotMat = PxMat33(sid, nup, dir);
 
-	PxQuat wallQuat;
-
-	wallQuat = PxQuat(rotMat);
-
-	wallQuat.normalize();
+	PxQuat wallQuat = PxQuat(rotMat);
 
 	// set position and rotation of wall segment
 	wallSeg.p = (a.p + b.p) / 2.0f;
