@@ -48,7 +48,7 @@ int main(int argc, char* argv[]) {
 		e_manager.addEntity(std::make_unique<ModelView>(render, args.at(1)));
 		e_manager.addEntity(std::make_unique<OrbitCam>(render, window));
 	} else {
-		e_manager.addEntity(std::make_unique<Game>(window, render, 2, e_manager, stereo));
+		e_manager.addEntity(std::make_unique<Game>(window, render, 4, e_manager, stereo));
 	}
 
 	// Loop will continue until "X" on window is clicked.

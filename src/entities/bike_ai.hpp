@@ -11,15 +11,17 @@ class BikeAI : public Bike {
 	bool right = false;
 	// timer before AI bikes will start driving
 	int buffer = 60;
-	// AI waypoint list, current target, and next target
-	std::vector<glm::vec3> waypoints;
+
+	std::vector<std::vector<glm::vec3>> ai_waypoints; // a list of waypoints for each ai bike
 	int currentWaypoint = 0, nextWaypoint = 1;
 
   public:
 	BikeAI(
-		Render::Render& render, int start_place, Render::Group& group, std::vector<glm::vec3> waypoints,
+		Render::Render& render, int start_place, Render::Group& group, std::vector<std::vector<glm::vec3>> ai_waypoints,
 		Audio::AudioEngine& audio)
-		: Bike(render, start_place, group, audio), waypoints(waypoints){};
+		: Bike(render, start_place, group, audio), ai_waypoints(ai_waypoints) {
+		waypoints = ai_waypoints[getId() - 1];
+	};
 
 	void update(float deltaTime) override {
 		Bike::update(deltaTime);
@@ -28,6 +30,9 @@ class BikeAI : public Bike {
 				followWaypoint();
 			}
 			buffer--;
+		}
+		if (getBikeTransform(getId()).p.y < 0) {
+			resetBike();
 		}
 	}
 
@@ -83,14 +88,14 @@ class BikeAI : public Bike {
 				bikeReleaseSteer(getId());
 				bikeTurnPrecise(getId(), glm::min(2 * radius, 1.f));
 				// bikeTurnLeft(getId());
-				bikeAcceleratePrecise(getId(), 0.75f);
+				bikeAcceleratePrecise(getId(), 0.825f);
 			} else if (d < 0) {
 				// std::cout << "right" << std::endl;
 
 				bikeReleaseSteer(getId());
 				bikeTurnPrecise(getId(), glm::max(-2 * radius, -1.f));
 				// bikeTurnRight(getId());
-				bikeAcceleratePrecise(getId(), 0.75f);
+				bikeAcceleratePrecise(getId(), 0.825f);
 			} else {
 				// std::cout << "on" << std::endl;
 				bikeReleaseSteer(getId());
@@ -98,5 +103,29 @@ class BikeAI : public Bike {
 		} else {
 			bikeReleaseAll(getId());
 		}
+	}
+
+	void resetBike() {
+		physx::PxTransform resetLocation = getBikeTransform(getId());
+		int waypoint = 0;
+		int waypointOffset = 5;
+		// waypointOffset is used to manage the fact that we hit waypoints within a certain radius of us.
+		if (currentWaypoint < waypointOffset) {
+			waypoint = waypoints.size() - (waypointOffset - currentWaypoint);
+		} else {
+			waypoint = currentWaypoint - waypointOffset;
+		}
+
+		resetLocation.p.x = waypoints[waypoint].x;
+		resetLocation.p.y = waypoints[waypoint].y + 5; // drop me in to avoid clipping
+		resetLocation.p.z = waypoints[waypoint].z;
+		float rads;
+		physx::PxVec3 axis;
+		resetLocation.q.toRadiansAndUnitAxis(rads, axis);
+		resetLocation.q.x = 0;
+		resetLocation.q.y = sin(rads / 2);
+		resetLocation.q.z = 0;
+		resetLocation.q.w = cos(rads / 2);
+		resetBikePos(getId(), resetLocation);
 	}
 };

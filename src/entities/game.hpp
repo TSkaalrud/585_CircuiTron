@@ -62,12 +62,14 @@ class Game : public Entity {
 		// std::vector<glm::vec3> map;
 		// ai_waypoints.push_back(map);
 		uploadMap("assets/AI_waypoints_1.obj");
-	}
+		uploadMap("assets/AI_waypoints_2.obj");
+		uploadMap("assets/AI_waypoints_3.obj");
+		}
 
 	void enter() override {
 		e_manager.addEntity(std::make_unique<Track>(render, track_model));
 
-		std::unique_ptr<Bike> b = std::make_unique<BikePlayer>(window, render, 1, car_model, ai_waypoints[0], stereo);
+		std::unique_ptr<Bike> b = std::make_unique<BikePlayer>(window, render, 1, car_model, ai_waypoints[1], stereo);
 		bikes.push_back(b.get());
 
 		e_manager.addEntity(std::move(b));
@@ -75,7 +77,7 @@ class Game : public Entity {
 		for (int i = 0; i < players - 1; i++) {
 			initVehicle();
 
-			std::unique_ptr<Bike> b = std::make_unique<BikeAI>(render, i + 2, car_model, ai_waypoints[0], stereo);
+			std::unique_ptr<Bike> b = std::make_unique<BikeAI>(render, i + 2, car_model, ai_waypoints, stereo);
 			bikes.push_back(b.get());
 
 			e_manager.addEntity(std::move(b));

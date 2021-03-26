@@ -95,7 +95,7 @@ std::vector<wallSpawnInfo> wallSpawnTimers;
 
 float impulseBase = 2500;
 
-PxF32 gSteerVsForwardSpeedData[2 * 8] = {0.0f,       0.75f,      5.0f,       0.75f,      30.0f,      0.125f,
+PxF32 gSteerVsForwardSpeedData[2 * 8] = {0.0f,       0.35f,      5.0f,       0.30f,      30.0f,      0.25f,
 										 120.0f,     0.1f,       PX_MAX_F32, PX_MAX_F32, PX_MAX_F32, PX_MAX_F32,
 										 PX_MAX_F32, PX_MAX_F32, PX_MAX_F32, PX_MAX_F32};
 PxFixedSizeLookupTable<8> gSteerVsForwardSpeedTable(gSteerVsForwardSpeedData, 4);
@@ -173,17 +173,17 @@ VehicleDesc initVehicleDesc() {
 	const PxF32 chassisMass = 250.0f;
 	const PxVec3 chassisDims(1.0f, 1.2f, 4.63f);
 	const PxVec3 chassisMOI(
-		(chassisDims.y * chassisDims.y + chassisDims.z * chassisDims.z) * chassisMass / 12.0f,
-		(chassisDims.x * chassisDims.x + chassisDims.z * chassisDims.z) * 0.8f * chassisMass / 12.0f,
-		(chassisDims.x * chassisDims.x + chassisDims.y * chassisDims.y) * chassisMass / 12.0f);
-	const PxVec3 chassisCMOffset(0.0f, -chassisDims.y * 0.5f + 0.65f, 0.55f);
+		(chassisDims.y * chassisDims.y + chassisDims.z * chassisDims.z) * 1.f * chassisMass / 12.0f,
+		(chassisDims.x * chassisDims.x + chassisDims.z * chassisDims.z) * 1.1f * chassisMass / 12.0f,
+		(chassisDims.x * chassisDims.x + chassisDims.y * chassisDims.y) * 1.3f * chassisMass / 12.0f);
+	const PxVec3 chassisCMOffset(0.0f, -chassisDims.y * 0.5f + 0.5f, 0.35f);
 
 	// Set up the wheel mass, radius, width, moment of inertia, and number of wheels.
 	// Moment of inertia is just the moment of inertia of a cylinder.
 	const PxF32 wheelMass = 15.0f;
 	const PxF32 wheelRadius = 0.3f;
 	const PxF32 wheelWidth = 0.3f;
-	const PxF32 wheelMOI = 0.5f * wheelMass * wheelRadius * wheelRadius;
+	const PxF32 wheelMOI = 0.55f * wheelMass * wheelRadius * wheelRadius;
 	const PxU32 nbWheels = 4;
 
 	VehicleDesc vehicleDesc;
@@ -339,6 +339,8 @@ void makeWallSeg(int i, PxTransform a, PxTransform b) {
 physx::PxTransform trackTransform;
 physx::PxTransform getTrackTransform() { return trackTransform; }
 
+float getSpeed(int i) { return CTbikes[i]->computeForwardSpeed(); }
+
 // return number of bikes
 int getNumBikes() { return CTbikes.size(); }
 
@@ -396,14 +398,16 @@ void bikeBreak(int i) { inputDatas[i].setAnalogBrake(1.0f); }
 void bikeHandbrake(int i) { inputDatas[i].setAnalogHandbrake(0.5f); }
 
 // turn functions used for input
-void bikeTurnRight(int i) { inputDatas[i].setAnalogSteer(glm::max(inputDatas[i].getAnalogSteer() - 0.05f, -1.0f)); }
+void bikeTurnRight(int i) { inputDatas[i].setAnalogSteer(glm::max(inputDatas[i].getAnalogSteer() - 0.035f, -1.0f)); }
 
-void bikeTurnLeft(int i) { inputDatas[i].setAnalogSteer(glm::min(inputDatas[i].getAnalogSteer() + .05f, 1.f)); }
+void bikeTurnLeft(int i) { inputDatas[i].setAnalogSteer(glm::min(inputDatas[i].getAnalogSteer() + .035f, 1.f)); }
 
 void bikeTurnPrecise(int i, float n) { inputDatas[i].setAnalogSteer(n); }
 
 // gas/turn/brake release functions used for input
-void bikeReleaseGas(int i) { inputDatas[i].setAnalogAccel(0.0f); }
+void bikeReleaseGas(int i) { 
+	inputDatas[i].setAnalogAccel(glm::min(0.8, inputDatas[i].getAnalogAccel()*0.992)); 
+}
 
 void bikeReleaseSteer(int i) { inputDatas[i].setAnalogSteer(0.0f); }
 
@@ -426,7 +430,7 @@ void bikeBooster(int bike, int keyPressed) {
 	} else if (keyPressed == 263) { // left
 		physx::PxVec3 left;
 		if (isVehicleInAir[bike]) {
-			left = getBikeTransform(bike).q.getBasisVector0() * .5 * impulseBase;
+			left = getBikeTransform(bike).q.getBasisVector0() * 1 * impulseBase;
 		} else {
 			left = getBikeTransform(bike).q.getBasisVector0() * 2 * impulseBase;
 		}
@@ -434,7 +438,7 @@ void bikeBooster(int bike, int keyPressed) {
 	} else if (keyPressed == 262) { // right
 		physx::PxVec3 right;
 		if (isVehicleInAir[bike]) {
-			right = getBikeTransform(bike).q.getBasisVector0() * -.5 * impulseBase;
+			right = getBikeTransform(bike).q.getBasisVector0() * -1 * impulseBase;
 		} else {
 			right = getBikeTransform(bike).q.getBasisVector0() * -2 * impulseBase;
 		}
@@ -502,7 +506,7 @@ void initVehicle() {
 	VehicleDesc vehicleDesc = initVehicleDesc();
 	gVehicle4W = createVehicle4W(vehicleDesc, gPhysics, gCooking);
 	PxTransform startTransform(
-		PxVec3(-175.0f - spawnOffset, (vehicleDesc.chassisDims.y * 1.f + vehicleDesc.wheelRadius + 3.0f), -110.0f),
+		PxVec3(-165.0f - spawnOffset, (vehicleDesc.chassisDims.y * 1.f + vehicleDesc.wheelRadius + 3.0f), -110.0f),
 		PxQuat(0.0f, 0.999f, 0.0f, -0.052f));
 
 	if (CTbikes.size() == 0) {
@@ -582,7 +586,7 @@ void initPhysics() {
 	gPhysics = PxCreatePhysics(PX_PHYSICS_VERSION, *gFoundation, PxTolerancesScale(), true, gPvd);
 
 	PxSceneDesc sceneDesc(gPhysics->getTolerancesScale());
-	sceneDesc.gravity = PxVec3(0.0f, -9.81f, 0.0f);
+	sceneDesc.gravity = PxVec3(0.0f, -9.81f * 1.5, 0.0f);
 
 	PxU32 numWorkers = 1;
 	gDispatcher = PxDefaultCpuDispatcherCreate(numWorkers);
@@ -600,7 +604,7 @@ void initPhysics() {
 		pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_CONTACTS, true);
 		pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_SCENEQUERIES, true);
 	}
-	gMaterial = gPhysics->createMaterial(0.25f, 0.25f, 0.6f);
+	gMaterial = gPhysics->createMaterial(0.25f, 0.2f, 0.6f);
 
 	gCooking = PxCreateCooking(PX_PHYSICS_VERSION, *gFoundation, PxCookingParams(PxTolerancesScale()));
 
@@ -622,7 +626,7 @@ void initPhysics() {
 	PxFilterData groundPlaneSimFilterData(COLLISION_FLAG_GROUND, COLLISION_FLAG_GROUND_AGAINST, 0, 0);
 	gGroundPlane = createDrivablePlane(groundPlaneSimFilterData, gMaterial, gPhysics);
 	gGroundPlane->setName("Ground Plane");
-	gScene->addActor(*gGroundPlane);
+	//gScene->addActor(*gGroundPlane);
 
 	// Cook track
 	PxTriangleMesh* trackMesh = cookTrack();

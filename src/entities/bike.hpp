@@ -17,6 +17,9 @@ class Bike : public GameObject {
 
 	Render::Wall wall;
 
+  protected:
+	std::vector<glm::vec3> waypoints; // current waypoints
+
   public:
 	Audio::AudioEngine& stereo;
 	AudioInstance* engineAudio = new AudioInstance();

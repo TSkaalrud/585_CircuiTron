@@ -28,10 +28,11 @@ class BikePlayer : public Bike {
 	BikePlayer(
 		Window& window, Render::Render& render, int start_place, Render::Group& group, std::vector<glm::vec3> waypoints,
 		Audio::AudioEngine& audio)
-		: Bike(render, start_place, group, audio), window(window), waypoints(waypoints) {
+		: Bike(render, start_place, group, audio), window(window) {
 		engineAudio->loop = true;
 		gearAudio->loop = false;
 		FRAGAudio->loop = false;
+		this->waypoints = waypoints;
 	};
 
 	void update(float deltaTime) override {
@@ -114,10 +115,6 @@ class BikePlayer : public Bike {
 		updateWaypoint();
 
 		render.camera_set_pos(convertTransform(getBikeTransform(0).transform(camera)));
-
-		model->setTransform(convertTransform(getBikeTransform(0)) * glm::scale(glm::mat4(1.0f), glm::vec3(2.0f)));
-
-		spawnWall(deltaTime, 0);
 	}
 
 	void checkInput() {
@@ -167,6 +164,7 @@ class BikePlayer : public Bike {
 			resetLocation.p.y = waypoints[waypoint].y + 5;
 			resetLocation.p.z = waypoints[waypoint].z;
 			resetBikePos(getId(), resetLocation);
+			modifyHealth(-10);
 		}
 
 		if (window.keyPressed(340)) { // left shift

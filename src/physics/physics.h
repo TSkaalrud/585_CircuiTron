@@ -24,6 +24,8 @@ void initVehicle();
 
 int getNumBikes();
 
+float getSpeed(int i);
+
 physx::PxVehicleDrive4W* getVehicle(int i);
 
 wallSpawnInfo* getWallInfo(int i);
