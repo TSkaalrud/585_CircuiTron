@@ -13,6 +13,14 @@ struct wallSegment {
 	physx::PxTransform back;
 };
 
+struct wallUserData {
+	wallSegment segmentInfo;
+
+	int wallIndex;
+	
+	int collisions;
+};
+
 struct wallSpawnInfo {
 	physx::PxF32 timer;
 	physx::PxF32 wallTime;
@@ -31,6 +39,10 @@ physx::PxVehicleDrive4W* getVehicle(int i);
 wallSpawnInfo* getWallInfo(int i);
 
 void makeWallSeg(int i, physx::PxTransform a, physx::PxTransform b);
+
+void deleteWallSeg(int i, int j);
+
+physx::PxRaycastBuffer castRay(int bike, int dir, int range);
 
 physx::PxTransform getBikeTransform(int i);
 
