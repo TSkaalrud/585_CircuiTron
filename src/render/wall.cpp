@@ -4,10 +4,6 @@
 
 namespace Render {
 void Wall::append_wall(mat4 bikeTransform, vec3 position, vec2 scale) {
-	if (frame++ < frame_delay)
-		return;
-	frame = 0;
-
 	vec3 points[] = {
 		{-scale.x, -scale.y, 0.0}, {-scale.x, scale.y, 0.0}, {scale.x, scale.y, 0.0}, {scale.x, -scale.y, 0.0}};
 
@@ -37,29 +33,27 @@ void Wall::append_wall(mat4 bikeTransform, vec3 position, vec2 scale) {
 		};
 	// clang-format on
 
-	if (last_frame.has_value()) {
-		// clang-format off
-			std::vector<Vertex> verticies = {
-				(*last_frame)[0], (*last_frame)[1], (*last_frame)[2], (*last_frame)[3],
-				(*last_frame)[4], (*last_frame)[5], (*last_frame)[6], (*last_frame)[7],
-				vertices[0], vertices[1], vertices[2], vertices[3],
-				vertices[4], vertices[5], vertices[6], vertices[7]
-			};
-			std::vector<uint32_t> indicies = {
-				0 + 0, 8 + 0, 1 + 0, 1 + 0, 8 + 0, 9 + 0,
-				0 + 2, 8 + 2, 1 + 2, 1 + 2, 8 + 2, 9 + 2,
-				0 + 4, 8 + 4, 1 + 4, 1 + 4, 8 + 4, 9 + 4,
-				0 + 6, 8 + 6, 1 + 6, 1 + 6, 8 + 6, 9 + 6,
-			};
-		// clang-format on
+	if (wall_segements.size() != 0) {
+		auto& wall = wall_segements.back();
+		auto bufferSlot = ((current_wall_count % alloc_wall_count) + 1);
 
+		glNamedBufferSubData(wall.vertex_buffer, bufferSlot * sizeof(Vertex) * 8, sizeof(Vertex) * 8, vertices.data());
+	}
+
+	if (frame++ < frame_delay)
+		return;
+	frame = 0;
+	current_wall_count++;
+
+	if (current_wall_count % alloc_wall_count == 0) {
 		GLuint vertex_buffer, index_buffer, vao;
 		glCreateBuffers(1, &vertex_buffer);
 		glCreateBuffers(1, &index_buffer);
 		glCreateVertexArrays(1, &vao);
 
-		glNamedBufferStorage(vertex_buffer, Core::vector_size(verticies), verticies.data(), 0);
-		glNamedBufferStorage(index_buffer, Core::vector_size(indicies), indicies.data(), 0);
+		auto num_buffer_slots = alloc_wall_count + 1;
+		glNamedBufferStorage(vertex_buffer, num_buffer_slots * sizeof(Vertex) * 8, nullptr, GL_DYNAMIC_STORAGE_BIT);
+		glNamedBufferStorage(index_buffer, alloc_wall_count * sizeof(uint32_t) * 24, nullptr, GL_DYNAMIC_STORAGE_BIT);
 
 		glVertexArrayVertexBuffer(vao, 0, vertex_buffer, 0, sizeof(Vertex));
 		glEnableVertexArrayAttrib(vao, 0);
@@ -68,13 +62,40 @@ void Wall::append_wall(mat4 bikeTransform, vec3 position, vec2 scale) {
 		glEnableVertexArrayAttrib(vao, 1);
 		glVertexArrayAttribFormat(vao, 1, 3, GL_FLOAT, false, offsetof(Vertex, normal));
 
+		glNamedBufferSubData(vertex_buffer, 0, sizeof(Vertex) * 8, vertices.data());
+
 		glVertexArrayElementBuffer(vao, index_buffer);
 
-		auto mesh = render.registerMesh({.vao = vao, .count = static_cast<uint>(indicies.size())});
+		auto mesh = render.registerMesh({.vao = vao, .count = 0});
 
 		auto instance = render.create_instance(mesh, mat);
-		wall_segements.push_back(MeshInstance{.mesh = mesh, .instance = instance});
+		wall_segements.push_back(MeshInstance{
+			.mesh = mesh,
+			.instance = instance,
+			.vertex_buffer = vertex_buffer,
+			.index_buffer = index_buffer,
+			.vao = vao});
 	}
-	last_frame.emplace(vertices);
+
+	auto& wall = wall_segements.back();
+	{
+		auto bufferSlot = current_wall_count % alloc_wall_count;
+		uint32_t offset = bufferSlot * 8;
+		std::array<uint32_t, 24> indicies = {
+			0 + 0 + offset, 8 + 0 + offset, 1 + 0 + offset, 1 + 0 + offset, 8 + 0 + offset, 9 + 0 + offset,
+			0 + 2 + offset, 8 + 2 + offset, 1 + 2 + offset, 1 + 2 + offset, 8 + 2 + offset, 9 + 2 + offset,
+			0 + 4 + offset, 8 + 4 + offset, 1 + 4 + offset, 1 + 4 + offset, 8 + 4 + offset, 9 + 4 + offset,
+			0 + 6 + offset, 8 + 6 + offset, 1 + 6 + offset, 1 + 6 + offset, 8 + 6 + offset, 9 + 6 + offset,
+		};
+		glNamedBufferSubData(
+			wall.index_buffer, (current_wall_count % alloc_wall_count) * sizeof(uint32_t) * 24, sizeof(uint32_t) * 24,
+			indicies.data());
+		render.meshes[wall.mesh].count += 24;
+	}
+	{
+		auto bufferSlot = ((current_wall_count % alloc_wall_count) + 1);
+
+		glNamedBufferSubData(wall.vertex_buffer, bufferSlot * sizeof(Vertex) * 8, sizeof(Vertex) * 8, vertices.data());
+	}
 }
 } // namespace Render

@@ -37,7 +37,7 @@ class Bike : public GameObject {
 	virtual void update(float deltaTime) override {
 		model->setTransform(convertTransform(getBikeTransform(getId())) * glm::scale(glm::mat4(1.0f), glm::vec3(2.0f)));
 
-		this->wall.append_wall(convertTransform(getBikeTransform(getId())), {0, 0, -3}, {0.1, 1});
+		this->wall.append_wall(convertTransform(getBikeTransform(getId())), {0, 0, -4.8}, {0.1, 1});
 
 		spawnWall(deltaTime, getId());
 	}

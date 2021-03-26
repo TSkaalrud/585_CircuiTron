@@ -8,11 +8,11 @@ class Wall {
 	Render& render;
 	MaterialHandle mat;
 
-	const int alloc_wall_count = 1000;
-	int current_wall_count = 0;
+	const uint alloc_wall_count = 1000;
+	uint current_wall_count = -1;
 
-	const int frame_delay = 10;
-	int frame = 0;
+	const uint frame_delay = 10;
+	uint frame = -1;
 
 	struct Vertex {
 		vec3 pos, normal;
@@ -21,10 +21,9 @@ class Wall {
 	struct MeshInstance {
 		MeshHandle mesh;
 		InstanceHandle instance;
+		GLuint vertex_buffer, index_buffer, vao;
 	};
 	std::vector<MeshInstance> wall_segements;
-
-	std::optional<std::array<Vertex, 8>> last_frame;
 
   public:
 	Wall(Render& render) : render(render) { mat = render.create_pbr_material({.albedoFactor = {0, 0.3, 0.7, 1.0}}); };
