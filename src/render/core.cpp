@@ -2,6 +2,7 @@
 
 #include "debug.hpp"
 #include "gl.hpp"
+#include <imgui.h>
 
 namespace Render {
 
@@ -77,25 +78,58 @@ uint Core::create_texture(int width, int height, int channels, bool srgb, void* 
 	return texture;
 }
 
-void Core::renderScene(Shader::Type type) {
-	for (auto& i : instances) {
-		if (i.mat == -1)
-			continue;
-
-		glBindVertexArray(meshes[i.model].vao);
-		for (auto& shader : materials[i.mat]) {
-			if ((shaders[shader.shader].type & type) == 0)
+void Core::renderScene(Shader::Type type, RenderOrder order) {
+	switch (order) {
+	case RenderOrder::Simple:
+		for (auto& i : instances) {
+			if (i.mat == -1)
 				continue;
 
-			glUseProgram(shaders[shader.shader].shader);
+			glBindVertexArray(meshes[i.model].vao);
+			for (auto& shader : materials[i.mat].shaders) {
+				if ((shaders[shader.shader].type & type) == 0)
+					continue;
 
-			glBindBufferBase(GL_UNIFORM_BUFFER, 1, shader.uniform);
-			glBindTextures(3, shader.textures.size(), shader.textures.data());
+				glUseProgram(shaders[shader.shader].shader);
 
-			glUniformMatrix4fv(0, 1, false, value_ptr(i.trans));
+				glBindBufferBase(GL_UNIFORM_BUFFER, 1, shader.uniform);
+				glBindTextures(3, shader.textures.size(), shader.textures.data());
 
-			glDrawElements(GL_TRIANGLES, meshes[i.model].count, GL_UNSIGNED_INT, 0);
+				glUniformMatrix4fv(0, 1, false, value_ptr(i.trans));
+
+				glDrawElements(GL_TRIANGLES, meshes[i.model].count, GL_UNSIGNED_INT, 0);
+			}
 		}
+		break;
+	case RenderOrder::Shader:
+		for (int i = 0; i < shaders.size(); i++) {
+			auto& shader = shaders[i];
+			if ((shader.type & type) == 0)
+				continue;
+
+			glUseProgram(shader.shader);
+			for (auto mat : shader.materials) {
+				auto& material = materials[mat];
+
+				for (auto shaderConfig : material.shaders) {
+					if (shaderConfig.shader != i)
+						continue;
+					glBindBufferBase(GL_UNIFORM_BUFFER, 1, shaderConfig.uniform);
+					glBindTextures(3, shaderConfig.textures.size(), shaderConfig.textures.data());
+					break;
+				}
+
+				for (auto i : material.instances) {
+					auto& instance = instances[i];
+					glBindVertexArray(meshes[instance.model].vao);
+
+					glUniformMatrix4fv(0, 1, false, value_ptr(instance.trans));
+
+					glDrawElements(GL_TRIANGLES, meshes[instance.model].count, GL_UNSIGNED_INT, 0);
+				}
+			}
+		}
+		break;
 	}
 }
 

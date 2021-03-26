@@ -4,6 +4,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/mat4x4.hpp>
 #include <glm/trigonometric.hpp>
+#include <unordered_set>
 #include <vector>
 
 namespace Render {
@@ -77,8 +78,18 @@ class Core {
 		GLuint uniform;
 		std::vector<TextureHandle> textures;
 	};
-	typedef std::vector<ShaderConfig> Material;
-	REGISTER(Material, materials)
+	struct Material {
+		std::vector<ShaderConfig> shaders;
+		std::unordered_set<InstanceHandle> instances = {};
+	};
+	REGISTER(Material, materials);
+	MaterialHandle register_material(Material mat) {
+		auto handle = registerMaterial(mat);
+		for (auto& shaderconf : mat.shaders) {
+			shaders[shaderconf.shader].materials.emplace(handle);
+		}
+		return handle;
+	}
 
 	struct Shader {
 		GLuint shader;
@@ -87,6 +98,7 @@ class Core {
 			return static_cast<Type>(static_cast<int>(lhs) | static_cast<int>(rhs));
 		}
 		Type type;
+		std::unordered_set<MaterialHandle> materials = {};
 	};
 	REGISTER(Shader, shaders)
 
@@ -103,7 +115,8 @@ class Core {
 	REGISTER(DirLight, dirLights)
 	GLuint dirLightBuffer, dirLightShadow;
 
-	void renderScene(Shader::Type type);
+	enum class RenderOrder { Simple, Shader };
+	void renderScene(Shader::Type type, RenderOrder order = RenderOrder::Shader);
 
   public:
 	Core(void (*(const char*))());
@@ -130,7 +143,13 @@ class Core {
 		return instance;
 	}
 	void instance_set_mesh(InstanceHandle instance, MeshHandle mesh) { instances[instance].model = mesh; }
-	void instance_set_material(InstanceHandle instance, MaterialHandle mat) { instances[instance].mat = mat; }
+	void instance_set_material(InstanceHandle instance, MaterialHandle mat) {
+		if (instances[instance].mat != -1)
+			materials[instances[instance].mat].instances.erase(instance);
+		instances[instance].mat = mat;
+		if (mat != -1)
+			materials[mat].instances.emplace(instance);
+	}
 	void instance_set_trans(InstanceHandle instance, mat4 trans) { instances[instance].trans = trans; }
 	void delete_instance(InstanceHandle instance) {
 		instance_set_material(instance, -1);

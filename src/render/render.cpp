@@ -73,9 +73,9 @@ MaterialHandle Render::create_pbr_material(MaterialPBR pbr) {
 		pbr.metalRoughTexture.value_or(whiteTexture),
 		pbr.emissiveTexture.value_or(whiteTexture)};
 
-	return registerMaterial(Material{
-		{.shader = shader, .uniform = uniform, .textures = textures},
-		{.shader = depthShader, .uniform = 0, .textures = {}}});
+	return register_material(Material{
+		{{.shader = shader, .uniform = uniform, .textures = textures},
+		 {.shader = depthShader, .uniform = 0, .textures = {}}}});
 }
 
 Render::Render(void (*glGetProcAddr(const char*))()) : Core(glGetProcAddr) {
@@ -85,7 +85,7 @@ Render::Render(void (*glGetProcAddr(const char*))()) : Core(glGetProcAddr) {
 				{{"shaders/skybox.vert", GL_VERTEX_SHADER}, {"shaders/testSkybox.frag", GL_FRAGMENT_SHADER}}),
 			Shader::Type::Skybox});
 		MaterialHandle skyboxMaterial =
-			registerMaterial(Material{{.shader = skyboxShader, .uniform = 0, .textures = {}}});
+			register_material(Material{{{.shader = skyboxShader, .uniform = 0, .textures = {}}}});
 
 		std::vector<vec3> verticies = {
 			{-1, -1, -1}, {-1, -1, 1}, {-1, 1, -1}, {-1, 1, 1}, {1, -1, -1}, {1, -1, 1}, {1, 1, -1}, {1, 1, 1},
@@ -192,7 +192,7 @@ const glm::mat4 captureViews[] = {
 	glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)),
 	glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f))};
 
-void Render::render_cubemap(Shader::Type type, GLuint cubemap, GLsizei size) {
+void Render::render_cubemap(Shader::Type type, RenderOrder order, GLuint cubemap, GLsizei size) {
 	GLuint framebuffer, renderbuffer;
 	glCreateFramebuffers(1, &framebuffer);
 	glCreateRenderbuffers(1, &renderbuffer);
@@ -211,7 +211,7 @@ void Render::render_cubemap(Shader::Type type, GLuint cubemap, GLsizei size) {
 
 		glViewport(0, 0, size, size);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		renderScene(type);
+		renderScene(type, order);
 	}
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glDeleteFramebuffers(1, &framebuffer);
@@ -219,7 +219,7 @@ void Render::render_cubemap(Shader::Type type, GLuint cubemap, GLsizei size) {
 }
 
 void Render::update_skybox() {
-	render_cubemap(Shader::Type::Skybox, skyboxCubemap, skyboxSize);
+	render_cubemap(Shader::Type::Skybox, RenderOrder::Shader, skyboxCubemap, skyboxSize);
 
 	GLuint framebuffer;
 	glCreateFramebuffers(1, &framebuffer);
@@ -284,10 +284,10 @@ void Render::set_skybox_rect_texture(TextureHandle texture, bool update) {
 	static ShaderHandle skyboxDepthShader = registerShader(Shader{
 		load_shader_program({{"shaders/skybox.vert", GL_VERTEX_SHADER}, {"shaders/depth.frag", GL_FRAGMENT_SHADER}}),
 		Shader::Type::Depth});
-	static MaterialHandle skyboxMaterial = registerMaterial(Material{
-		{.shader = skyboxShader, .uniform = 0, .textures = {texture}},
-		{.shader = skyboxDepthShader, .uniform = 0, .textures = {}}});
-	materials[skyboxMaterial][0].textures[0] = texture;
+	static MaterialHandle skyboxMaterial = register_material(Material{
+		{{.shader = skyboxShader, .uniform = 0, .textures = {texture}},
+		 {.shader = skyboxDepthShader, .uniform = 0, .textures = {}}}});
+	materials[skyboxMaterial].shaders[0].textures[0] = texture;
 	set_skybox_material(skyboxMaterial, update);
 }
 
@@ -299,10 +299,10 @@ void Render::set_skybox_cube_texture(TextureHandle texture, bool update) {
 	static ShaderHandle skyboxDepthShader = registerShader(Shader{
 		load_shader_program({{"shaders/skybox.vert", GL_VERTEX_SHADER}, {"shaders/depth.frag", GL_FRAGMENT_SHADER}}),
 		Shader::Type::Depth});
-	static MaterialHandle skyboxMaterial = registerMaterial(Material{
-		{.shader = skyboxShader, .uniform = 0, .textures = {texture}},
-		{.shader = skyboxDepthShader, .uniform = 0, .textures = {}}});
-	materials[skyboxMaterial][0].textures[0] = texture;
+	static MaterialHandle skyboxMaterial = register_material(Material{
+		{{.shader = skyboxShader, .uniform = 0, .textures = {texture}},
+		 {.shader = skyboxDepthShader, .uniform = 0, .textures = {}}}});
+	materials[skyboxMaterial].shaders[0].textures[0] = texture;
 	set_skybox_material(skyboxMaterial, update);
 }
 
