@@ -2,7 +2,6 @@
 
 #include "debug.hpp"
 #include "gl.hpp"
-#include <imgui.h>
 
 namespace Render {
 
