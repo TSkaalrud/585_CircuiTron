@@ -67,6 +67,15 @@ class Game : public Entity {
 		}
 
 	void enter() override {
+		render.set_skybox_rect_texture(importSkybox("assets/skyboxes/SPACE-1.hdr", render));
+
+		AudioInstance* bgm = new AudioInstance();
+		bgm->gain = 0.0;
+		bgm->playSound(stereo.buffer[Audio::SOUND_FILE_CYBERSONG_BGM]); // Song
+		AudioInstance* ambiance = new AudioInstance();
+		ambiance->gain = 0.0;
+		ambiance->playSound(stereo.buffer[Audio::SOUND_FILE_AMBIENCE_BGM]); // ambient environment sounds
+
 		e_manager.addEntity(std::make_unique<Track>(render, track_model));
 
 		std::unique_ptr<Bike> b = std::make_unique<BikePlayer>(window, render, 1, car_model, ai_waypoints[1], stereo);
