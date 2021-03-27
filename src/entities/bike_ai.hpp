@@ -6,27 +6,25 @@
 
 class BikeAI : public Bike {
   private:
-	//direction of the bike's current target
+	// direction of the bike's current target
 	bool left = false;
 	bool right = false;
-	//timer before AI bikes will start driving
+	// timer before AI bikes will start driving
 	int buffer = 60;
-	//AI waypoint list, current target, and next target
-	std::vector<std::vector<glm::vec3>> ai_waypoints; // a list of waypoints for each ai bike
-	std::vector<glm::vec3> waypoints; //current waypoints
-	int currentWaypoint = 0, nextWaypoint = 1;
 
+	std::vector<std::vector<glm::vec3>> ai_waypoints; // a list of waypoints for each ai bike
+	int currentWaypoint = 0, nextWaypoint = 1;
 
   public:
 	BikeAI(
-		Render::Render& render, int start_place, Render::Group& group, 
-		std::vector<std::vector<glm::vec3>> ai_waypoints, Audio::AudioEngine& audio, WallManager* wm)
-		: Bike(render, start_place, group, audio, wm), ai_waypoints(ai_waypoints) 
-	{
-		waypoints = ai_waypoints[getId()-1];
+		Render::Render& render, int start_place, Render::Group& group, std::vector<std::vector<glm::vec3>> ai_waypoints,
+		Audio::AudioEngine& audio)
+		: Bike(render, start_place, group, audio), ai_waypoints(ai_waypoints) {
+		waypoints = ai_waypoints[getId() - 1];
 	};
 
 	void update(float deltaTime) override {
+		Bike::update(deltaTime);
 		if (!getLocked()) {
 			if (buffer < 0) {
 				followWaypoint();
@@ -36,13 +34,9 @@ class BikeAI : public Bike {
 		if (getBikeTransform(getId()).p.y < 0) {
 			resetBike();
 		}
-
-		model->setTransform(convertTransform(getBikeTransform(getId())) * glm::scale(glm::mat4(1.0f), glm::vec3(2.0f)));
-
-		spawnWall(deltaTime, getId());
 	}
 
-	void followWaypoint() { 
+	void followWaypoint() {
 		glm::vec3 target = waypoints[currentWaypoint];
 		physx::PxTransform ai = getBikeTransform(getId());
 
@@ -52,8 +46,8 @@ class BikeAI : public Bike {
 
 		float d = (target.x - ai_pos.x) * (heading.z - ai_pos.z) - (target.z - ai_pos.z) * (heading.x - ai_pos.x);
 		float dist = glm::sqrt(glm::pow(target.x - ai_pos.x, 2) + glm::pow(target.z - ai_pos.z, 2));
-		
-		//update to next WP if distance is less than 10 -- play with this number for feel
+
+		// update to next WP if distance is less than 10 -- play with this number for feel
 		if (dist < 25) {
 			currentWaypoint = nextWaypoint;
 			if (nextWaypoint == waypoints.size()) {
@@ -66,7 +60,7 @@ class BikeAI : public Bike {
 				addWaypoint();
 			}
 		}
-		//std::cout << currentWaypoint << " distance = " << (int)dist << std::endl;
+		// std::cout << currentWaypoint << " distance = " << (int)dist << std::endl;
 
 		physx::PxTransform player = getBikeTransform(0);
 		physx::PxVec3 player_pos = player.p;
@@ -79,32 +73,31 @@ class BikeAI : public Bike {
 
 		float angle = glm::acos(dot / mag);
 
-		//std::cout << angle << std::endl;
+		// std::cout << angle << std::endl;
 
 		float angleRange = (3.14f - 0.0f);
 		float radiusRange = (1.0f - 0.0f);
 
 		float radius = (((angle - 0.0f) * radiusRange) / angleRange) - 0.0f;
-		//std::cout << radius << std::endl;
-
+		// std::cout << radius << std::endl;
 
 		if (dist > 25.0f) {
 			if (d > 0) {
-				//std::cout << "left" << std::endl;
+				// std::cout << "left" << std::endl;
 
 				bikeReleaseSteer(getId());
-				bikeTurnPrecise(getId(), glm::min(2*radius,1.f));
-				//bikeTurnLeft(getId());
+				bikeTurnPrecise(getId(), glm::min(2 * radius, 1.f));
+				// bikeTurnLeft(getId());
 				bikeAcceleratePrecise(getId(), 0.825f);
 			} else if (d < 0) {
-				//std::cout << "right" << std::endl;
+				// std::cout << "right" << std::endl;
 
 				bikeReleaseSteer(getId());
-				bikeTurnPrecise(getId(), glm::max(-2*radius,-1.f));
-				//bikeTurnRight(getId());
+				bikeTurnPrecise(getId(), glm::max(-2 * radius, -1.f));
+				// bikeTurnRight(getId());
 				bikeAcceleratePrecise(getId(), 0.825f);
 			} else {
-				//std::cout << "on" << std::endl;
+				// std::cout << "on" << std::endl;
 				bikeReleaseSteer(getId());
 			}
 		} else {
@@ -112,7 +105,7 @@ class BikeAI : public Bike {
 		}
 	}
 
-		void resetBike() {
+	void resetBike() {
 		physx::PxTransform resetLocation = getBikeTransform(getId());
 		int waypoint = 0;
 		int waypointOffset = 5;
@@ -135,5 +128,4 @@ class BikeAI : public Bike {
 		resetLocation.q.w = cos(rads / 2);
 		resetBikePos(getId(), resetLocation);
 	}
-
 };

@@ -1,9 +1,11 @@
 #include "window.hpp"
 
+#include <chrono>
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 #include <iostream>
+#include <thread>
 
 GLFWwindow* init() {
 	// GLFW Init
@@ -35,8 +37,7 @@ GLFWwindow* init() {
 		exit(EXIT_FAILURE);
 	}
 	glfwMakeContextCurrent(window);
-	// Uncomment to disable v-sync
-	// glfwSwapInterval(0);
+	glfwSwapInterval(0);
 
 	return window;
 }
@@ -104,4 +105,8 @@ void Window::endFrame() {
 	// Swap the render buffers and wait for the next frame
 	// Should probably be the last thing in the game loop
 	glfwSwapBuffers(window);
+
+	auto now = std::chrono::high_resolution_clock::now();
+	auto frameEnd = std::chrono::ceil<std::chrono::duration<int64_t, std::ratio<1L, 60L>>>(now);
+	std::this_thread::sleep_until(frameEnd);
 }

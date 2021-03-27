@@ -28,7 +28,7 @@ class Render : public Core {
 	TextureHandle reflection;
 	TextureHandle reflectionBRDF;
 
-	void render_cubemap(Shader::Type type, GLuint cubemap, GLsizei width);
+	void render_cubemap(Shader::Type type, RenderOrder order, GLuint cubemap, GLsizei width);
 
   public:
 	Render(void (*glGetProcAddr(const char*))());

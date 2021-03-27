@@ -1,26 +1,27 @@
 #pragma once
 
 #include "entities/entity.hpp"
-#include "render/model_import.hpp"
+#include "render/import.hpp"
 #include "render/render.hpp"
 #include <string>
 
 class ModelView : public Entity {
   private:
 	Render::Render& render;
-	Render::Group group;
+	Render::Model model;
 	Render::TextureHandle skyboxTexture;
+	std::optional<Render::ModelInstance> modelInstance;
 
   public:
 	ModelView(
 		Render::Render& render, std::string modelPath = "assets/DamagedHelmet.glb",
 		std::string skyboxPath = "assets/neurathen_rock_castle_4k.hdr")
-		: render(render), group(importModel(modelPath, render)), skyboxTexture(importSkybox(skyboxPath, render)){};
+		: render(render), model(importModel(modelPath, render)), skyboxTexture(importSkybox(skyboxPath, render)){};
 	void enter() override {
 
 		render.set_skybox_rect_texture(skyboxTexture);
 
-		Render::GroupInstance model(group);
+		modelInstance.emplace(model);
 
 		float pi = glm::pi<float>();
 		render.create_dir_light({pi, pi, pi}, {1, 1, 1});

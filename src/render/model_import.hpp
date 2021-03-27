@@ -1,13 +1,10 @@
 #pragma once
 
 #include "group.hpp"
-#include "render.hpp"
-#include <string>
+#include "import.hpp"
 
-namespace Render {
-
-Group importModel(std::string filename, Render&);
-
-TextureHandle importSkybox(std::string filename, Render&);
-
-}
+#ifdef __GNUC__
+#warning("model_import.hpp is renamed to import.hpp")
+#else
+#pragma NOTE("model_import.hpp is renamed to import.hpp")
+#endif

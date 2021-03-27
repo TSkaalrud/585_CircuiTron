@@ -293,13 +293,30 @@ void releaseAllControls() {
 void makeWallSeg(int i, PxTransform a, PxTransform b) {
 	PxTransform wallSeg;
 
-	// get length of wall segment
-	PxVec3 aTob = b.p - a.p;
-	float length = aTob.magnitude();
+	// direction vector
+	PxVec3 dir = b.p - a.p;
 
-	// get position and rotation of wall segment
+	// up vector
+	PxVec3 up = a.q.getBasisVector1();
+
+	// length
+	float length = dir.magnitude();
+
+	// calculate matrix for conversion to quaternion
+	PxVec3 sid = up.cross(dir);
+	PxVec3 nup = dir.cross(sid);
+
+	nup.normalize();
+	dir.normalize();
+	sid.normalize();
+
+	PxMat33 rotMat = PxMat33(sid, nup, dir);
+
+	PxQuat wallQuat = PxQuat(rotMat);
+
+	// set position and rotation of wall segment
 	wallSeg.p = (a.p + b.p) / 2.0f;
-	wallSeg.q = a.q;
+	wallSeg.q = wallQuat;
 
 	// make wall segment
 	PxShape* wallShape = gPhysics->createShape(PxBoxGeometry(0.1f, 0.6f, length / 2.0f), *gMaterial);
@@ -321,20 +338,68 @@ void makeWallSeg(int i, PxTransform a, PxTransform b) {
 	PxRigidStatic* aWall = gPhysics->createRigidStatic(wallSeg);
 	aWall->attachShape(*wallShape);
 
-	// create a string and a char array of i
-	std::string bikeIDString = std::to_string(i);
-	char* bikeIDArray = new char[bikeIDString.length() + 1];
-	strcpy(bikeIDArray, bikeIDString.c_str());
+	// set the actor name
+	aWall->setName("wall");
 
-	// set the actor name to its bike ID
-	aWall->setName(bikeIDArray);
+	// wall segment data
+	wallSegment segment = {i, aWall, b, a};
+	walls[i].push_back(segment);
+
+	// wall user data
+	wallUserData* wallData = new wallUserData{segment,(int) walls[i].size() - 1, (int)0};
+	aWall->userData = wallData;
 
 	// add actor to scene
 	gScene->addActor(*aWall);
-
-	wallSegment segment = {i, aWall, b, a};
-	walls[i].push_back(segment);
 }
+
+void deleteWallSeg(int i, int j) { 
+	walls[i][j].wall->release(); 
+	walls[i].erase(walls[i].begin() + j);
+}
+
+// cast a ray from a bike in a given direction and at a given range
+PxRaycastBuffer castRay(int bike, int dir, int range) { 
+	int FRONT = 0;
+	int BACK = 1;
+	int LEFT = 2;
+	int RIGHT = 3;
+
+	PxVehicleDrive4W* vehicle = CTbikes[bike];
+	auto origin = vehicle->getRigidDynamicActor()->getGlobalPose().p;
+	auto quat = vehicle->getRigidDynamicActor()->getGlobalPose().q;
+
+	PxVec3 heading;
+
+	// https://www.gamedev.net/forums/topic/56471-extracting-direction-vectors-from-quaternion/1273785
+
+	if (dir == FRONT) {
+		heading = getBikeTransform(bike).q.getBasisVector2();
+	}else if (dir == BACK) {
+		heading = -getBikeTransform(bike).q.getBasisVector2();
+	}else if (dir == LEFT) {
+		heading = getBikeTransform(bike).q.getBasisVector0();
+	}else if (dir == RIGHT) {
+		heading = -getBikeTransform(bike).q.getBasisVector0();
+	}
+
+	heading.normalize();
+
+	const PxU32 bufferSize = 1;                 // [in] size of 'hitBuffer'
+	PxRaycastHit hitBuffer[bufferSize];         // [out] User provided buffer for results
+	PxRaycastBuffer buf(hitBuffer, bufferSize); // [out] Blocking and touching hits stored here
+
+	gScene->raycast(origin, heading, range, buf);
+	
+	// https://gameworksdocs.nvidia.com/PhysX/4.1/documentation/physxguide/Manual/SceneQueries.html?highlight=ray#multiple-hits
+		
+	for (PxU32 i = 0; i < buf.nbTouches; i++) {
+		std::cout << "RAY CAST RESULTS ON OBJECT: " << buf.touches[i].actor->getName() << "\n";
+	}
+
+	return buf.touches;
+}
+
 
 physx::PxTransform trackTransform;
 physx::PxTransform getTrackTransform() { return trackTransform; }
@@ -497,7 +562,7 @@ void initVehicle() {
 
 	wallSpawnInfo wallInfo;
 	wallInfo.timer = 0.0f;
-	wallInfo.wallTime = 0.5f;
+	wallInfo.wallTime = 1.0f / 6.0f;
 
 	wallSpawnTimers.push_back(wallInfo);
 
@@ -518,14 +583,9 @@ void initVehicle() {
 	CTbikes.push_back(gVehicle4W);
 
 	gVehicle4W->getRigidDynamicActor()->setGlobalPose(startTransform);
-
-	// create a string and a char array of the bike ID
-	std::string bikeIDString = std::to_string(CTbikes.size() - 1);
-	char* bikeIDArray = new char[bikeIDString.length() + 1];
-	strcpy(bikeIDArray, bikeIDString.c_str());
-
-	// set the actor name to its bike ID
-	gVehicle4W->getRigidDynamicActor()->setName(bikeIDArray);
+	
+	// set the actor name
+	gVehicle4W->getRigidDynamicActor()->setName("bike");
 
 	gScene->addActor(*gVehicle4W->getRigidDynamicActor());
 
@@ -648,46 +708,9 @@ void initPhysics() {
 	initVehicle();
 }
 
-int caster = 0;
 
 void stepPhysics(float timestep) {
 	//const PxF32 timestep = 1.0f / 60.0f;
-
-	if (caster++ == 60) {
-		// do raycast
-
-		PxU32 maxHits = 1;
-		PxHitFlags hitFlags = PxHitFlag::ePOSITION | PxHitFlag::eNORMAL | PxHitFlag::eUV;
-
-		physx::PxVehicleDrive4W* player = CTbikes[0];
-		auto origin = player->getRigidDynamicActor()->getGlobalPose().p;
-		auto quat = player->getRigidDynamicActor()->getGlobalPose().q;
-
-		// You can replpace this with basis vectors I think (i forgot about them)
-		// https://www.gamedev.net/forums/topic/56471-extracting-direction-vectors-from-quaternion/1273785
-		float x = 2 * (quat.x * quat.z + quat.w * quat.y);
-		float y = 2 * (quat.y * quat.z - quat.w * quat.x);
-		float z = 1 - 2 * (quat.x * quat.x + quat.y * quat.y);
-
-		physx::PxVec3 unitDir(x, y, z);
-		unitDir.normalize();
-
-		const PxU32 bufferSize = 5;                 // [in] size of 'hitBuffer'
-		PxRaycastHit hitBuffer[bufferSize];         // [out] User provided buffer for results
-		PxRaycastBuffer buf(hitBuffer, bufferSize); // [out] Blocking and touching hits stored here
-
-		gScene->raycast(origin, unitDir, 100, buf);
-
-		/*
-		https://gameworksdocs.nvidia.com/PhysX/4.1/documentation/physxguide/Manual/SceneQueries.html?highlight=ray#multiple-hits
-		*/
-
-		for (PxU32 i = 0; i < buf.nbTouches; i++) {
-			std::cout << "RAY CAST RESULTS ON OBJECT: " << buf.touches[i].actor->getName() << "\n";
-		}
-
-		caster = 0;
-	}
 
 	for (int i = 0; i < CTbikes.size(); i++) {
 		if (gMimicKeyInputs) {

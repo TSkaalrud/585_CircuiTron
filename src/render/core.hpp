@@ -4,6 +4,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/mat4x4.hpp>
 #include <glm/trigonometric.hpp>
+#include <unordered_set>
 #include <vector>
 
 namespace Render {
@@ -38,7 +39,10 @@ typedef uint DirLightHandle;
 typedef uint TextureHandle;
 typedef uint ShaderHandle;
 
+class Wall;
 class Core {
+	friend Wall;
+
   protected:
 	template <class T> static size_t vector_size(const std::vector<T>& vec) { return sizeof(T) * vec.size(); }
 
@@ -59,7 +63,9 @@ class Core {
 		uint mat;
 		mat4 trans;
 	};
-	REGISTER(Instance, instances)
+	// REGISTER(Instance, instances)
+	std::vector<Instance> instances;
+	std::vector<uint> recycled_instances;
 
 	struct Mesh {
 		GLuint vao;
@@ -72,8 +78,18 @@ class Core {
 		GLuint uniform;
 		std::vector<TextureHandle> textures;
 	};
-	typedef std::vector<ShaderConfig> Material;
-	REGISTER(Material, materials)
+	struct Material {
+		std::vector<ShaderConfig> shaders;
+		std::unordered_set<InstanceHandle> instances = {};
+	};
+	REGISTER(Material, materials);
+	MaterialHandle register_material(Material mat) {
+		auto handle = registerMaterial(mat);
+		for (auto& shaderconf : mat.shaders) {
+			shaders[shaderconf.shader].materials.emplace(handle);
+		}
+		return handle;
+	}
 
 	struct Shader {
 		GLuint shader;
@@ -82,11 +98,12 @@ class Core {
 			return static_cast<Type>(static_cast<int>(lhs) | static_cast<int>(rhs));
 		}
 		Type type;
+		std::unordered_set<MaterialHandle> materials = {};
 	};
 	REGISTER(Shader, shaders)
 
 	const int lightmapSize = 4096;
-	const float lightmapCoverage = 200;
+	const float lightmapCoverage = 300;
 
 	struct DirLight {
 		vec3 dir;
@@ -98,7 +115,8 @@ class Core {
 	REGISTER(DirLight, dirLights)
 	GLuint dirLightBuffer, dirLightShadow;
 
-	void renderScene(Shader::Type type);
+	enum class RenderOrder { Simple, Shader };
+	void renderScene(Shader::Type type, RenderOrder order = RenderOrder::Shader);
 
   public:
 	Core(void (*(const char*))());
@@ -111,15 +129,32 @@ class Core {
 
 	MeshHandle create_mesh(MeshDef);
 	InstanceHandle create_instance(MeshHandle mesh, MaterialHandle mat, mat4 trans = mat4(1.0f)) {
-		InstanceHandle instance = registerInstance(Instance{});
+		InstanceHandle instance;
+		if (recycled_instances.empty()) {
+			instance = instances.size();
+			instances.push_back(Instance{});
+		} else {
+			instance = recycled_instances.back();
+			recycled_instances.pop_back();
+		}
 		instance_set_mesh(instance, mesh);
 		instance_set_material(instance, mat);
 		instance_set_trans(instance, trans);
 		return instance;
 	}
 	void instance_set_mesh(InstanceHandle instance, MeshHandle mesh) { instances[instance].model = mesh; }
-	void instance_set_material(InstanceHandle instance, MaterialHandle mat) { instances[instance].mat = mat; }
+	void instance_set_material(InstanceHandle instance, MaterialHandle mat) {
+		if (instances[instance].mat != -1)
+			materials[instances[instance].mat].instances.erase(instance);
+		instances[instance].mat = mat;
+		if (mat != -1)
+			materials[mat].instances.emplace(instance);
+	}
 	void instance_set_trans(InstanceHandle instance, mat4 trans) { instances[instance].trans = trans; }
+	void delete_instance(InstanceHandle instance) {
+		instance_set_material(instance, -1);
+		recycled_instances.push_back(instance);
+	}
 
 	void camera_set_pos(mat4 pos) { cameraPos = glm::inverse(pos); }
 	void camera_set_fov(float degrees) { fov = radians(degrees); }
