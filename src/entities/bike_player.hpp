@@ -11,6 +11,8 @@ class BikePlayer : public Bike {
   private:
 	Window& window;
 
+	
+
 	// CD = cooldowns for abilities
 	int BoostCD = 0;
 	int StrafeCD = 0;
@@ -27,8 +29,8 @@ class BikePlayer : public Bike {
   public:
 	BikePlayer(
 		Window& window, Render::Render& render, int start_place, Render::Group& group, std::vector<glm::vec3> waypoints,
-		Audio::AudioEngine& audio)
-		: Bike(render, start_place, group, audio), window(window) {
+		Audio::AudioEngine& audio, Render::MaterialHandle wallMaterialHandle)
+		: Bike(render, start_place, group, audio, wallMaterialHandle), window(window) {
 		engineAudio->loop = true;
 		gearAudio->loop = false;
 		FRAGAudio->loop = false;
