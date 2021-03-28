@@ -22,6 +22,7 @@
 
 #include "Audio/audioEngine.h"
 #include "Audio/audioInstance.h"
+#include <stdlib.h>
 
 struct {
 	bool operator()(Bike* a, Bike* b) const {
@@ -55,7 +56,7 @@ class Game : public Entity {
 	EntityManager& e_manager;
 
 	Audio::AudioEngine& stereo;
-
+	
 	bool gameover = false;
 
   public:
@@ -108,9 +109,10 @@ class Game : public Entity {
 		playerWallMaterials.push_back(p4_wall);
 
 		//Run the looping bgm and ambiance tracks
+		srand((unsigned int)time(NULL));
 		AudioInstance* bgm = new AudioInstance();
 		bgm->gain = 0.0;
-		bgm->playSound(stereo.buffer[Audio::SOUND_FILE_CYBERSONG_BGM]); // Song
+		bgm->playSound(stereo.buffer[rand() % 7 + 101]); // Song
 		AudioInstance* ambiance = new AudioInstance();
 		ambiance->gain = 0.0;
 		ambiance->playSound(stereo.buffer[Audio::SOUND_FILE_AMBIENCE_BGM]); // ambient environment sounds
