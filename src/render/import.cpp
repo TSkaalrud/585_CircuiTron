@@ -146,4 +146,13 @@ TextureHandle importSkybox(std::string filename, Render&) {
 	return texture;
 }
 
+MaterialHandle importUI(std::string filename, Render& render) {
+	int width, height, channels;
+	auto* data = stbi_load(filename.c_str(), &width, &height, &channels, 0);
+	auto tex = render.create_texture(width, height, channels, true, data);
+	stbi_image_free(data);
+
+	return render.create_ui_material(tex);
+}
+
 } // namespace Render

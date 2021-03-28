@@ -78,6 +78,14 @@ MaterialHandle Render::create_pbr_material(MaterialPBR pbr) {
 		 {.shader = depthShader, .uniform = 0, .textures = {}}}});
 }
 
+MaterialHandle Render::create_ui_material(TextureHandle texture) {
+	static ShaderHandle shader = registerShader(Shader{
+		load_shader_program({{"shaders/quad.vert", GL_VERTEX_SHADER}, {"shaders/ui.frag", GL_FRAGMENT_SHADER}}),
+		Shader::Type::UI});
+
+	return register_material(Material{{{.shader = shader, .uniform = 0, .textures = {texture}}}});
+}
+
 Render::Render(void (*glGetProcAddr(const char*))()) : Core(glGetProcAddr) {
 	{
 		ShaderHandle skyboxShader = registerShader(Shader{
