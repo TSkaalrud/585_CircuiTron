@@ -1,5 +1,7 @@
 #include "core.hpp"
 
+#include <algorithm>
+
 #include "debug.hpp"
 #include "gl.hpp"
 
