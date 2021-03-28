@@ -397,7 +397,7 @@ PxRaycastBuffer castRay(int bike, int dir, int range) {
 		std::cout << "RAY CAST RESULTS ON OBJECT: " << buf.touches[i].actor->getName() << "\n";
 	}
 
-	return buf.touches;
+	return buf;
 }
 
 
@@ -686,7 +686,7 @@ void initPhysics() {
 	PxFilterData groundPlaneSimFilterData(COLLISION_FLAG_GROUND, COLLISION_FLAG_GROUND_AGAINST, 0, 0);
 	gGroundPlane = createDrivablePlane(groundPlaneSimFilterData, gMaterial, gPhysics);
 	gGroundPlane->setName("Ground Plane");
-	//gScene->addActor(*gGroundPlane);
+	gScene->addActor(*gGroundPlane);
 
 	// Cook track
 	PxTriangleMesh* trackMesh = cookTrack();
