@@ -64,7 +64,21 @@ class Bike : public GameObject {
 	int getWaypoint() { return waypoint; }
 
 	int getHealth() { return health; }
-	void modifyHealth(int amount) { health += amount; }
+	void modifyHealth(int amount) { 
+		if (amount > 0) {
+			if (health + amount > 100) {
+				health = 100;
+			} else {
+				health += amount;
+			}
+		} else if (amount < 0) {
+			if (health + amount < 0) {
+				health = 0;
+			} else {
+				health += amount;
+			}
+		}
+	}
 
 	void wallCollision() {
 		modifyHealth(-25);
