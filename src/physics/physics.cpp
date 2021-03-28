@@ -359,7 +359,7 @@ void deleteWallSeg(int i, int j) {
 }
 
 // cast a ray from a bike in a given direction and at a given range
-PxRigidActor* castRay(int bike, int dir, int range) { 
+PxRaycastBuffer* castRay(int bike, int dir, int range) { 
 	int FRONT = 0;
 	int BACK = 1;
 	int LEFT = 2;
@@ -375,6 +375,7 @@ PxRigidActor* castRay(int bike, int dir, int range) {
 
 	if (dir == FRONT) {
 		heading = getBikeTransform(bike).q.getBasisVector2();
+	}else if (dir == BACK) {
 	}else if (dir == BACK) {
 		heading = -getBikeTransform(bike).q.getBasisVector2();
 	}else if (dir == LEFT) {
@@ -394,10 +395,78 @@ PxRigidActor* castRay(int bike, int dir, int range) {
 	// https://gameworksdocs.nvidia.com/PhysX/4.1/documentation/physxguide/Manual/SceneQueries.html?highlight=ray#multiple-hits
 		
 	for (PxU32 i = 0; i < buf.nbTouches; i++) {
-		std::cout << "RAY CAST RESULTS ON OBJECT: " << buf.touches[i].actor->getName() << "\n";
+		//std::cout << "RAY CAST RESULTS ON OBJECT: " << buf.touches[i].actor->getName() << "\n";
 	}
 
-	return buf.touches[0].actor;
+	return &buf;
+}
+
+bool slipstreamRay(int bike, int dir, int range) {
+	int FRONT = 0;
+	int BACK = 1;
+	int LEFT = 2;
+	int RIGHT = 3;
+
+	PxVehicleDrive4W* vehicle = CTbikes[bike];
+	auto origin = vehicle->getRigidDynamicActor()->getGlobalPose().p;
+	auto quat = vehicle->getRigidDynamicActor()->getGlobalPose().q;
+
+	PxVec3 heading;
+
+	// https://www.gamedev.net/forums/topic/56471-extracting-direction-vectors-from-quaternion/1273785
+
+	if (dir == FRONT) {
+		heading = getBikeTransform(bike).q.getBasisVector2();
+	} else if (dir == BACK) {
+		heading = -getBikeTransform(bike).q.getBasisVector2();
+	} else if (dir == LEFT) {
+		heading = getBikeTransform(bike).q.getBasisVector0();
+	} else if (dir == RIGHT) {
+		heading = -getBikeTransform(bike).q.getBasisVector0();
+	}
+
+	heading.normalize();
+
+	const PxU32 bufferSize = 1;                 // [in] size of 'hitBuffer'
+	PxRaycastHit hitBuffer[bufferSize];         // [out] User provided buffer for results
+	PxRaycastBuffer buf(hitBuffer, bufferSize); // [out] Blocking and touching hits stored here
+
+	gScene->raycast(origin, heading, range, buf);
+
+	// https://gameworksdocs.nvidia.com/PhysX/4.1/documentation/physxguide/Manual/SceneQueries.html?highlight=ray#multiple-hits
+
+	// std::cout << "RAY CAST RESULTS ON OBJECT: " << buf.touches[i].actor->getName() << "\n";
+	const char* name = buf.touches[0].actor->getName();
+	return std::strcmp(name, "wall") == 0;
+}
+
+void * fragRay(int bike, int range) {
+	PxVehicleDrive4W* vehicle = CTbikes[bike];
+	auto origin = vehicle->getRigidDynamicActor()->getGlobalPose().p;
+	auto quat = vehicle->getRigidDynamicActor()->getGlobalPose().q;
+
+	PxVec3 heading = getBikeTransform(bike).q.getBasisVector2();
+
+	heading.normalize();
+
+	const PxU32 bufferSize = 100;                 // [in] size of 'hitBuffer'
+	PxRaycastHit hitBuffer[bufferSize];         // [out] User provided buffer for results
+	PxRaycastBuffer buf(hitBuffer, bufferSize); // [out] Blocking and touching hits stored here
+
+	gScene->raycast(origin, heading, range, buf);
+
+	// https://gameworksdocs.nvidia.com/PhysX/4.1/documentation/physxguide/Manual/SceneQueries.html?highlight=ray#multiple-hits
+
+	for (PxU32 i = 0; i < buf.nbTouches; i++) {
+		std::cout << "RAY CAST RESULTS ON OBJECT: " << buf.touches[i].actor->getName() << "\n";
+		const char* name = buf.touches[i].actor->getName();
+		if (std::strcmp(name, "wall") == 0) {
+			return buf.touches[i].actor->userData;
+			break;
+		}
+	}
+
+	return nullptr;
 }
 
 

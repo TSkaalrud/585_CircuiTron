@@ -42,7 +42,11 @@ void makeWallSeg(int i, physx::PxTransform a, physx::PxTransform b);
 
 void deleteWallSeg(int i, int j);
 
-physx::PxRigidActor* castRay(int bike, int dir, int range);
+physx::PxRaycastBuffer* castRay(int bike, int dir, int range);
+
+bool slipstreamRay(int bike, int dir, int range);
+
+void * fragRay(int bike, int range);
 
 physx::PxTransform getBikeTransform(int i);
 
