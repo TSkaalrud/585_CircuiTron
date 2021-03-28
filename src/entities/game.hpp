@@ -39,7 +39,9 @@ class Game : public Entity {
 	// std::vector<Checkpoint> checkpoints;
 	// Checkpoint finish = new Checkpoint();
 
+	std::vector<Render::Group> BikeModels; //a list of bike models
 	Render::Group car_model;
+
 	Render::Group wall_model;
 	Render::Group track_model;
 
@@ -69,6 +71,12 @@ class Game : public Entity {
 		uploadMap("assets/AI_waypoints_1.obj");
 		uploadMap("assets/AI_waypoints_2.obj");
 		uploadMap("assets/AI_waypoints_3.obj");
+		//load in the 4 bike models
+		uploadBike("assets/Bike_P1.glb", render);
+		uploadBike("assets/Bike_P2.glb", render);
+		uploadBike("assets/Bike_P3.glb", render);
+		uploadBike("assets/Bike_P4.glb", render);
+
 		}
 
 	void enter() override {
@@ -120,7 +128,7 @@ class Game : public Entity {
 		e_manager.addEntity(std::make_unique<Track>(render, track_model));
 
 		//make the player's bike
-		std::unique_ptr<Bike> b = std::make_unique<BikePlayer>(window, render, 1, car_model, ai_waypoints[1], stereo, playerWallMaterials[0]);
+		std::unique_ptr<Bike> b = std::make_unique<BikePlayer>(window, render, 1, BikeModels[0], ai_waypoints[1], stereo, playerWallMaterials[0]);
 		bikes.push_back(b.get());
 		
 		e_manager.addEntity(std::move(b));
@@ -129,7 +137,7 @@ class Game : public Entity {
 		for (int i = 0; i < players - 1; i++) {
 			initVehicle();
 
-			std::unique_ptr<Bike> b = std::make_unique<BikeAI>(render, i + 2, car_model, ai_waypoints, stereo, playerWallMaterials[i+1]);
+			std::unique_ptr<Bike> b = std::make_unique<BikeAI>(render, i + 2, BikeModels[i+1], ai_waypoints, stereo, playerWallMaterials[i+1]);
 			bikes.push_back(b.get());
 
 			e_manager.addEntity(std::move(b));
@@ -203,6 +211,10 @@ class Game : public Entity {
 		}
 		// pushback the ai_map array
 		ai_waypoints.push_back(map);
+	}
+
+	void uploadBike(const char bike[], Render::Render& render) {
+		BikeModels.push_back(Render::importModel(bike, render));
 	}
 
 	void wallCollision(int i) { bikes[i]->wallCollision(); }
