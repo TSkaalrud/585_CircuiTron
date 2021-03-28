@@ -174,7 +174,11 @@ class Core {
 			lookAt(vec3{0, 0, 0}, -dirLights[handle].dir, vec3{0, 1, 0});
 	}
 
-	TextureHandle create_texture(int width, int height, int channels, bool srgb, void* data);
+	enum TextureFlags { NONE = 0, SRGB = 1 << 0, MIPMAPPED = 1 << 1, ANIOSTROPIC = 1 << 2, CLAMPED = 1 << 3 };
+	friend inline TextureFlags operator|(const TextureFlags lhs, const TextureFlags rhs) {
+		return static_cast<TextureFlags>(static_cast<int>(lhs) | static_cast<int>(rhs));
+	}
+	TextureHandle create_texture(int width, int height, int channels, TextureFlags flags, void* data);
 
 	void run();
 };

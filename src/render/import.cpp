@@ -57,8 +57,12 @@ loadTexture(aiMaterial* material, aiTextureType type, unsigned int index, const 
 	int x, y, channels;
 	auto data =
 		stbi_load_from_memory(reinterpret_cast<stbi_uc*>(texture->pcData), texture->mWidth, &x, &y, &channels, 0);
-	auto tex =
-		render.create_texture(x, y, channels, type == aiTextureType_DIFFUSE || type == aiTextureType_EMISSIVE, data);
+
+	auto flags = Core::TextureFlags::ANIOSTROPIC | Core::TextureFlags::MIPMAPPED;
+	if (type == aiTextureType_DIFFUSE || type == aiTextureType_EMISSIVE) {
+		flags = flags | Core::TextureFlags::SRGB;
+	}
+	auto tex = render.create_texture(x, y, channels, flags, data);
 	stbi_image_free(data);
 	return tex;
 }
@@ -149,7 +153,9 @@ TextureHandle importSkybox(std::string filename, Render&) {
 MaterialHandle importUI(std::string filename, Render& render) {
 	int width, height, channels;
 	auto* data = stbi_load(filename.c_str(), &width, &height, &channels, 0);
-	auto tex = render.create_texture(width, height, channels, true, data);
+	auto tex = render.create_texture(
+		width, height, channels, Core::TextureFlags::SRGB | Core::TextureFlags::CLAMPED | Core::TextureFlags::MIPMAPPED,
+		data);
 	stbi_image_free(data);
 
 	return render.create_ui_material(tex);

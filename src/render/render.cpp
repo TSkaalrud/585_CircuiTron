@@ -63,7 +63,7 @@ MaterialHandle Render::create_pbr_material(MaterialPBR pbr) {
 	glNamedBufferStorage(uniform, sizeof(PBR), &_pbr, 0);
 
 	static uint8_t white[3] = {255, 255, 255};
-	static auto whiteTexture = create_texture(1, 1, 3, false, &white);
+	static auto whiteTexture = create_texture(1, 1, 3, Core::TextureFlags::NONE, &white);
 
 	std::vector<TextureHandle> textures = {
 		irradiance,
