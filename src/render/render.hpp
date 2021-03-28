@@ -37,6 +37,8 @@ class Render : public Core {
 	MaterialHandle create_pbr_material(MaterialPBR);
 	MaterialHandle create_ui_material(TextureHandle);
 
+	MeshHandle ui_mesh();
+
 	void set_skybox_material(MaterialHandle material, bool update = true) {
 		instance_set_material(skybox, material);
 		if (update)

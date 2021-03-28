@@ -80,10 +80,42 @@ MaterialHandle Render::create_pbr_material(MaterialPBR pbr) {
 
 MaterialHandle Render::create_ui_material(TextureHandle texture) {
 	static ShaderHandle shader = registerShader(Shader{
-		load_shader_program({{"shaders/quad.vert", GL_VERTEX_SHADER}, {"shaders/ui.frag", GL_FRAGMENT_SHADER}}),
+		load_shader_program({{"shaders/quad.vert", GL_VERTEX_SHADER}, {"shaders/simple.frag", GL_FRAGMENT_SHADER}}),
 		Shader::Type::UI});
 
 	return register_material(Material{{{.shader = shader, .uniform = 0, .textures = {texture}}}});
+}
+
+MeshHandle Render::ui_mesh() {
+	static MeshHandle handle = -1;
+
+	if (handle == -1) {
+		GLuint vertex_buffer, index_buffer, quadVertexArray;
+		glCreateBuffers(1, &vertex_buffer);
+		glCreateBuffers(1, &index_buffer);
+		glCreateVertexArrays(1, &quadVertexArray);
+
+		vec2 quadverts[] = {
+			{-1, -1}, {0, 0}, {-1, 1}, {0, 1}, {1, -1}, {1, 0}, {1, 1}, {1, 1},
+		};
+		int quadindicies[] = {0, 1, 2, 2, 1, 3};
+
+		glNamedBufferStorage(vertex_buffer, sizeof(quadverts), &quadverts, 0);
+		glNamedBufferStorage(index_buffer, sizeof(quadindicies), &quadindicies, 0);
+
+		glVertexArrayVertexBuffer(quadVertexArray, 0, vertex_buffer, 0, sizeof(vec2) * 2);
+		glEnableVertexArrayAttrib(quadVertexArray, 0);
+		glVertexArrayAttribFormat(quadVertexArray, 0, 2, GL_FLOAT, false, 0);
+		glVertexArrayVertexBuffer(quadVertexArray, 1, vertex_buffer, 0, sizeof(vec2) * 2);
+		glEnableVertexArrayAttrib(quadVertexArray, 1);
+		glVertexArrayAttribFormat(quadVertexArray, 1, 2, GL_FLOAT, false, sizeof(vec2));
+
+		glVertexArrayElementBuffer(quadVertexArray, index_buffer);
+
+		handle = registerMesh(Mesh{.vao = quadVertexArray, .count = 6});
+	}
+
+	return handle;
 }
 
 Render::Render(void (*glGetProcAddr(const char*))()) : Core(glGetProcAddr) {
@@ -153,40 +185,14 @@ Render::Render(void (*glGetProcAddr(const char*))()) : Core(glGetProcAddr) {
 		static GLuint reflectionBRDFShader = load_shader_program(
 			{{"shaders/quad.vert", GL_VERTEX_SHADER}, {"shaders/reflectionBRDF.frag", GL_FRAGMENT_SHADER}});
 		glUseProgram(reflectionBRDFShader);
-		mat3 transform(1.0f);
-		glUniformMatrix3fv(0, 1, false, value_ptr(transform));
+		mat4 transform(1.0f);
+		glUniformMatrix4fv(0, 1, false, value_ptr(transform));
 
-		GLuint vertex_buffer, index_buffer, quadVertexArray;
-		glCreateBuffers(1, &vertex_buffer);
-		glCreateBuffers(1, &index_buffer);
-		glCreateVertexArrays(1, &quadVertexArray);
-
-		vec2 quadverts[] = {
-			{-1, -1}, {0, 0}, {-1, 1}, {0, 1}, {1, -1}, {1, 0}, {1, 1}, {1, 1},
-		};
-		int quadindicies[] = {0, 1, 2, 2, 1, 3};
-
-		glNamedBufferStorage(vertex_buffer, sizeof(quadverts), &quadverts, 0);
-		glNamedBufferStorage(index_buffer, sizeof(quadindicies), &quadindicies, 0);
-
-		glVertexArrayVertexBuffer(quadVertexArray, 0, vertex_buffer, 0, sizeof(vec2) * 2);
-		glEnableVertexArrayAttrib(quadVertexArray, 0);
-		glVertexArrayAttribFormat(quadVertexArray, 0, 2, GL_FLOAT, false, 0);
-		glVertexArrayVertexBuffer(quadVertexArray, 1, vertex_buffer, 0, sizeof(vec2) * 2);
-		glEnableVertexArrayAttrib(quadVertexArray, 1);
-		glVertexArrayAttribFormat(quadVertexArray, 1, 2, GL_FLOAT, false, sizeof(vec2));
-
-		glVertexArrayElementBuffer(quadVertexArray, index_buffer);
-
-		glBindVertexArray(quadVertexArray);
-
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		auto& quadMesh = meshes[ui_mesh()];
+		glBindVertexArray(quadMesh.vao);
+		glDrawElements(GL_TRIANGLES, quadMesh.count, GL_UNSIGNED_INT, 0);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-		glDeleteVertexArrays(1, &quadVertexArray);
-		glDeleteBuffers(1, &vertex_buffer);
-		glDeleteBuffers(1, &index_buffer);
 
 		glDeleteProgram(reflectionBRDFShader);
 	}
