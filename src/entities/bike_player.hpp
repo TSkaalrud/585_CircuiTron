@@ -54,6 +54,7 @@ class BikePlayer : public Bike {
 
 			// Slipstreaming
 			Slipstreams = slipstreams(getId());
+			std::cout << Slipstreams << std::endl;
 			if (Slipstreams > 0) {
 				if (SlipstreamCD > 0) {
 					SlipstreamCD--;
@@ -61,6 +62,7 @@ class BikePlayer : public Bike {
 					modifyHealth(0.5);
 					// slipstreaming code here. get the bike's physics model and apply increasing force to it's -z basis
 					// vector
+					getVehicle(getId())->getRigidDynamicActor()->addForce(physx::PxVec3(0.0f, 0.0f, 1.0f));
 				}
 			} else if (SlipstreamCD < 30) {
 				SlipstreamCD++;
@@ -238,6 +240,10 @@ class BikePlayer : public Bike {
 				FRAGCD += 30;
 				FRAGAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_GUN_IMPACT2_SFX]);
 				modifyHealth(-20);
+
+				//if (wallHit(getId())) {
+					// do something if we shoot a wall
+				//}
 			}
 		}
 
@@ -297,6 +303,50 @@ class BikePlayer : public Bike {
 
 	int slipstreams(int bike) {
 		int slipstreamCount = 0;
+
+		physx::PxRigidActor* leftActor = castRay(bike, 2, 10);
+		//physx::PxRaycastBuffer rightRay = castRay(bike, 3, 5);
+			
+		std::cout << leftActor->getName() << std::endl;
+
+		/*
+		for (physx::PxU32 i = 0; i < leftRay->nbTouches; i++) {
+			std::cout << "RAY CAST RESULTS ON OBJECT: " << leftRay->touches[i].actor->getName() << "\n";
+		}
+
+		/*
+		if (false && leftRay.nbTouches > 0) {
+			const char* leftName = leftRay.touches[leftRay.nbTouches-1].actor->getName();
+			std::cout << leftName << std::endl;
+			if (std::strcmp(leftName, "wall") == 0) {
+				slipstreamCount++;
+			}
+		}
+
+		/*
+		if (rightRay.nbTouches > 0) {
+			const char* name = rightRay.touches[0].actor->getName();
+			if (std::strcmp(name, "wall") == 0) {
+				slipstreamCount++;
+			}
+		}
+		*/
+
 		return slipstreamCount;
 	}
+
+	/*
+	bool wallHit(int bike) { 
+		physx::PxRaycastBuffer* forwardRay = castRay(bike, 0, 100);
+		
+		if (forwardRay->nbTouches > 0) {
+			const char* name = forwardRay->touches[0].actor->getName();
+			if (std::strcmp(name, "wall") == 0) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+	*/
 };

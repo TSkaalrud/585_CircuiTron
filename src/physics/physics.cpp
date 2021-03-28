@@ -359,7 +359,7 @@ void deleteWallSeg(int i, int j) {
 }
 
 // cast a ray from a bike in a given direction and at a given range
-PxRaycastBuffer castRay(int bike, int dir, int range) { 
+PxRigidActor* castRay(int bike, int dir, int range) { 
 	int FRONT = 0;
 	int BACK = 1;
 	int LEFT = 2;
@@ -397,7 +397,7 @@ PxRaycastBuffer castRay(int bike, int dir, int range) {
 		std::cout << "RAY CAST RESULTS ON OBJECT: " << buf.touches[i].actor->getName() << "\n";
 	}
 
-	return buf.touches;
+	return buf.touches[0].actor;
 }
 
 
