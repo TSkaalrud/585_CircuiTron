@@ -22,6 +22,7 @@
 
 #include "Audio/audioEngine.h"
 #include "Audio/audioInstance.h"
+#include <stdlib.h>
 
 struct {
 	bool operator()(Bike* a, Bike* b) const {
@@ -42,6 +43,12 @@ class Game : public Entity {
 	Render::Group wall_model;
 	Render::Group track_model;
 
+	std::vector<Render::MaterialHandle> playerWallMaterials;
+	Render::MaterialHandle p1_wall;
+	Render::MaterialHandle p2_wall;
+	Render::MaterialHandle p3_wall;
+	Render::MaterialHandle p4_wall;
+
 	std::vector<std::vector<glm::vec3>> ai_waypoints; // a list of waypoints for each ai bike
 
 	Window& window;
@@ -49,7 +56,7 @@ class Game : public Entity {
 	EntityManager& e_manager;
 
 	Audio::AudioEngine& stereo;
-
+	
 	bool gameover = false;
 
   public:
@@ -58,42 +65,77 @@ class Game : public Entity {
 		  car_model(importModel("assets/Bike_Final.glb", render)),
 		  wall_model(importModel("assets/Wall_blob.glb", render)),
 		  track_model(importModel("assets/The_Coffin_render.glb", render)), stereo(audio) {
-		// loading in the AI waypoint vertices with a dummy variable 0 for the player bike id
-		// std::vector<glm::vec3> map;
-		// ai_waypoints.push_back(map);
+		// loading in the AI waypoint vertices
 		uploadMap("assets/AI_waypoints_1.obj");
 		uploadMap("assets/AI_waypoints_2.obj");
 		uploadMap("assets/AI_waypoints_3.obj");
 		}
 
 	void enter() override {
+		//set the skybox texture asset
 		render.set_skybox_rect_texture(importSkybox("assets/skyboxes/SPACE-1.hdr", render));
 
+		//Create and pushback the 4 playerWallMaterials
+		Render::MaterialPBR p1_wall_pbr = {
+			.albedoFactor = glm::vec4(0.f, 0.000260f, 0.133f, 1.f), 
+			.metalFactor = 0.5f, 
+			.roughFactor = 0.05f, 
+			.emissiveFactor = glm::vec3(0, 0, 0)};
+		p1_wall = render.create_pbr_material(p1_wall_pbr);
+		playerWallMaterials.push_back(p1_wall);
+
+		Render::MaterialPBR p2_wall_pbr = {
+			.albedoFactor = glm::vec4(0.448f, 0.079f, 0.f, 1.f),
+			.metalFactor = 0.5f,
+			.roughFactor = 0.05f,
+			.emissiveFactor = glm::vec3(0, 0, 0)};
+		p2_wall = render.create_pbr_material(p2_wall_pbr);
+		playerWallMaterials.push_back(p2_wall);
+
+		Render::MaterialPBR p3_wall_pbr = {
+			.albedoFactor = glm::vec4(0.f, 0.133f, 0.035f, 1.f),
+			.metalFactor = 0.5f,
+			.roughFactor = 0.05f,
+			.emissiveFactor = glm::vec3(0, 0, 0)};
+		p3_wall = render.create_pbr_material(p3_wall_pbr);
+		playerWallMaterials.push_back(p3_wall);
+
+		Render::MaterialPBR p4_wall_pbr = {
+			.albedoFactor = glm::vec4(0.319f, 0.f, 0.14f, 1.f),
+			.metalFactor = 0.5f,
+			.roughFactor = 0.05f,
+			.emissiveFactor = glm::vec3(0, 0, 0)};
+		p4_wall = render.create_pbr_material(p4_wall_pbr);
+		playerWallMaterials.push_back(p4_wall);
+
+		//Run the looping bgm and ambiance tracks
+		srand((unsigned int)time(NULL));
 		AudioInstance* bgm = new AudioInstance();
 		bgm->gain = 0.0;
-		bgm->playSound(stereo.buffer[Audio::SOUND_FILE_CYBERSONG_BGM]); // Song
+		bgm->playSound(stereo.buffer[rand() % 7 + 101]); // Song
 		AudioInstance* ambiance = new AudioInstance();
 		ambiance->gain = 0.0;
 		ambiance->playSound(stereo.buffer[Audio::SOUND_FILE_AMBIENCE_BGM]); // ambient environment sounds
 
 		e_manager.addEntity(std::make_unique<Track>(render, track_model));
 
-		std::unique_ptr<Bike> b = std::make_unique<BikePlayer>(window, render, 1, car_model, ai_waypoints[1], stereo);
+		//make the player's bike
+		std::unique_ptr<Bike> b = std::make_unique<BikePlayer>(window, render, 1, car_model, ai_waypoints[1], stereo, playerWallMaterials[0]);
 		bikes.push_back(b.get());
-
+		
 		e_manager.addEntity(std::move(b));
 
+		//make the AI bikes
 		for (int i = 0; i < players - 1; i++) {
 			initVehicle();
 
-			std::unique_ptr<Bike> b = std::make_unique<BikeAI>(render, i + 2, car_model, ai_waypoints, stereo);
+			std::unique_ptr<Bike> b = std::make_unique<BikeAI>(render, i + 2, car_model, ai_waypoints, stereo, playerWallMaterials[i+1]);
 			bikes.push_back(b.get());
 
 			e_manager.addEntity(std::move(b));
 		}
 
-		// e_manager.addEntity(std::make_unique<Wall>(render, wall_model));
-
+		//make the camera
 		e_manager.addEntity(std::make_unique<Camera>(window, render));
 	}
 

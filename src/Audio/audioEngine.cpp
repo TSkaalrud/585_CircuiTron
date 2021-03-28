@@ -141,8 +141,7 @@ void AudioEngine::initialize() {
 	CheckError();
 
 	// load in all audio files into buffer sequentially
-	loadWavFile("assets/audio/Cybersong.wav", buffer, &size, &freq, &format);
-	CheckError();
+	//buffer 0 empty
 	loadWavFile("assets/audio/Ambience.wav", buffer + 1, &size, &freq, &format);
 	CheckError();
 	loadWavFile("assets/audio/Apprehension.wav", buffer + 2, &size, &freq, &format);
@@ -192,6 +191,20 @@ void AudioEngine::initialize() {
 	loadWavFile("assets/audio/burr.wav", buffer + 24, &size, &freq, &format);
 	CheckError();
 	loadWavFile("assets/audio/Boost.wav", buffer + 25, &size, &freq, &format);
+	CheckError();
+	loadWavFile("assets/audio/Cybersong.wav", buffer + 101, &size, &freq, &format);//music starts at 101
+	CheckError();
+	loadWavFile("assets/audio/03 Initial Entry.wav", buffer + 102, &size, &freq, &format);
+	CheckError();
+	loadWavFile("assets/audio/04 Sinister Gale.wav", buffer + 103, &size, &freq, &format);
+	CheckError();
+	loadWavFile("assets/audio/05 Solar Eclipse.wav", buffer + 104, &size, &freq, &format);
+	CheckError();
+	loadWavFile("assets/audio/07 Vicious Clarity.wav", buffer + 105, &size, &freq, &format);
+	CheckError();
+	loadWavFile("assets/audio/08 Aerial Walkways.wav", buffer + 106, &size, &freq, &format);
+	CheckError();
+	loadWavFile("assets/audio/09 Aurora.wav", buffer + 107, &size, &freq, &format);
 	CheckError();
 
 	// alSourcef(source[1], AL_PITCH, 1.0f);

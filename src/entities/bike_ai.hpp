@@ -18,8 +18,8 @@ class BikeAI : public Bike {
   public:
 	BikeAI(
 		Render::Render& render, int start_place, Render::Group& group, std::vector<std::vector<glm::vec3>> ai_waypoints,
-		Audio::AudioEngine& audio)
-		: Bike(render, start_place, group, audio), ai_waypoints(ai_waypoints) {
+		Audio::AudioEngine& audio, Render::MaterialHandle wallMaterialHandle)
+		: Bike(render, start_place, group, audio, wallMaterialHandle), ai_waypoints(ai_waypoints) {
 		waypoints = ai_waypoints[getId() - 1];
 	};
 
