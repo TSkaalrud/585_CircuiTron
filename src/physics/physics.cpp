@@ -588,8 +588,7 @@ void initVehicle() {
 	gVehicle4W->getRigidDynamicActor()->setName("bike");
 
 	// userdata
-	bikeUserData* bikeData = {};
-	bikeData->bikeNumber = CTbikes.size() - 1;
+	bikeUserData* bikeData = new bikeUserData{(int)CTbikes.size() - 1};
 	gVehicle4W->getRigidDynamicActor()->userData;
 
 	gScene->addActor(*gVehicle4W->getRigidDynamicActor());
