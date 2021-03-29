@@ -24,6 +24,8 @@
 #include "Audio/audioInstance.h"
 #include <stdlib.h>
 
+#include "entities/ui_game.h"
+
 struct {
 	bool operator()(Bike* a, Bike* b) const {
 		if (a->getLap() != b->getLap())
@@ -56,14 +58,17 @@ class Game : public Entity {
 	Window& window;
 	Render::Render& render;
 	EntityManager& e_manager;
+	UiGame* game_UI;
 
 	Audio::AudioEngine& stereo;
 	
 	bool gameover = false;
 
   public:
-	Game(Window& window, Render::Render& render, int players, EntityManager& em, Audio::AudioEngine& audio)
+	Game(
+		Window& window, Render::Render& render, int players, EntityManager& em, Audio::AudioEngine& audio, UiGame* UI)
 		: window(window), render(render), e_manager(em), players(players),
+		  game_UI(UI),
 		  car_model(importModel("assets/Bike_Final.glb", render)),
 		  wall_model(importModel("assets/Wall_blob.glb", render)),
 		  track_model(importModel("assets/The_Coffin_render.glb", render)), stereo(audio) {
@@ -125,6 +130,7 @@ class Game : public Entity {
 		ambiance->gain = 0.0;
 		ambiance->playSound(stereo.buffer[Audio::SOUND_FILE_AMBIENCE_BGM]); // ambient environment sounds
 
+		//make the track 
 		e_manager.addEntity(std::make_unique<Track>(render, track_model));
 
 		//make the player's bike
@@ -164,6 +170,9 @@ class Game : public Entity {
 		for (int i = 0; i < bikes.size(); i++) {
 			bikes[i]->setPlace(i + 1);
 		}
+		//game_UI->currentPlace = bikes[0]->getPlace();
+		game_UI->updatePlace(bikes[0]->getPlace());
+		game_UI->updateLap(bikes[0]->getLap());
 	}
 
 	void checkWin() {
