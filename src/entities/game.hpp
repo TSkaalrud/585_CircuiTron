@@ -24,6 +24,8 @@
 #include "Audio/audioInstance.h"
 #include <stdlib.h>
 
+#include "entities/ui_game.h"
+
 struct {
 	bool operator()(Bike* a, Bike* b) const {
 		if (a->getLap() != b->getLap())
@@ -57,14 +59,17 @@ class Game : public Entity {
 	Window& window;
 	Render::Render& render;
 	EntityManager& e_manager;
+	UiGame* game_UI;
 
 	Audio::AudioEngine& stereo;
 	
 	bool gameover = false;
 
   public:
-	Game(Window& window, Render::Render& render, int players, EntityManager& em, Audio::AudioEngine& audio)
+	Game(
+		Window& window, Render::Render& render, int players, EntityManager& em, Audio::AudioEngine& audio, UiGame* UI)
 		: window(window), render(render), e_manager(em), players(players),
+		  game_UI(UI),
 		  car_model(importModel("assets/Bike_Final.glb", render)),
 		  wall_model(importModel("assets/Wall_blob.glb", render)),
 		  track_model(importModel("assets/The_Coffin_render.glb", render)), stereo(audio) {
@@ -126,20 +131,23 @@ class Game : public Entity {
 		ambiance->gain = 0.0;
 		ambiance->playSound(stereo.buffer[Audio::SOUND_FILE_AMBIENCE_BGM]); // ambient environment sounds
 
+		//make the track 
 		e_manager.addEntity(std::make_unique<Track>(render, track_model));
 
 		//make the player's bike
-		std::unique_ptr<Bike> b = std::make_unique<BikePlayer>(window, render, 1, BikeModels[0], ai_waypoints[1], stereo, playerWallMaterials[0]);
+		std::unique_ptr<Bike> b = std::make_unique<BikePlayer>(
+			window, render, 1, BikeModels[0], ai_waypoints[1], stereo, playerWallMaterials[0], game_UI);
 		bikes.push_back(b.get());
 		order.push_back(b.get());
-		
+
 		e_manager.addEntity(std::move(b));
 
 		//make the AI bikes
 		for (int i = 0; i < players - 1; i++) {
 			initVehicle();
 
-			std::unique_ptr<Bike> b = std::make_unique<BikeAI>(render, i + 2, BikeModels[i+1], ai_waypoints, stereo, playerWallMaterials[i+1]);
+			std::unique_ptr<Bike> b = std::make_unique<BikeAI>(
+				window, render, i + 2, BikeModels[i + 1], ai_waypoints, stereo, playerWallMaterials[i + 1], game_UI);
 			bikes.push_back(b.get());
 			order.push_back(b.get());
 
@@ -166,21 +174,27 @@ class Game : public Entity {
 		std::sort(order.begin(), order.end(), place_sort);
 		for (int i = 0; i < bikes.size(); i++) {
 			order[i]->setPlace(i + 1);
+			//std::cout << bikes[0]->getPlace() << std::endl;
+			std::cout << bikes[0]->getPlace() << std::endl;
 		}
-
-		std::cout << bikes[0]->getPlace() << std::endl;
+		//game_UI->currentPlace = bikes[0]->getPlace();
+		game_UI->updatePlace(bikes[0]->getPlace());
+		game_UI->updateLap(bikes[0]->getLap());
 	}
 
 	void checkWin() {
-		// currently 1 lap to win  CHANGE TO 3 LATER
-		if (bikes[0]->getLap() - 1 == 3) {
-			if (bikes[0]->getId() == 0) {
+		// currently 3 laps to win
+		if (order[0]->getLap() - 1 == 3) {
+			if (order[0]->getId() == 0) {
 				std::cout << "Player Wins!" << std::endl;
 			} else {
-				std::cout << "AI " << bikes[0]->getId() << " Wins!" << std::endl;
+				std::cout << "AI " << order[0]->getId() << " Wins!" << std::endl;
 			}
 			lockAllBikes();
+			game_UI->winner(order[0]->getId());
 			gameover = true;
+		} else {
+			game_UI->winner(-1);
 		}
 	}
 

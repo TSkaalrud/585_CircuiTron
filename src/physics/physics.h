@@ -28,6 +28,10 @@ struct wallSpawnInfo {
 	physx::PxTransform wallBack;
 };
 
+struct bikeUserData {
+	int bikeNumber;
+};
+
 void initVehicle();
 
 int getNumBikes();

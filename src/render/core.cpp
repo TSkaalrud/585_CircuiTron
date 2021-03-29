@@ -1,5 +1,7 @@
 #include "core.hpp"
 
+#include <algorithm>
+
 #include "debug.hpp"
 #include "gl.hpp"
 
@@ -48,7 +50,9 @@ uint Core::create_mesh(MeshDef def) {
 	return registerMesh(Mesh{.vao = vao, .count = static_cast<uint>(def.indicies.size())});
 }
 
-uint Core::create_texture(int width, int height, int channels, bool srgb, void* data) {
+uint Core::create_texture(int width, int height, int channels, TextureFlags flags, void* data) {
+	bool srgb = flags & TextureFlags::SRGB;
+	bool mipmaps = flags & TextureFlags::MIPMAPPED;
 	GLuint texture;
 	GLenum format, internalformat;
 	switch (channels) {
@@ -70,37 +74,24 @@ uint Core::create_texture(int width, int height, int channels, bool srgb, void* 
 		break;
 	}
 	glCreateTextures(GL_TEXTURE_2D, 1, &texture);
-	glTextureStorage2D(texture, glm::max(glm::log2(min(width, height)), 1), internalformat, width, height);
-	glTextureParameterf(texture, GL_TEXTURE_MAX_ANISOTROPY, INFINITY);
+	auto levels = 1;
+	if (mipmaps)
+		levels = glm::max(glm::log2(min(width, height)), 1);
+	glTextureStorage2D(texture, levels, internalformat, width, height);
+	if (flags & TextureFlags::ANIOSTROPIC)
+		glTextureParameterf(texture, GL_TEXTURE_MAX_ANISOTROPY, INFINITY);
 	glTextureSubImage2D(texture, 0, 0, 0, width, height, format, GL_UNSIGNED_BYTE, data);
-	glGenerateTextureMipmap(texture);
+	if (flags & TextureFlags::CLAMPED) {
+		glTextureParameteri(texture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTextureParameteri(texture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	}
+	if (mipmaps)
+		glGenerateTextureMipmap(texture);
 	return texture;
 }
 
 void Core::renderScene(Shader::Type type, RenderOrder order) {
-	switch (order) {
-	case RenderOrder::Simple:
-		for (auto& i : instances) {
-			if (i.mat == -1)
-				continue;
-
-			glBindVertexArray(meshes[i.model].vao);
-			for (auto& shader : materials[i.mat].shaders) {
-				if ((shaders[shader.shader].type & type) == 0)
-					continue;
-
-				glUseProgram(shaders[shader.shader].shader);
-
-				glBindBufferBase(GL_UNIFORM_BUFFER, 1, shader.uniform);
-				glBindTextures(3, shader.textures.size(), shader.textures.data());
-
-				glUniformMatrix4fv(0, 1, false, value_ptr(i.trans));
-
-				glDrawElements(GL_TRIANGLES, meshes[i.model].count, GL_UNSIGNED_INT, 0);
-			}
-		}
-		break;
-	case RenderOrder::Shader:
+	if (order == RenderOrder::Shader) {
 		for (int i = 0; i < shaders.size(); i++) {
 			auto& shader = shaders[i];
 			if ((shader.type & type) == 0)
@@ -128,7 +119,32 @@ void Core::renderScene(Shader::Type type, RenderOrder order) {
 				}
 			}
 		}
-		break;
+	} else {
+		auto sorted_instances = instances;
+		if (order == RenderOrder::UIDepth) {
+			std::sort(sorted_instances.begin(), sorted_instances.end(), [](Instance a, Instance b) {
+				return a.trans[3][2] < b.trans[3][2];
+			});
+		}
+		for (auto& i : sorted_instances) {
+			if (i.mat == -1)
+				continue;
+
+			glBindVertexArray(meshes[i.model].vao);
+			for (auto& shader : materials[i.mat].shaders) {
+				if ((shaders[shader.shader].type & type) == 0)
+					continue;
+
+				glUseProgram(shaders[shader.shader].shader);
+
+				glBindBufferBase(GL_UNIFORM_BUFFER, 1, shader.uniform);
+				glBindTextures(3, shader.textures.size(), shader.textures.data());
+
+				glUniformMatrix4fv(0, 1, false, value_ptr(i.trans));
+
+				glDrawElements(GL_TRIANGLES, meshes[i.model].count, GL_UNSIGNED_INT, 0);
+			}
+		}
 	}
 }
 
@@ -138,6 +154,7 @@ void Core::run() {
 	glEnable(GL_DEPTH_CLAMP);
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+	glDisable(GL_BLEND);
 	glDepthFunc(GL_LEQUAL);
 
 	glNamedBufferData(dirLightBuffer, vector_size(dirLights), dirLights.data(), GL_DYNAMIC_DRAW);
@@ -172,6 +189,11 @@ void Core::run() {
 	glBindTextures(0, 1, &dirLightShadow);
 	glCullFace(GL_BACK);
 	renderScene(Shader::Type::Opaque | Shader::Type::Skybox);
+
+	glDepthFunc(GL_ALWAYS);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	renderScene(Shader::Type::UI, RenderOrder::UIDepth);
 }
 
 } // namespace Render

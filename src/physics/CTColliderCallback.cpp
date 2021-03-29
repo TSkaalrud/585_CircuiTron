@@ -21,8 +21,9 @@ void CTColliderCallback::onTrigger(PxTriggerPair* pairs, PxU32 count) {
 			if (w->collisions < 5) {	//bike triggers wall up to 4 times on bike creation so this is just to ignore that
 				w->collisions++;
 			} else {					//if wall is triggered otherwise, do this stuff
-				std::cout << "bike #" << w->segmentInfo.bikeNumber << " wall #" << w->wallIndex << " broken!"
-						  << std::endl;
+				std::cout << "bike #" << w->segmentInfo.bikeNumber << " wall #" << w->wallIndex << " broken!"  << std::endl;
+				bikeUserData* bikeData = (bikeUserData*)pairs[i].otherActor->userData;
+				std::cout << bikeData->bikeNumber << std::endl;
 				//deleteWallSeg(w->segmentInfo.bikeNumber, w->wallIndex);
 			}
 

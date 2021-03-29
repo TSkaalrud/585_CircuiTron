@@ -5,6 +5,9 @@
 #include "game_object.hpp"
 #include "physics/physics.h"
 #include "render/wall.hpp"
+#include "window.hpp"
+#include "ui_game.h"
+
 
 class Bike : public GameObject {
   private:
@@ -15,8 +18,9 @@ class Bike : public GameObject {
 	int id;
 	bool locked = false;
 
+	Window& window;
 	Render::Wall wall;
-
+	UiGame* UI;
   protected:
 	std::vector<glm::vec3> waypoints; // current waypoints
 
@@ -30,8 +34,10 @@ class Bike : public GameObject {
 	AudioInstance* FRAGAudio = new AudioInstance();
 	AudioInstance* chassisAudio = new AudioInstance();
 
-	Bike(Render::Render& render, int start_place, Render::Group& group, Audio::AudioEngine& audio, Render::MaterialHandle wallMaterialHandle)
-		: GameObject(render, group), place(start_place), id(start_place - 1), stereo(audio), wall(render, wallMaterialHandle) {
+	Bike(Window& window, Render::Render & render, int start_place, Render::Group& group, Audio::AudioEngine& audio,
+		Render::MaterialHandle wallMaterialHandle, UiGame* UI)
+		: window(window), GameObject(render, group), place(start_place), id(start_place - 1), stereo(audio),
+		  wall(render, wallMaterialHandle), UI(UI) {
 		FRAGAudio->gain = 1.f;
 	};
 
@@ -64,7 +70,23 @@ class Bike : public GameObject {
 	int getWaypoint() { return waypoint; }
 
 	int getHealth() { return health; }
-	void modifyHealth(int amount) { health += amount; }
+	void modifyHealth(float amount) { 
+		if (amount > 0) {
+			if (health + amount > 100) {
+				health = 100;
+			} else {
+				health += amount;
+			}
+		} else if (amount < 0) {
+			if (health + amount < 0) {
+				health = 0;
+			} else {
+				health += amount;
+			}
+		}
+		std::cout << health << std::endl;
+		UI->updateSI(health);
+	}
 
 	void wallCollision() {
 		modifyHealth(-25);
@@ -85,11 +107,13 @@ class Bike : public GameObject {
 			if (wall->timer >= wall->wallTime) {
 				if (wall->wallFront.p.x != NULL) {
 					wall->wallBack = wall->wallFront;
-					wall->wallFront = vehicle->getRigidDynamicActor()->getGlobalPose();
+					wall->wallFront.p = getBikeTransform(i).p - 4.8f * getBikeTransform(i).q.getBasisVector2();
+					wall->wallFront.q = getBikeTransform(i).q;
 
 					makeWallSeg(i, wall->wallBack, wall->wallFront);
 				}
-				wall->wallFront = vehicle->getRigidDynamicActor()->getGlobalPose();
+				wall->wallFront.p = getBikeTransform(i).p - 4.8f * getBikeTransform(i).q.getBasisVector2();
+				wall->wallFront.q = getBikeTransform(i).q;
 				wall->timer = 0.0f;
 			}
 		} else {
