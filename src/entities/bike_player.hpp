@@ -18,7 +18,6 @@ class BikePlayer : public Bike {
 	int WADCharge = 0;
 	int SlipstreamCD = 30;
 	int Slipstreams = 0;
-	bool slipstreaming = false;
 
 	int currentGear = 2;
 
@@ -59,21 +58,18 @@ class BikePlayer : public Bike {
 			if (Slipstreams > 0) {
 				if (SlipstreamCD > 0) {
 					SlipstreamCD--;
-					slipstreaming = false;
 				} else {
 					modifyHealth(0.5);
 					// slipstreaming code here. get the bike's physics model and apply increasing force to it's -z basis
 					// vector
 					std::cout << "yeeeee" << std::endl;
-					slipstreaming = true;
-					/*
+					
 					physx::PxVec3 forward = getBikeTransform(getId()).q.getBasisVector2() * 100;
-					getVehicle(getId())->getRigidDynamicActor()->addForce(forward, physx::PxForceMode::eIMPULSE);
-					*/
+					getVehicle(getId())->getRigidDynamicActor()->addForce(forward, physx::PxForceMode::eFORCE);
+					
 				}
 			} else if (SlipstreamCD < 30) {
 				SlipstreamCD++;
-				slipstreaming = false;
 			}
 
 			modifyHealth(1);
@@ -129,11 +125,7 @@ class BikePlayer : public Bike {
 
 	void checkInput() {
 		if (window.keyPressed(87)) { // w
-			if (slipstreaming) {
-				bikeAcceleratePrecise(0, 1.0f);
-			} else {
-				bikeAcceleratePrecise(0, 0.9f);
-			}
+			bikeAcceleratePrecise(0, 1.0f);
 			
 		} else {
 			if (!window.keyPressed(83)) {
