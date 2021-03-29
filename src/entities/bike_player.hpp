@@ -21,6 +21,7 @@ class BikePlayer : public Bike {
 	int WADCharge = 0;
 	int SlipstreamCD = 30;
 	int Slipstreams = 0;
+	bool slipstreaming = false;
 
 	int currentGear = 2;
 
@@ -57,19 +58,29 @@ class BikePlayer : public Bike {
 
 			// Slipstreaming
 			Slipstreams = slipstreams(getId());
+			//std::cout << Slipstreams << std::endl;
 			if (Slipstreams > 0) {
 				if (SlipstreamCD > 0) {
 					SlipstreamCD--;
+					slipstreaming = false;
 				} else {
-					modifyHealth(0.25);
+					modifyHealth(0.25*Slipstreams);
 					// slipstreaming code here. get the bike's physics model and apply increasing force to it's -z basis
 					// vector
+					//std::cout << "slipstreaming" << std::endl;
+					slipstreaming = true;
+					/*
+					physx::PxVec3 forward = getBikeTransform(getId()).q.getBasisVector2() * 50;
+					getVehicle(getId())->getRigidDynamicActor()->addForce(
+						forward, physx::PxForceMode::eACCELERATION);
+					*/
 				}
 			} else if (SlipstreamCD < 30) {
 				SlipstreamCD++;
+				slipstreaming = false;
 			}
 
-			modifyHealth(.25);
+			//modifyHealth(.25);
 			checkInput();
 
 			if (getBikeTransform(getId()).p.y < 0) {
@@ -122,7 +133,11 @@ class BikePlayer : public Bike {
 
 	void checkInput() {
 		if (window.keyPressed(87)) { // w
-			bikeAccelerate(0);
+			if (slipstreaming) {
+				bikeAcceleratePrecise(0, 1.0f);
+			} else {
+				bikeAcceleratePrecise(0, 0.875f);
+			}
 		} else {
 			if (!window.keyPressed(83)) {
 				bikeReleaseGas(0);
@@ -240,7 +255,13 @@ class BikePlayer : public Bike {
 			if (FRAGCD < 1) {
 				FRAGCD += 30;
 				FRAGAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_GUN_IMPACT2_SFX]);
-				modifyHealth(-20);
+				modifyHealth(-10);
+
+				if (fragHit(getId())) {// if true, a wall was hit! Play sound here if true
+					FRAGImpactAudio->playSound(stereo.buffer[Audio::SOUND_FILE_GUN_IMPACT_SFX]);
+
+				} 
+
 			}
 		}
 
@@ -300,6 +321,60 @@ class BikePlayer : public Bike {
 
 	int slipstreams(int bike) {
 		int slipstreamCount = 0;
+
+		if (slipstreamRay(bike, 2, 5)) {
+			slipstreamCount++;
+		}
+
+		if (slipstreamRay(bike, 3, 5)) {
+			slipstreamCount++;
+		}
+
+		/*
+		physx::PxRaycastBuffer* leftRay = castRay(bike, 2, 10);
+		physx::PxRaycastBuffer* rightRay = castRay(bike, 3, 10);
+		
+		if (leftRay->nbTouches > 0) {
+			const char* leftName = leftRay->touches[0].actor->getName();
+			std::cout << leftName << std::endl;
+			if (std::strcmp(leftName, "wall") == 0) {
+				slipstreamCount++;
+			}
+		}
+
+		if (rightRay->nbTouches > 0) {
+			const char* rightName = rightRay->touches[0].actor->getName();
+			std::cout << rightName << std::endl;
+			if (std::strcmp(rightName, "wall") == 0) {
+				slipstreamCount++;
+			}
+		}
+		*/
+
 		return slipstreamCount;
+	}
+
+	
+	bool fragHit(int bike) { 
+		auto wallPointer = fragRay(bike, 100);
+
+		if (wallPointer != NULL) {
+			//std::cout << "hit" << std::endl;
+
+			// Possibly put wall deletion here
+
+			return true;
+		}
+
+		/*
+		for (physx::PxU32 i = 0; i < forwardRay->nbTouches; i++) {
+			const char* name = forwardRay->touches[i].actor->getName();
+			if (std::strcmp(name, "wall") == 0) {
+				std::cout << "frag hit" << std::endl;
+				return true;
+			}
+		}*/
+		//std::cout << "no hit" << std::endl;
+		return false;
 	}
 };

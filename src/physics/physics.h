@@ -30,6 +30,7 @@ struct wallSpawnInfo {
 
 struct bikeUserData {
 	int bikeNumber;
+	bool collided;
 };
 
 void initVehicle();
@@ -47,6 +48,12 @@ void makeWallSeg(int i, physx::PxTransform a, physx::PxTransform b);
 void deleteWallSeg(int i, int j);
 
 physx::PxRaycastBuffer castRay(int bike, int dir, int range);
+
+void* fragRay(int bike, int range);
+
+bool slipstreamRay(int bike, int dir, int range);
+
+bool collision(int bike);
 
 physx::PxTransform getBikeTransform(int i);
 

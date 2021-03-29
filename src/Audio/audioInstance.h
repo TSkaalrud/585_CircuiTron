@@ -14,7 +14,7 @@ class AudioInstance {
 	  AudioInstance() {
 		  alGenSources(1, &source);
 		  alSourcef(source, AL_PITCH, pitch);
-		  alSourcef(source, AL_GAIN, 0.5);//hardcoded to be quieter for now
+		  alSourcef(source, AL_GAIN, 1.f);//hardcoded to be quieter for now
 		  alSource3f(source, AL_POSITION, pos[0], pos[1], pos[2]);
 		  alSource3f(source, AL_VELOCITY, vel[0], vel[1], vel[2]);
 		  alSourcei(source, AL_LOOPING, loop);

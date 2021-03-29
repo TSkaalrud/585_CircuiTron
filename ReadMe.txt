@@ -1,4 +1,4 @@
-MS3 features:
+MS4 features:
 Skybox & image-based lighting
 Functional (though not yet competitive AI) which will carefully make its way around the track on a programmatic waypoint path.
 Improvements to the driving model
@@ -13,7 +13,8 @@ Known issues:
 ***Audio: requires OpenAL installed? Not packaged in the build atm?
 Old Town Road: Driving around the corners is bumpy
 Do a Barrel Roll: Attempting to "Strafe" from a stationary position can sometimes cause a brief wild rotation.
-
+Graphical walls and physical walls aren't exactly 1:1 and drift over time, thus:
+Walls aren't deleted on collision or upon being shot due to a bug that would otherwise delete the wrong walls.
 
 How to Play:
 "W"/"S" to accelerate/decelerate
@@ -21,7 +22,7 @@ How to Play:
 "Left Shift" to brake
 "Up arrow" to "Jump" on a 1 second cooldown
 "Left arrow"/"Right arrow" to strafe left/right on a 1 second cooldown
-"R" to reset position of the bike to starting position (for testing purposes)
+"R" to reset position of the bike to starting position 
 Waypoints and laps update in the console currently to inform the player on their game progress
 
 Future developments:

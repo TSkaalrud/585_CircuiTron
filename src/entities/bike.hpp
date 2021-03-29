@@ -17,6 +17,7 @@ class Bike : public GameObject {
 	float health = 100;
 	int id;
 	bool locked = false;
+	int collisionCD = 60;
 
 	Window& window;
 	Render::Wall wall;
@@ -32,7 +33,9 @@ class Bike : public GameObject {
 	AudioInstance* StrafeAudio = new AudioInstance();
 	AudioInstance* WADAudio = new AudioInstance();
 	AudioInstance* FRAGAudio = new AudioInstance();
+	AudioInstance* FRAGImpactAudio = new AudioInstance();
 	AudioInstance* chassisAudio = new AudioInstance();
+	AudioInstance* SlipstreamingAudio = new AudioInstance();
 
 	Bike(Window& window, Render::Render & render, int start_place, Render::Group& group, Audio::AudioEngine& audio,
 		Render::MaterialHandle wallMaterialHandle, UiGame* UI)
@@ -49,6 +52,12 @@ class Bike : public GameObject {
 		this->wall.append_wall(convertTransform(getBikeTransform(getId())), {0, 0, -4.8}, {0.1, 1});
 
 		spawnWall(deltaTime, getId());
+
+		if (collisionCD > 0) {
+			collisionCD--;
+		}
+
+		wallCollision();
 	}
 
 	void lockBike() {
@@ -76,24 +85,30 @@ class Bike : public GameObject {
 				health = 100;
 			} else {
 				health += amount;
+				SlipstreamingAudio->playSound(stereo.buffer[Audio::SOUND_FILE_HEALING_SFX]);
 			}
 		} else if (amount < 0) {
 			if (health + amount < 0) {
 				health = 0;
+				engineAudio->playSound(stereo.buffer[Audio::SOUND_FILE_DESPAWN_SFX]);
+
+				lockBike();
 			} else {
 				health += amount;
 			}
 		}
-		std::cout << health << std::endl;
+		//std::cout << health << std::endl;
 		UI->updateSI(health);
 	}
 
 	void wallCollision() {
-		modifyHealth(-25);
-		chassisAudio->playSound(stereo.buffer[Audio::SOUND_FILE_BIKE_IMPACT_SFX]);
-
-		// std::cout << "current health = " << health << std::endl;
-		// play sound?
+		if (getId() == 0) {
+			if (collision(getId()) && collisionCD <= 0) {
+				modifyHealth(-10);
+				collisionCD = 60;
+				chassisAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_BIKE_IMPACT_SFX]);
+			}
+		}
 	}
 
 	void spawnWall(float timestep, int i) {
