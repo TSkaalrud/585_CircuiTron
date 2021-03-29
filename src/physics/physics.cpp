@@ -59,6 +59,7 @@
 #include <iostream>
 #include <math.h>
 #include <stdio.h>
+#include <cstring>
 #include <string>
 #include <vector>
 
