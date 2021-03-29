@@ -397,7 +397,7 @@ PxRaycastBuffer castRay(int bike, int dir, int range) {
 		std::cout << "RAY CAST RESULTS ON OBJECT: " << buf.touches[i].actor->getName() << "\n";
 	}
 
-	return buf.touches;
+	return buf;
 }
 
 
@@ -587,6 +587,10 @@ void initVehicle() {
 	// set the actor name
 	gVehicle4W->getRigidDynamicActor()->setName("bike");
 
+	// userdata
+	bikeUserData* bikeData = new bikeUserData{(int)CTbikes.size() - 1};
+	gVehicle4W->getRigidDynamicActor()->userData = bikeData;
+
 	gScene->addActor(*gVehicle4W->getRigidDynamicActor());
 
 	// Set the vehicle to rest in first gear.
@@ -686,7 +690,7 @@ void initPhysics() {
 	PxFilterData groundPlaneSimFilterData(COLLISION_FLAG_GROUND, COLLISION_FLAG_GROUND_AGAINST, 0, 0);
 	gGroundPlane = createDrivablePlane(groundPlaneSimFilterData, gMaterial, gPhysics);
 	gGroundPlane->setName("Ground Plane");
-	//gScene->addActor(*gGroundPlane);
+	gScene->addActor(*gGroundPlane);
 
 	// Cook track
 	PxTriangleMesh* trackMesh = cookTrack();

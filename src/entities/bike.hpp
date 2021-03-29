@@ -107,11 +107,13 @@ class Bike : public GameObject {
 			if (wall->timer >= wall->wallTime) {
 				if (wall->wallFront.p.x != NULL) {
 					wall->wallBack = wall->wallFront;
-					wall->wallFront = vehicle->getRigidDynamicActor()->getGlobalPose();
+					wall->wallFront.p = getBikeTransform(i).p - 4.8f * getBikeTransform(i).q.getBasisVector2();
+					wall->wallFront.q = getBikeTransform(i).q;
 
 					makeWallSeg(i, wall->wallBack, wall->wallFront);
 				}
-				wall->wallFront = vehicle->getRigidDynamicActor()->getGlobalPose();
+				wall->wallFront.p = getBikeTransform(i).p - 4.8f * getBikeTransform(i).q.getBasisVector2();
+				wall->wallFront.q = getBikeTransform(i).q;
 				wall->timer = 0.0f;
 			}
 		} else {
