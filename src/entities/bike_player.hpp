@@ -58,16 +58,16 @@ class BikePlayer : public Bike {
 
 			// Slipstreaming
 			Slipstreams = slipstreams(getId());
-			std::cout << Slipstreams << std::endl;
+			//std::cout << Slipstreams << std::endl;
 			if (Slipstreams > 0) {
 				if (SlipstreamCD > 0) {
 					SlipstreamCD--;
 					slipstreaming = false;
 				} else {
-					modifyHealth(0.25);
+					modifyHealth(0.25*Slipstreams);
 					// slipstreaming code here. get the bike's physics model and apply increasing force to it's -z basis
 					// vector
-					std::cout << "slipstreaming" << std::endl;
+					//std::cout << "slipstreaming" << std::endl;
 					slipstreaming = true;
 					/*
 					physx::PxVec3 forward = getBikeTransform(getId()).q.getBasisVector2() * 50;
@@ -80,7 +80,7 @@ class BikePlayer : public Bike {
 				slipstreaming = false;
 			}
 
-			modifyHealth(.25);
+			//modifyHealth(.25);
 			checkInput();
 
 			if (getBikeTransform(getId()).p.y < 0) {
@@ -255,11 +255,13 @@ class BikePlayer : public Bike {
 			if (FRAGCD < 1) {
 				FRAGCD += 30;
 				FRAGAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_GUN_IMPACT2_SFX]);
-				modifyHealth(-20);
+				modifyHealth(-10);
 
-				fragHit(getId());	// if true, a wall was hit!
+				if (fragHit(getId())) {// if true, a wall was hit! Play sound here if true
+					FRAGImpactAudio->playSound(stereo.buffer[Audio::SOUND_FILE_GUN_IMPACT_SFX]);
 
-				// play sound here if true
+				} 
+
 			}
 		}
 
@@ -357,7 +359,7 @@ class BikePlayer : public Bike {
 		auto wallPointer = fragRay(bike, 100);
 
 		if (wallPointer != NULL) {
-			std::cout << "hit" << std::endl;
+			//std::cout << "hit" << std::endl;
 
 			// Possibly put wall deletion here
 
@@ -372,7 +374,7 @@ class BikePlayer : public Bike {
 				return true;
 			}
 		}*/
-		std::cout << "no hit" << std::endl;
+		//std::cout << "no hit" << std::endl;
 		return false;
 	}
 };

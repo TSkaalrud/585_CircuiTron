@@ -175,7 +175,7 @@ class Game : public Entity {
 		for (int i = 0; i < bikes.size(); i++) {
 			order[i]->setPlace(i + 1);
 			//std::cout << bikes[0]->getPlace() << std::endl;
-			std::cout << bikes[0]->getPlace() << std::endl;
+			//std::cout << bikes[0]->getPlace() << std::endl;
 		}
 		//game_UI->currentPlace = bikes[0]->getPlace();
 		game_UI->updatePlace(bikes[0]->getPlace());
