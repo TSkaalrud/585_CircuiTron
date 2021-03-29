@@ -3,6 +3,8 @@
 #include "entities/entity.hpp"
 #include "render/import.hpp"
 #include "render/ui_util.hpp"
+#include "window.hpp"
+
 
 class UiGame : public Entity {
 
@@ -17,6 +19,7 @@ class UiGame : public Entity {
 	Render::InstanceHandle Lap_Num = -1;
 	Render::InstanceHandle Place_UI = -1;
 	Render::InstanceHandle Place_Num = -1;
+	Render::InstanceHandle Winner = -1;
 
 	//Menu InstanceHandles
 	Render::InstanceHandle Background = -1;
@@ -38,6 +41,11 @@ class UiGame : public Entity {
 	Render::MaterialHandle Fourth_png;
 	Render::MaterialHandle UI_Lap_png;
 	Render::MaterialHandle UI_Place_png;
+	Render::MaterialHandle You_Win_png;
+	Render::MaterialHandle P2_Wins_png;
+	Render::MaterialHandle P3_Wins_png;
+	Render::MaterialHandle P4_Wins_png;
+
 
 	//Menu MaterialHandles
 	Render::MaterialHandle Background_png;
@@ -72,6 +80,10 @@ class UiGame : public Entity {
 		  Fourth_png(Render::importUI("assets/UI/UI_4th.png", render)),
 		  UI_Lap_png(Render::importUI("assets/UI/UI_Lap.png", render)),
 		  UI_Place_png(Render::importUI("assets/UI/UI_Place.png", render)),
+		  You_Win_png(Render::importUI("assets/UI/You Win!.png", render)),
+		  P2_Wins_png(Render::importUI("assets/UI/P2_Wins..png", render)),
+		  P3_Wins_png(Render::importUI("assets/UI/P3_Wins..png", render)),
+		  P4_Wins_png(Render::importUI("assets/UI/P4_Wins..png", render)),
 
 		  Background_png(Render::importUI("assets/UI/Background.png", render)),
 		  Circuitron_Title_png(Render::importUI("assets/UI/CircuiTron Title.png", render)),
@@ -141,6 +153,15 @@ class UiGame : public Entity {
 			auto transform = Render::ui_transform(position, scale, depth);
 
 			Place_Num = render.create_instance(render.ui_mesh(), Fourth_png, transform);
+		}
+		//Winner shows who won the race at the end
+		if (Winner == -1) {
+			auto position = glm::vec3{0, 0, 0};
+			auto scale = glm::vec2{212, 51} / 2.0f;
+			auto depth = 0.0f;
+			auto transform = Render::ui_transform(position, scale, depth);
+
+			//Winner = render.create_instance(render.ui_mesh(), You_Win_png, transform);
 		}
 		//The menu background, this is opaque/has no transparency*
 		if (Background == -1) {
@@ -226,7 +247,7 @@ class UiGame : public Entity {
 		//render.instance_set_trans(SI_Bar, transform);
 		render.instance_set_material(SI_Bar, SI_Bar_png);
 		render.instance_set_material(SI_Fill, SI_Secure_png);
-		render.instance_set_material(Lap_UI, UI_Lap_png);
+		//render.instance_set_material(Lap_UI, UI_Lap_png);
 		//updatePlace(currentPlace);
 		//updateLap(currentPlace);
 		// Set the material
@@ -259,5 +280,24 @@ class UiGame : public Entity {
 		} else if (currentPlace == 4) {
 			render.instance_set_material(Place_Num, Fourth_png);
 		}
+	}
+
+	void updateSI(float currentHealth) {
+		auto position = glm::vec3{1920 * -0.35, 1080 * 0.45, 0};
+		auto scale = glm::vec2{401/1.5f, 41/1.5f};
+		auto depth = 1.0f;
+		auto transform = Render::ui_transform(position, scale, depth);
+		render.instance_set_trans(SI_Fill, transform);
+
+		if (currentHealth <= 25) {
+			render.instance_set_material(SI_Fill, SI_Critical_png);
+		} else if (currentHealth >= 76) {
+			render.instance_set_material(SI_Fill, SI_Secure_png);
+		} else {
+			render.instance_set_material(SI_Fill, SI_Damaged_png);
+		}
+	}
+	void winner(int bike) {
+
 	}
 };
