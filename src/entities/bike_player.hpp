@@ -61,7 +61,7 @@ class BikePlayer : public Bike {
 				if (SlipstreamCD > 0) {
 					SlipstreamCD--;
 				} else {
-					modifyHealth(0.5);
+					modifyHealth(0.25);
 					// slipstreaming code here. get the bike's physics model and apply increasing force to it's -z basis
 					// vector
 				}
@@ -69,7 +69,7 @@ class BikePlayer : public Bike {
 				SlipstreamCD++;
 			}
 
-			modifyHealth(1);
+			modifyHealth(.25);
 			checkInput();
 
 			if (getBikeTransform(getId()).p.y < 0) {

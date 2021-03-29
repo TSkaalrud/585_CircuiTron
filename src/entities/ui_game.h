@@ -283,8 +283,9 @@ class UiGame : public Entity {
 	}
 
 	void updateSI(float currentHealth) {
+		float ratio = currentHealth / 100;
 		auto position = glm::vec3{1920 * -0.35, 1080 * 0.45, 0};
-		auto scale = glm::vec2{401/1.5f, 41/1.5f};
+		auto scale = glm::vec2{401/1.5f*ratio, 41/1.5f};
 		auto depth = 1.0f;
 		auto transform = Render::ui_transform(position, scale, depth);
 		render.instance_set_trans(SI_Fill, transform);

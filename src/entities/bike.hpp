@@ -70,7 +70,7 @@ class Bike : public GameObject {
 	int getWaypoint() { return waypoint; }
 
 	int getHealth() { return health; }
-	void modifyHealth(int amount) { 
+	void modifyHealth(float amount) { 
 		if (amount > 0) {
 			if (health + amount > 100) {
 				health = 100;

@@ -36,6 +36,7 @@ struct {
 
 class Game : public Entity {
   private:
+	std::vector<Bike*> order;
 	std::vector<Bike*> bikes;
 	int players;
 	// std::vector<Checkpoint> checkpoints;
@@ -137,7 +138,8 @@ class Game : public Entity {
 		std::unique_ptr<Bike> b = std::make_unique<BikePlayer>(
 			window, render, 1, BikeModels[0], ai_waypoints[1], stereo, playerWallMaterials[0], game_UI);
 		bikes.push_back(b.get());
-		
+		order.push_back(b.get());
+
 		e_manager.addEntity(std::move(b));
 
 		//make the AI bikes
@@ -147,6 +149,7 @@ class Game : public Entity {
 			std::unique_ptr<Bike> b = std::make_unique<BikeAI>(
 				window, render, i + 2, BikeModels[i + 1], ai_waypoints, stereo, playerWallMaterials[i + 1], game_UI);
 			bikes.push_back(b.get());
+			order.push_back(b.get());
 
 			e_manager.addEntity(std::move(b));
 		}
@@ -168,10 +171,11 @@ class Game : public Entity {
 		// if lap is equal compare by checkpoint (divide the track up invisibly)
 		// finally if equal again compare by distance to next checkpoint
 
-		std::sort(bikes.begin(), bikes.end(), place_sort);
+		std::sort(order.begin(), order.end(), place_sort);
 		for (int i = 0; i < bikes.size(); i++) {
-			bikes[i]->setPlace(i + 1);
+			order[i]->setPlace(i + 1);
 			//std::cout << bikes[0]->getPlace() << std::endl;
+			std::cout << bikes[0]->getPlace() << std::endl;
 		}
 		//game_UI->currentPlace = bikes[0]->getPlace();
 		game_UI->updatePlace(bikes[0]->getPlace());
