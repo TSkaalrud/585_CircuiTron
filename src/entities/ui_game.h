@@ -161,7 +161,7 @@ class UiGame : public Entity {
 			auto depth = 0.0f;
 			auto transform = Render::ui_transform(position, scale, depth);
 
-			//Winner = render.create_instance(render.ui_mesh(), You_Win_png, transform);
+			Winner = render.create_instance(render.ui_mesh(), You_Win_png, transform);
 		}
 		//The menu background, this is opaque/has no transparency*
 		if (Background == -1) {
@@ -246,7 +246,7 @@ class UiGame : public Entity {
 
 		//render.instance_set_trans(SI_Bar, transform);
 		render.instance_set_material(SI_Bar, SI_Bar_png);
-		render.instance_set_material(SI_Fill, SI_Secure_png);
+		//render.instance_set_material(SI_Fill, SI_Secure_png);
 		//render.instance_set_material(Lap_UI, UI_Lap_png);
 		//updatePlace(currentPlace);
 		//updateLap(currentPlace);
@@ -300,7 +300,17 @@ class UiGame : public Entity {
 	}
 
 	void winner(int bike) {
-
+		if (bike == -1) {
+			render.instance_set_material(Winner, -1);
+		} else if (bike == 0) {
+			render.instance_set_material(Winner, You_Win_png);
+		} else if (bike == 1) {
+			render.instance_set_material(Winner, P2_Wins_png);
+		} else if (bike == 2) {
+			render.instance_set_material(Winner, P3_Wins_png);
+		} else if (bike == 3) {
+			render.instance_set_material(Winner, P4_Wins_png);
+		}
 	}
 
 };

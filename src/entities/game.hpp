@@ -183,15 +183,18 @@ class Game : public Entity {
 	}
 
 	void checkWin() {
-		// currently 1 lap to win  CHANGE TO 3 LATER
-		if (bikes[0]->getLap() - 1 == 3) {
-			if (bikes[0]->getId() == 0) {
+		// currently 3 laps to win
+		if (order[0]->getLap() - 1 == 3) {
+			if (order[0]->getId() == 0) {
 				std::cout << "Player Wins!" << std::endl;
 			} else {
-				std::cout << "AI " << bikes[0]->getId() << " Wins!" << std::endl;
+				std::cout << "AI " << order[0]->getId() << " Wins!" << std::endl;
 			}
 			lockAllBikes();
+			game_UI->winner(order[0]->getId());
 			gameover = true;
+		} else {
+			game_UI->winner(-1);
 		}
 	}
 
