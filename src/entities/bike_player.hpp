@@ -277,7 +277,7 @@ class BikePlayer : public Bike {
 		float dist = glm::sqrt(glm::pow(target.x - player.x, 2) + glm::pow(target.z - player.z, 2));
 
 		// this radius might need to be tweaked
-		if (dist < 25.0f) {
+		if (dist < 30.0f) {
 			currentWaypoint = nextWaypoint;
 			if (nextWaypoint == waypoints.size()) {
 				currentWaypoint = 0;
