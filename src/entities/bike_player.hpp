@@ -4,6 +4,7 @@
 #include "physics/physics.h"
 #include "window.hpp"
 #include <string>
+#include "ui_game.h"
 
 #include <iostream>
 
@@ -29,8 +30,8 @@ class BikePlayer : public Bike {
   public:
 	BikePlayer(
 		Window& window, Render::Render& render, int start_place, Render::Group& group, std::vector<glm::vec3> waypoints,
-		Audio::AudioEngine& audio, Render::MaterialHandle wallMaterialHandle)
-		: Bike(render, start_place, group, audio, wallMaterialHandle), window(window) {
+		Audio::AudioEngine& audio, Render::MaterialHandle wallMaterialHandle, UiGame* UI)
+		: Bike(window, render, start_place, group, audio, wallMaterialHandle, UI), window(window) {
 		engineAudio->loop = true;
 		gearAudio->loop = false;
 		FRAGAudio->loop = false;

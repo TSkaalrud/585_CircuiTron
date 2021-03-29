@@ -134,7 +134,8 @@ class Game : public Entity {
 		e_manager.addEntity(std::make_unique<Track>(render, track_model));
 
 		//make the player's bike
-		std::unique_ptr<Bike> b = std::make_unique<BikePlayer>(window, render, 1, BikeModels[0], ai_waypoints[1], stereo, playerWallMaterials[0]);
+		std::unique_ptr<Bike> b = std::make_unique<BikePlayer>(
+			window, render, 1, BikeModels[0], ai_waypoints[1], stereo, playerWallMaterials[0], game_UI);
 		bikes.push_back(b.get());
 		
 		e_manager.addEntity(std::move(b));
@@ -143,7 +144,8 @@ class Game : public Entity {
 		for (int i = 0; i < players - 1; i++) {
 			initVehicle();
 
-			std::unique_ptr<Bike> b = std::make_unique<BikeAI>(render, i + 2, BikeModels[i+1], ai_waypoints, stereo, playerWallMaterials[i+1]);
+			std::unique_ptr<Bike> b = std::make_unique<BikeAI>(
+				window, render, i + 2, BikeModels[i + 1], ai_waypoints, stereo, playerWallMaterials[i + 1], game_UI);
 			bikes.push_back(b.get());
 
 			e_manager.addEntity(std::move(b));
@@ -169,6 +171,7 @@ class Game : public Entity {
 		std::sort(bikes.begin(), bikes.end(), place_sort);
 		for (int i = 0; i < bikes.size(); i++) {
 			bikes[i]->setPlace(i + 1);
+			//std::cout << bikes[0]->getPlace() << std::endl;
 		}
 		//game_UI->currentPlace = bikes[0]->getPlace();
 		game_UI->updatePlace(bikes[0]->getPlace());

@@ -1,11 +1,16 @@
 #pragma once
 
 #include "bike.hpp"
+#include "window.hpp"
+#include "ui_game.h"
+
 
 #include <iostream>
 
 class BikeAI : public Bike {
   private:
+	Window& window;
+	UiGame* UI;
 	// direction of the bike's current target
 	bool left = false;
 	bool right = false;
@@ -17,9 +22,10 @@ class BikeAI : public Bike {
 
   public:
 	BikeAI(
-		Render::Render& render, int start_place, Render::Group& group, std::vector<std::vector<glm::vec3>> ai_waypoints,
-		Audio::AudioEngine& audio, Render::MaterialHandle wallMaterialHandle)
-		: Bike(render, start_place, group, audio, wallMaterialHandle), ai_waypoints(ai_waypoints) {
+		Window& window, Render::Render& render, int start_place, Render::Group& group,
+		std::vector<std::vector<glm::vec3>> ai_waypoints, Audio::AudioEngine& audio,
+		Render::MaterialHandle wallMaterialHandle, UiGame* UI)
+		: window(window), Bike(window, render, start_place, group, audio, wallMaterialHandle, UI), ai_waypoints(ai_waypoints), UI(UI) {
 		waypoints = ai_waypoints[getId() - 1];
 	};
 

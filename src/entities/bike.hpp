@@ -5,6 +5,9 @@
 #include "game_object.hpp"
 #include "physics/physics.h"
 #include "render/wall.hpp"
+#include "window.hpp"
+#include "ui_game.h"
+
 
 class Bike : public GameObject {
   private:
@@ -15,8 +18,9 @@ class Bike : public GameObject {
 	int id;
 	bool locked = false;
 
+	Window& window;
 	Render::Wall wall;
-
+	UiGame* UI;
   protected:
 	std::vector<glm::vec3> waypoints; // current waypoints
 
@@ -30,8 +34,10 @@ class Bike : public GameObject {
 	AudioInstance* FRAGAudio = new AudioInstance();
 	AudioInstance* chassisAudio = new AudioInstance();
 
-	Bike(Render::Render& render, int start_place, Render::Group& group, Audio::AudioEngine& audio, Render::MaterialHandle wallMaterialHandle)
-		: GameObject(render, group), place(start_place), id(start_place - 1), stereo(audio), wall(render, wallMaterialHandle) {
+	Bike(Window& window, Render::Render & render, int start_place, Render::Group& group, Audio::AudioEngine& audio,
+		Render::MaterialHandle wallMaterialHandle, UiGame* UI)
+		: window(window), GameObject(render, group), place(start_place), id(start_place - 1), stereo(audio),
+		  wall(render, wallMaterialHandle), UI(UI) {
 		FRAGAudio->gain = 1.f;
 	};
 
@@ -78,6 +84,8 @@ class Bike : public GameObject {
 				health += amount;
 			}
 		}
+		std::cout << health << std::endl;
+		UI->updateSI(health);
 	}
 
 	void wallCollision() {
