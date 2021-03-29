@@ -30,8 +30,8 @@ class Bike : public GameObject {
 	AudioInstance* FRAGAudio = new AudioInstance();
 	AudioInstance* chassisAudio = new AudioInstance();
 
-	Bike(Render::Render& render, int start_place, Render::Group& group, Audio::AudioEngine& audio)
-		: GameObject(render, group), place(start_place), id(start_place - 1), stereo(audio), wall(render) {
+	Bike(Render::Render& render, int start_place, Render::Group& group, Audio::AudioEngine& audio, Render::MaterialHandle wallMaterialHandle)
+		: GameObject(render, group), place(start_place), id(start_place - 1), stereo(audio), wall(render, wallMaterialHandle) {
 		FRAGAudio->gain = 1.f;
 	};
 

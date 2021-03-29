@@ -16,7 +16,8 @@
 
 namespace Audio {
 	// audio is stored in an array, indexes are used to refer to the audio files in that array
-	const int SOUND_FILE_CYBERSONG_BGM = 0;
+	//0 if available
+	//SFX
 	const int SOUND_FILE_AMBIENCE_BGM = 1;
 	const int SOUND_FILE_APPREHENSION_SFX = 2;
 	const int SOUND_FILE_BIKE_IMPACT_SFX = 3;
@@ -42,9 +43,18 @@ namespace Audio {
 	const int SOUND_FILE_WUBWUB_SFX = 23;
 	const int SOUND_FILE_BURR_SFX = 24;
 	const int SOUND_FILE_BOOST_SFX = 25;
+	//MUSIC
+	const int SOUND_FILE_CYBERSONG_BGM = 101;
+	const int SOUND_FILE_INITIAL_ENTRY_BGM = 102;
+	const int SOUND_FILE_SINISTER_GALE_BGM = 103;
+	const int SOUND_FILE_SOLAR_ECLIPSE_BGM = 104;
+	const int SOUND_FILE_VICIOUS_CLARITY_BGM = 105;
+	const int SOUND_FILE_AERIAL_WALKWAYS_BGM = 106;
+	const int SOUND_FILE_AURORA_BGM = 107;
 
 
-	#define NUM_BUFFERS 50
+
+	#define NUM_BUFFERS 150
 	#define NUM_SOURCES 50
 	#define NUM_ENVIRONMENTS 2
 
