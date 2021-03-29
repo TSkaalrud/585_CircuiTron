@@ -176,7 +176,7 @@ VehicleDesc initVehicleDesc() {
 		(chassisDims.y * chassisDims.y + chassisDims.z * chassisDims.z) * 1.f * chassisMass / 12.0f,
 		(chassisDims.x * chassisDims.x + chassisDims.z * chassisDims.z) * 1.1f * chassisMass / 12.0f,
 		(chassisDims.x * chassisDims.x + chassisDims.y * chassisDims.y) * 1.3f * chassisMass / 12.0f);
-	const PxVec3 chassisCMOffset(0.0f, -chassisDims.y * 0.5f + 0.5f, 0.35f);
+	const PxVec3 chassisCMOffset(0.0f, -chassisDims.y * 0.5f + 0.20f, 0.35f);
 
 	// Set up the wheel mass, radius, width, moment of inertia, and number of wheels.
 	// Moment of inertia is just the moment of inertia of a cylinder.
