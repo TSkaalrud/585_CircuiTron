@@ -257,6 +257,8 @@ class BikePlayer : public Bike {
 				modifyHealth(-20);
 
 				fragHit(getId());	// if true, a wall was hit!
+
+				// play sound here if true
 			}
 		}
 
