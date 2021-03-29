@@ -161,11 +161,7 @@ class UiGame : public Entity {
 			auto depth = 0.0f;
 			auto transform = Render::ui_transform(position, scale, depth);
 
-<<<<<<< Updated upstream
 			//Winner = render.create_instance(render.ui_mesh(), You_Win_png, transform);
-=======
-			Winner = render.create_instance(render.ui_mesh(), You_Win_png, transform);
->>>>>>> Stashed changes
 		}
 		//The menu background, this is opaque/has no transparency*
 		if (Background == -1) {
@@ -301,10 +297,9 @@ class UiGame : public Entity {
 			render.instance_set_material(SI_Fill, SI_Damaged_png);
 		}
 	}
-<<<<<<< Updated upstream
+
 	void winner(int bike) {
 
 	}
-=======
->>>>>>> Stashed changes
+
 };
