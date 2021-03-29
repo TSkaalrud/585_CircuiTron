@@ -237,4 +237,8 @@ class Game : public Entity {
 	}
 
 	void wallCollision(int i) { bikes[i]->wallCollision(); }
+
+	std::vector<glm::vec3> getWaypoints(int middle) { 
+		//middle is ai_waypoints[1]
+		return ai_waypoints[middle];}
 };

@@ -9,12 +9,9 @@ Trigger Volume detection for wall segments (though not yet hooked up into other 
 
 
 Known issues:
-"A$$ over tea kettle": if the chassis of the bike becomes inverted you can fall through terrain, ignoring collision, and falling through the "abyss"
-***Audio: requires OpenAL installed? Not packaged in the build atm?
-Old Town Road: Driving around the corners is bumpy
-Do a Barrel Roll: Attempting to "Strafe" from a stationary position can sometimes cause a brief wild rotation.
 Graphical walls and physical walls aren't exactly 1:1 and drift over time, thus:
 Walls aren't deleted on collision or upon being shot due to a bug that would otherwise delete the wrong walls.
+WAD trap-walls are deployed physically, but exacerbate the wall offset and are set to not currently render
 
 How to Play:
 "W"/"S" to accelerate/decelerate
