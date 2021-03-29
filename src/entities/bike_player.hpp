@@ -20,6 +20,7 @@ class BikePlayer : public Bike {
 	int WADCharge = 0;
 	int SlipstreamCD = 30;
 	int Slipstreams = 0;
+	bool slipstreaming = false;
 
 	int currentGear = 2;
 
@@ -60,18 +61,22 @@ class BikePlayer : public Bike {
 			if (Slipstreams > 0) {
 				if (SlipstreamCD > 0) {
 					SlipstreamCD--;
+					slipstreaming = false;
 				} else {
 					modifyHealth(0.5);
 					// slipstreaming code here. get the bike's physics model and apply increasing force to it's -z basis
 					// vector
-					std::cout << "yeeeee" << std::endl;
-					
-					physx::PxVec3 forward = getBikeTransform(getId()).q.getBasisVector2() * 100;
-					getVehicle(getId())->getRigidDynamicActor()->addForce(forward, physx::PxForceMode::eFORCE);
-					
+					std::cout << "slipstreaming" << std::endl;
+					slipstreaming = true;
+					/*
+					physx::PxVec3 forward = getBikeTransform(getId()).q.getBasisVector2() * 50;
+					getVehicle(getId())->getRigidDynamicActor()->addForce(
+						forward, physx::PxForceMode::eACCELERATION);
+					*/
 				}
 			} else if (SlipstreamCD < 30) {
 				SlipstreamCD++;
+				slipstreaming = false;
 			}
 
 			modifyHealth(1);
@@ -127,8 +132,11 @@ class BikePlayer : public Bike {
 
 	void checkInput() {
 		if (window.keyPressed(87)) { // w
-			bikeAcceleratePrecise(0, 1.0f);
-			
+			if (slipstreaming) {
+				bikeAcceleratePrecise(0, 1.0f);
+			} else {
+				bikeAcceleratePrecise(0, 0.875f);
+			}
 		} else {
 			if (!window.keyPressed(83)) {
 				bikeReleaseGas(0);
@@ -248,11 +256,7 @@ class BikePlayer : public Bike {
 				FRAGAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_GUN_IMPACT2_SFX]);
 				modifyHealth(-20);
 
-				fragHit(getId());
-
-				//if (wallHit(getId())) {
-					// do something if we shoot a wall
-				//}
+				fragHit(getId());	// if true, a wall was hit!
 			}
 		}
 
