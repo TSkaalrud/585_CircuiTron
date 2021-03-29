@@ -19,6 +19,8 @@ struct wallUserData {
 	int wallIndex;
 	
 	int collisions;
+
+	std::vector<int> graphicIndex;
 };
 
 struct wallSpawnInfo {
