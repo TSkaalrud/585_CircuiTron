@@ -322,26 +322,5 @@ class BikePlayer : public Bike {
 	}
 
 	
-	bool fragHit(int bike) { 
-		auto wallPointer = fragRay(bike, 100);
 
-		if (wallPointer != NULL) {
-			//std::cout << "hit" << std::endl;
-
-			// Possibly put wall deletion here
-
-			return true;
-		}
-
-		/*
-		for (physx::PxU32 i = 0; i < forwardRay->nbTouches; i++) {
-			const char* name = forwardRay->touches[i].actor->getName();
-			if (std::strcmp(name, "wall") == 0) {
-				std::cout << "frag hit" << std::endl;
-				return true;
-			}
-		}*/
-		//std::cout << "no hit" << std::endl;
-		return false;
-	}
 };
