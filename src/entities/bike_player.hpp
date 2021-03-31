@@ -14,13 +14,8 @@ class BikePlayer : public Bike {
 
 	
 
-	// CD = cooldowns for abilities
-	int BoostCD = 0;
-	int StrafeCD = 0;
-	int FRAGCD = 0;
-	int SlipstreamCD = 30;
-	int Slipstreams = 0;
-	bool slipstreaming = false;
+
+
 
 	int currentGear = 2;
 
@@ -286,40 +281,7 @@ class BikePlayer : public Bike {
 
 	
 
-	int slipstreams(int bike) {
-		int slipstreamCount = 0;
 
-		if (slipstreamRay(bike, 2, 5)) {
-			slipstreamCount++;
-		}
-
-		if (slipstreamRay(bike, 3, 5)) {
-			slipstreamCount++;
-		}
-
-		/*
-		physx::PxRaycastBuffer* leftRay = castRay(bike, 2, 10);
-		physx::PxRaycastBuffer* rightRay = castRay(bike, 3, 10);
-		
-		if (leftRay->nbTouches > 0) {
-			const char* leftName = leftRay->touches[0].actor->getName();
-			std::cout << leftName << std::endl;
-			if (std::strcmp(leftName, "wall") == 0) {
-				slipstreamCount++;
-			}
-		}
-
-		if (rightRay->nbTouches > 0) {
-			const char* rightName = rightRay->touches[0].actor->getName();
-			std::cout << rightName << std::endl;
-			if (std::strcmp(rightName, "wall") == 0) {
-				slipstreamCount++;
-			}
-		}
-		*/
-
-		return slipstreamCount;
-	}
 
 	
 
