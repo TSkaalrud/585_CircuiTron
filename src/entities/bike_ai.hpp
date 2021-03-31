@@ -111,27 +111,4 @@ class BikeAI : public Bike {
 		}
 	}
 
-	void resetBike() {
-		physx::PxTransform resetLocation = getBikeTransform(getId());
-		int waypoint = 0;
-		int waypointOffset = 5;
-		// waypointOffset is used to manage the fact that we hit waypoints within a certain radius of us.
-		if (currentWaypoint < waypointOffset) {
-			waypoint = waypoints.size() - (waypointOffset - currentWaypoint);
-		} else {
-			waypoint = currentWaypoint - waypointOffset;
-		}
-
-		resetLocation.p.x = waypoints[waypoint].x;
-		resetLocation.p.y = waypoints[waypoint].y + 5; // drop me in to avoid clipping
-		resetLocation.p.z = waypoints[waypoint].z;
-		float rads;
-		physx::PxVec3 axis;
-		resetLocation.q.toRadiansAndUnitAxis(rads, axis);
-		resetLocation.q.x = 0;
-		resetLocation.q.y = sin(rads / 2);
-		resetLocation.q.z = 0;
-		resetLocation.q.w = cos(rads / 2);
-		resetBikePos(getId(), resetLocation);
-	}
 };
