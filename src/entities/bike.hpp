@@ -24,6 +24,8 @@ class Bike : public GameObject {
 	UiGame* UI;
   protected:
 	std::vector<glm::vec3> waypoints; // current waypoints
+	int WADCharge = 0;
+	bool WADRelease = false;
 
   public:
 	Audio::AudioEngine& stereo;
@@ -112,6 +114,7 @@ class Bike : public GameObject {
 	}
 
 	void spawnWall(float timestep, int i) {
+		//Standard Wall generation
 		physx::PxVehicleDrive4W* vehicle = getVehicle(i);
 		wallSpawnInfo* wall = getWallInfo(i);
 
@@ -133,6 +136,26 @@ class Bike : public GameObject {
 			}
 		} else {
 			wall->wallFront.p.x = NULL;
+		}
+		//WAD wall generation
+		if (WADRelease) {
+			physx::PxTransform start = getBikeTransform(getId());
+			physx::PxTransform end = getBikeTransform(getId());
+			// origin behind the bike's +Z then, with a length based on WADcharge,
+			// extend out +/- x-axes of the bike to create the start and end points
+			physx::PxVec3 z = -start.q.getBasisVector2();
+			physx::PxVec3 x = start.q.getBasisVector0();
+			physx::PxVec3 wallCentre = start.p + 3 * z;
+
+			start.q *= physx::PxQuat(0, -1, 0, 0);
+
+			start.p = wallCentre + 0.5 * x * WADCharge;
+			end.p = wallCentre + -0.5 * x * WADCharge;
+			makeWallSeg(0, start, end);
+
+
+			WADCharge = 0;
+			WADRelease = false;
 		}
 	}
 };

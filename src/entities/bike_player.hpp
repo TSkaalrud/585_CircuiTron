@@ -18,7 +18,6 @@ class BikePlayer : public Bike {
 	int BoostCD = 0;
 	int StrafeCD = 0;
 	int FRAGCD = 0;
-	int WADCharge = 0;
 	int SlipstreamCD = 30;
 	int Slipstreams = 0;
 	bool slipstreaming = false;
@@ -227,27 +226,16 @@ class BikePlayer : public Bike {
 		// down arrow - WAD
 		if (window.keyPressed(264)) { // charge WAD
 			WADCharge++;
+
 			WADAudio->loop = true;
 			WADAudio->playSound(stereo.buffer[Audio::SOUND_FILE_WAD_SFX]);
 		} else if (WADCharge > 0 && window.keyReleased(264)) { // release charged WAD
-			physx::PxTransform start = getBikeTransform(getId());
-			physx::PxTransform end = getBikeTransform(getId());
-			// origin behind the bike's +Z then, with a length based on WADcharge,
-			// extend out +/- x-axes of the bike to create the start and end points
-			physx::PxVec3 z = -start.q.getBasisVector2();
-			physx::PxVec3 x = start.q.getBasisVector0();
-			physx::PxVec3 wallCentre = start.p + 3 * z;
-
-			start.q *= physx::PxQuat(0, -1, 0, 0);
-
-			start.p = wallCentre + 0.5 * x * WADCharge;
-			end.p = wallCentre + -0.5 * x * WADCharge;
-			makeWallSeg(0, start, end);
+			WADRelease = true;
 
 			WADAudio->loop = false;
 			WADAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_SIZZLE_SFX]);
+			
 			modifyHealth(-WADCharge / 10);
-			WADCharge = 0;
 		}
 
 		// spacebar - Forward Projector Cannon (shoot)
