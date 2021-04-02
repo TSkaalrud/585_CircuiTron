@@ -3,7 +3,7 @@
 #include <gl.hpp>
 
 namespace Render {
-void Wall::append_wall(mat4 bikeTransform, vec3 position, vec2 scale) {
+void Wall::append_wall(mat4 bikeTransform, vec3 position, vec2 scale, bool commit) {
 	vec3 points[] = {
 		{-scale.x, -scale.y, 0.0}, {-scale.x, scale.y, 0.0}, {scale.x, scale.y, 0.0}, {scale.x, -scale.y, 0.0}};
 
@@ -40,9 +40,8 @@ void Wall::append_wall(mat4 bikeTransform, vec3 position, vec2 scale) {
 		glNamedBufferSubData(wall.vertex_buffer, bufferSlot * sizeof(Vertex) * 8, sizeof(Vertex) * 8, vertices.data());
 	}
 
-	if (frame++ < frame_delay)
+	if (!commit && current_wall_count != -1)
 		return;
-	frame = 0;
 	current_wall_count++;
 
 	if (current_wall_count % alloc_wall_count == 0) {
@@ -98,4 +97,17 @@ void Wall::append_wall(mat4 bikeTransform, vec3 position, vec2 scale) {
 		glNamedBufferSubData(wall.vertex_buffer, bufferSlot * sizeof(Vertex) * 8, sizeof(Vertex) * 8, vertices.data());
 	}
 }
+
+void Wall::delete_wall(uint wall) {
+	auto wallChunk = wall / alloc_wall_count;
+	auto bufferSlot = wall % alloc_wall_count;
+	std::array<uint32_t, 24> indicies = {
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		// -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+	};
+	glNamedBufferSubData(
+		wall_segements[wall].index_buffer, (current_wall_count % alloc_wall_count) * sizeof(uint32_t) * 24,
+		sizeof(uint32_t) * 24, indicies.data());
+}
+
 } // namespace Render
