@@ -3,24 +3,21 @@
 #include <foundation/PxTransform.h>
 #include <foundation/Px.h>
 #include <PxPhysicsAPI.h>
+#include <vector>
+#include "Render/wall.hpp"
 
-struct wallSegment {
+struct wallUserData {
 	int bikeNumber;
+	int wallIndex;
+	int collisions;
 
 	physx::PxRigidStatic* wall;
 
 	physx::PxTransform front;
 	physx::PxTransform back;
-};
 
-struct wallUserData {
-	wallSegment segmentInfo;
-
-	int wallIndex;
-	
-	int collisions;
-
-	std::vector<int> graphicIndex;
+	std::vector<uint32_t> graphicIndex;
+	Render::Wall& graphicReference;
 };
 
 struct wallSpawnInfo {
@@ -44,7 +41,9 @@ physx::PxVehicleDrive4W* getVehicle(int i);
 
 wallSpawnInfo* getWallInfo(int i);
 
-void makeWallSeg(int i, physx::PxTransform a, physx::PxTransform b);
+void makeWallSeg(
+	int i, physx::PxTransform a, physx::PxTransform b, float width, float height, std::vector<uint32_t> graphicIndex,
+	Render::Wall& graphicReference);
 
 void deleteWallSeg(int i, int j);
 

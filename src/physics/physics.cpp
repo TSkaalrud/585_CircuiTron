@@ -88,7 +88,7 @@ PxVehicleDrivableSurfaceToTireFrictionPairs* gFrictionPairs = NULL;
 PxRigidStatic* gGroundPlane = NULL;
 
 std::vector<PxVehicleDrive4W*> CTbikes;
-std::vector<std::vector<wallSegment>> walls;
+std::vector<std::vector<wallUserData*>> walls;
 std::vector<PxVehicleDrive4WRawInputData> inputDatas;
 std::vector<bool> isVehicleInAir;
 std::vector<wallSpawnInfo> wallSpawnTimers;
@@ -290,7 +290,7 @@ void releaseAllControls() {
 
 */
 
-void makeWallSeg(int i, PxTransform a, PxTransform b) {
+void makeWallSeg(int i, PxTransform a, PxTransform b, float width, float height, std::vector<uint32_t> graphicIndex, Render::Wall &graphicReference) {
 	PxTransform wallSeg;
 
 	// direction vector
@@ -341,20 +341,18 @@ void makeWallSeg(int i, PxTransform a, PxTransform b) {
 	// set the actor name
 	aWall->setName("wall");
 
-	// wall segment data
-	wallSegment segment = {i, aWall, b, a};
-	walls[i].push_back(segment);
-
 	// wall user data
-	wallUserData* wallData = new wallUserData{segment,(int) walls[i].size() - 1, (int)0};
+	wallUserData* wallData = new wallUserData{i,(int) walls[i].size(), 0, aWall, b, a, graphicIndex, graphicReference};
 	aWall->userData = wallData;
+
+	// wall segment data
+	walls[i].push_back(wallData);
 
 	// add actor to scene
 	gScene->addActor(*aWall);
 }
 
 void deleteWallSeg(int i, int j) { 
-	walls[i][j].wall->release(); 
 	walls[i].erase(walls[i].begin() + j);
 }
 
@@ -417,11 +415,11 @@ wallSpawnInfo* getWallInfo(int i) { return &wallSpawnTimers[i]; }
 PxTransform getBikeTransform(int i) { return CTbikes[i]->getRigidDynamicActor()->getGlobalPose(); }
 
 // getter methods for bike walls (i = bike number, j = wall segment number)
-physx::PxTransform getWallPos(int i, int j) { return walls[i][j].wall->getGlobalPose(); };
+physx::PxTransform getWallPos(int i, int j) { return walls[i][j]->wall->getGlobalPose(); };
 
-physx::PxTransform getWallFront(int i, int j) { return walls[i][j].front; };
+physx::PxTransform getWallFront(int i, int j) { return walls[i][j]->front; };
 
-physx::PxTransform getWallBack(int i, int j) { return walls[i][j].back; };
+physx::PxTransform getWallBack(int i, int j) { return walls[i][j]->back; };
 
 int getNumWalls(int i) { return walls[i].size(); }
 
@@ -553,7 +551,7 @@ void initVehicle() {
 	inputDatas.push_back(gVehicleInputData);
 
 	// wall arrays
-	std::vector<wallSegment> bikeWalls;
+	std::vector<wallUserData*> bikeWalls;
 	walls.push_back(bikeWalls);
 
 	// is vehicle in air
