@@ -11,29 +11,27 @@
 
 class Bike : public GameObject {
   private:
-	int lap = 1;
-	int waypoint = 0;
-	int place;
+
+  protected:
+	//Game
+	Window& window;
+	UiGame* UI;
+	Render::Wall wall;
+
+	//Race
+	int place, lap = 1, waypoint = 0, currentWaypoint = 0, nextWaypoint = 1;
+	std::vector<glm::vec3> waypoints; // current waypoints
+
+	//Bike
+	int currentGear = 2;
 	float health = 100;
 	int id;
 	bool locked = false;
-	int collisionCD = 60;
 
-	Window& window;
-	Render::Wall wall;
-	UiGame* UI;
-  protected:
-	std::vector<glm::vec3> waypoints; // current waypoints
-	int WADCharge = 0;
-	bool WADRelease = false;
-	int currentWaypoint = 0, nextWaypoint = 1;
-	// CD = cooldowns for abilities
-	int BoostCD = 0;
-	int StrafeCD = 0;
-	int FRAGCD = 0;
-	int SlipstreamCD = 30;
-	int Slipstreams = 0;
-	bool slipstreaming = false;
+	//Abilities
+	int BoostCD = 0, collisionCD = 60, FRAGCD = 0, resettingCD = 0, SlipstreamCD = 30, StrafeCD = 0;
+	bool resetting = false, Slipstreaming = false, WADRelease = false;
+	int Slipstreams = 0, WADCharge = 0;
 
   public:
 	Audio::AudioEngine& stereo;
@@ -52,6 +50,9 @@ class Bike : public GameObject {
 		: window(window), GameObject(render, group), place(start_place), id(start_place - 1), stereo(audio),
 		  wall(render, wallMaterialHandle), UI(UI) {
 		FRAGAudio->gain = 1.f;
+		engineAudio->loop = true;
+		gearAudio->loop = false;
+		FRAGAudio->loop = false;
 	};
 
 	int getId() { return id; }
@@ -62,12 +63,51 @@ class Bike : public GameObject {
 		this->wall.append_wall(convertTransform(getBikeTransform(getId())), {0, 0, -4.8}, {0.1, 1});
 
 		spawnWall(deltaTime, getId());
-
-		if (collisionCD > 0) {
-			collisionCD--;
+		if (!getLocked()) {
+			// reduce CD's
+			if (BoostCD > 0) {	BoostCD--;	}
+			if (StrafeCD > 0) {	StrafeCD--;	}
+			if (FRAGCD > 0) {	FRAGCD--;	}
+			if (collisionCD > 0) {	collisionCD--;	}
+			if (resettingCD > 0) {	resettingCD--;	}
+			// off track auto reset
+			if (getBikeTransform(getId()).p.y < 0) {resetBike();}
+			slipstreaming();
+			wallCollision();
+			engineSounds();
 		}
+	}
 
-		wallCollision();
+	void engineSounds() {
+		// Audio
+		// Rev check
+		int gear = getBikeGear(getId());
+		if (currentGear != gear) {
+			if (gear == 0) { // reset audio levels when reversing (first gear is used during gear shifts)
+				engineAudio->changePitch(1);
+				gearAudio->changePitch(1);
+				engineAudio->playSound(stereo.buffer[Audio::SOUND_FILE_IDLE_WUB_SFX]);
+				gearAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_REV_DOWN2_SFX]);
+
+			} else {
+				float delta = 0.1f;
+				if (currentGear < gear && gear != 1) {
+					delta = delta * (gear - currentGear); // increase pitch (accelerating) (max 2.0)
+					engineAudio->changePitch(1 + delta);
+					gearAudio->changePitch(1 + delta);
+
+					gearAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_REV_UP2_SFX]);
+				} else if (currentGear > gear && gear != 1) {
+					delta = delta * (currentGear - gear); // decrease pitch (decelerating) (min 0.5)
+					engineAudio->changePitch(1 - delta);
+					gearAudio->changePitch(1 - delta);
+					gearAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_REV_DOWN2_SFX]);
+				}
+			}
+		}
+		// Play pitch corrected revs (on loop)
+		engineAudio->playSound(stereo.buffer[Audio::SOUND_FILE_REV_STEADY_SFX]);
+		currentGear = gear;
 	}
 
 	void lockBike() {
@@ -107,10 +147,12 @@ class Bike : public GameObject {
 				health += amount;
 			}
 		}
-		//std::cout << health << std::endl;
-		UI->updateSI(health);
+		if (getId() == 0) {
+			UI->updateSI(health);
+		}
 	}
 
+	//Bike collisions with walls
 	void wallCollision() {
 		if (getId() == 0) {
 			if (collision(getId()) && collisionCD <= 0) {
@@ -121,6 +163,7 @@ class Bike : public GameObject {
 		}
 	}
 
+	//Wall generation for driving and WAD 
 	void spawnWall(float timestep, int i) {
 		//Standard Wall generation
 		physx::PxVehicleDrive4W* vehicle = getVehicle(i);
@@ -145,6 +188,7 @@ class Bike : public GameObject {
 		} else {
 			wall->wallFront.p.x = NULL;
 		}
+
 		//WAD wall generation
 		if (WADRelease) {
 			physx::PxTransform start = getBikeTransform(getId());
@@ -161,16 +205,24 @@ class Bike : public GameObject {
 			end.p = wallCentre + -0.5 * x * WADCharge;
 			makeWallSeg(0, start, end);
 
-
+			WADAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_SIZZLE_SFX]);
+			WADAudio->loop = false;
+			
+			modifyHealth(-WADCharge / 5);
 			WADCharge = 0;
 			WADRelease = false;
 		}
+		if (WADCharge > 0) {
+			WADAudio->loop = true;
+			WADAudio->playSound(stereo.buffer[Audio::SOUND_FILE_WAD_SFX]);
+		}
 	}
 
+	//Reset and orient the bike on the track.
 	void resetBike() {
 		physx::PxTransform resetLocation = getBikeTransform(getId());
 		int waypoint = 0;
-		int waypointOffset = 5;
+		int waypointOffset = 4;
 		// waypointOffset is used to manage the fact that we hit waypoints within a certain radius of us.
 		if (currentWaypoint < waypointOffset) {
 			waypoint = waypoints.size() - (waypointOffset - currentWaypoint);
@@ -189,29 +241,23 @@ class Bike : public GameObject {
 		resetLocation.q.z = 0;
 		resetLocation.q.w = cos(rads / 2);
 		resetBikePos(getId(), resetLocation);
+		modifyHealth(-33);
+		resettingCD += 60;
 	}
 
-	bool fragHit(int bike) {
+	//Hitscan bike cannon, the FRAG
+	bool fragFire(int bike) {
 		auto wallPointer = fragRay(bike, 100);
 
 		if (wallPointer != NULL) {
-			// std::cout << "hit" << std::endl;
-
 			// Possibly put wall deletion here
-
+			FRAGImpactAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_GUN_IMPACT2_SFX]);
 			return true;
+		} else {
+			// play FRAG fired (but no hit) sound
+			FRAGAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_GUN_IMPACT_SFX]);
+			return false;
 		}
-
-		/*
-		for (physx::PxU32 i = 0; i < forwardRay->nbTouches; i++) {
-			const char* name = forwardRay->touches[i].actor->getName();
-			if (std::strcmp(name, "wall") == 0) {
-				std::cout << "frag hit" << std::endl;
-				return true;
-			}
-		}*/
-		// std::cout << "no hit" << std::endl;
-		return false;
 	}
 
 	int slipstreams(int bike) {
@@ -247,5 +293,27 @@ class Bike : public GameObject {
 		*/
 
 		return slipstreamCount;
+	}
+
+	void slipstreaming() {
+		// Slipstreaming
+		Slipstreams = slipstreams(getId());
+		if (Slipstreams > 0) {
+			if (SlipstreamCD > 0) {
+				SlipstreamCD--;
+				Slipstreaming = false;
+			} else {
+				modifyHealth(0.25 * Slipstreams);
+				Slipstreaming = true;
+				/*
+				physx::PxVec3 forward = getBikeTransform(getId()).q.getBasisVector2() * 50;
+				getVehicle(getId())->getRigidDynamicActor()->addForce(
+					forward, physx::PxForceMode::eACCELERATION);
+				*/
+			}
+		} else if (SlipstreamCD < 30) {
+			SlipstreamCD++;
+			Slipstreaming = false;
+		}
 	}
 };

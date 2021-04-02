@@ -9,23 +9,19 @@
 
 class BikeAI : public Bike {
   private:
-	Window& window;
-	UiGame* UI;
+	std::vector<std::vector<glm::vec3>> ai_waypoints; // a list of waypoints for each ai bike
 	// direction of the bike's current target
 	bool left = false;
 	bool right = false;
-	// timer before AI bikes will start driving
-	int buffer = 60;
+	int buffer = 60; // timer before AI bikes will start driving
 
-	std::vector<std::vector<glm::vec3>> ai_waypoints; // a list of waypoints for each ai bike
-	int currentWaypoint = 0, nextWaypoint = 1;
 
   public:
 	BikeAI(
 		Window& window, Render::Render& render, int start_place, Render::Group& group,
 		std::vector<std::vector<glm::vec3>> ai_waypoints, Audio::AudioEngine& audio,
 		Render::MaterialHandle wallMaterialHandle, UiGame* UI)
-		: window(window), Bike(window, render, start_place, group, audio, wallMaterialHandle, UI), ai_waypoints(ai_waypoints), UI(UI) {
+		: Bike(window, render, start_place, group, audio, wallMaterialHandle, UI), ai_waypoints(ai_waypoints) {
 		waypoints = ai_waypoints[getId() - 1];
 	};
 
@@ -34,11 +30,9 @@ class BikeAI : public Bike {
 		if (!getLocked()) {
 			if (buffer < 0) {
 				followWaypoint();
+			} else {
+				buffer--;
 			}
-			buffer--;
-		}
-		if (getBikeTransform(getId()).p.y < 0) {
-			resetBike();
 		}
 	}
 
@@ -53,20 +47,20 @@ class BikeAI : public Bike {
 		float d = (target.x - ai_pos.x) * (heading.z - ai_pos.z) - (target.z - ai_pos.z) * (heading.x - ai_pos.x);
 		float dist = glm::sqrt(glm::pow(target.x - ai_pos.x, 2) + glm::pow(target.z - ai_pos.z, 2));
 
-		// update to next WP if distance is less than 10 -- play with this number for feel
-		if (dist < 25) {
+		if (dist < 25) {// update to next WP if distance is less than 25
 			currentWaypoint = nextWaypoint;
 			if (nextWaypoint == waypoints.size()) {
 				currentWaypoint = 0;
 				nextWaypoint = 1;
+				std::cout << getLap() << std::endl;
 				addLap();
 				resetWaypoint();
 			} else {
 				nextWaypoint++;
+				std::cout << currentWaypoint << std::endl;
 				addWaypoint();
 			}
 		}
-		// std::cout << currentWaypoint << " distance = " << (int)dist << std::endl;
 
 		physx::PxTransform player = getBikeTransform(0);
 		physx::PxVec3 player_pos = player.p;
@@ -79,31 +73,21 @@ class BikeAI : public Bike {
 
 		float angle = glm::acos(dot / mag);
 
-		// std::cout << angle << std::endl;
-
 		float angleRange = (3.14f - 0.0f);
 		float radiusRange = (1.0f - 0.0f);
 
 		float radius = (((angle - 0.0f) * radiusRange) / angleRange) - 0.0f;
-		// std::cout << radius << std::endl;
 
 		if (dist > 25.0f) {
-			if (d > 0) {
-				// std::cout << "left" << std::endl;
-
+			if (d > 0) { //left
 				bikeReleaseSteer(getId());
 				bikeTurnPrecise(getId(), glm::min(2 * radius, 1.f));
-				// bikeTurnLeft(getId());
 				bikeAcceleratePrecise(getId(), 0.825f);
-			} else if (d < 0) {
-				// std::cout << "right" << std::endl;
-
+			} else if (d < 0) { //right
 				bikeReleaseSteer(getId());
 				bikeTurnPrecise(getId(), glm::max(-2 * radius, -1.f));
-				// bikeTurnRight(getId());
 				bikeAcceleratePrecise(getId(), 0.825f);
-			} else {
-				// std::cout << "on" << std::endl;
+			} else {//on
 				bikeReleaseSteer(getId());
 			}
 		} else {
