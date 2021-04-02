@@ -197,7 +197,7 @@ class Bike : public GameObject {
 			// extend out +/- x-axes of the bike to create the start and end points
 			physx::PxVec3 z = -start.q.getBasisVector2();
 			physx::PxVec3 x = start.q.getBasisVector0();
-			physx::PxVec3 wallCentre = start.p + 3 * z;
+			physx::PxVec3 wallCentre = start.p + 4.8 * z;
 
 			start.q *= physx::PxQuat(0, -1, 0, 0);
 
