@@ -91,7 +91,7 @@ class Game : public Entity {
 
 		//Create and pushback the 4 playerWallMaterials
 		Render::MaterialPBR p1_wall_pbr = {
-			.albedoFactor = glm::vec4(0.f, 0.000260f, 0.133f, 1.f), 
+			.albedoFactor = glm::vec4(0.f, 0.000520f, 0.266f, 1.f), 
 			.metalFactor = 0.5f, 
 			.roughFactor = 0.05f, 
 			.emissiveFactor = glm::vec3(0, 0, 0)};
@@ -99,7 +99,7 @@ class Game : public Entity {
 		playerWallMaterials.push_back(p1_wall);
 
 		Render::MaterialPBR p2_wall_pbr = {
-			.albedoFactor = glm::vec4(0.448f, 0.079f, 0.f, 1.f),
+			.albedoFactor = glm::vec4(0.898f, 0.158f, 0.f, 1.f),
 			.metalFactor = 0.5f,
 			.roughFactor = 0.05f,
 			.emissiveFactor = glm::vec3(0, 0, 0)};
@@ -107,7 +107,7 @@ class Game : public Entity {
 		playerWallMaterials.push_back(p2_wall);
 
 		Render::MaterialPBR p3_wall_pbr = {
-			.albedoFactor = glm::vec4(0.f, 0.133f, 0.035f, 1.f),
+			.albedoFactor = glm::vec4(0.f, 0.266f, 0.07f, 1.f),
 			.metalFactor = 0.5f,
 			.roughFactor = 0.05f,
 			.emissiveFactor = glm::vec3(0, 0, 0)};
@@ -115,7 +115,7 @@ class Game : public Entity {
 		playerWallMaterials.push_back(p3_wall);
 
 		Render::MaterialPBR p4_wall_pbr = {
-			.albedoFactor = glm::vec4(0.319f, 0.f, 0.14f, 1.f),
+			.albedoFactor = glm::vec4(0.638f, 0.f, 0.28f, 1.f),
 			.metalFactor = 0.5f,
 			.roughFactor = 0.05f,
 			.emissiveFactor = glm::vec3(0, 0, 0)};
