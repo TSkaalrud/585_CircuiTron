@@ -14,6 +14,7 @@ class Bike : public GameObject {
 
   protected:
 	//Game
+	bool& menuActive;
 	Window& window;
 	UiGame* UI;
 	Render::Wall wall;
@@ -46,9 +47,9 @@ class Bike : public GameObject {
 	AudioInstance* SlipstreamingAudio = new AudioInstance();
 
 	Bike(Window& window, Render::Render & render, int start_place, Render::Group& group, Audio::AudioEngine& audio,
-		Render::MaterialHandle wallMaterialHandle, UiGame* UI)
+		Render::MaterialHandle wallMaterialHandle, UiGame* UI, bool& menuActive)
 		: window(window), GameObject(render, group), place(start_place), id(start_place - 1), stereo(audio),
-		  wall(render, wallMaterialHandle), UI(UI) {
+		  wall(render, wallMaterialHandle), UI(UI), menuActive(menuActive) {
 		FRAGAudio->gain = 1.f;
 		engineAudio->loop = true;
 		gearAudio->loop = false;

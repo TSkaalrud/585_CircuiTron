@@ -149,7 +149,8 @@ class Game : public Entity {
 			initVehicle();
 
 			std::unique_ptr<Bike> b = std::make_unique<BikeAI>(
-				window, render, i + 2, BikeModels[i + 1], ai_waypoints, stereo, playerWallMaterials[i + 1], game_UI);
+				window, render, i + 2, BikeModels[i + 1], ai_waypoints, stereo, playerWallMaterials[i + 1], game_UI,
+				menuActive);
 			bikes.push_back(b.get());
 			order.push_back(b.get());
 

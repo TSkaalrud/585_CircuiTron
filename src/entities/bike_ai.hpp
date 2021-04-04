@@ -20,8 +20,8 @@ class BikeAI : public Bike {
 	BikeAI(
 		Window& window, Render::Render& render, int start_place, Render::Group& group,
 		std::vector<std::vector<glm::vec3>> ai_waypoints, Audio::AudioEngine& audio,
-		Render::MaterialHandle wallMaterialHandle, UiGame* UI)
-		: Bike(window, render, start_place, group, audio, wallMaterialHandle, UI), ai_waypoints(ai_waypoints) {
+		Render::MaterialHandle wallMaterialHandle, UiGame* UI, bool& menuActive)
+		: Bike(window, render, start_place, group, audio, wallMaterialHandle, UI, menuActive), ai_waypoints(ai_waypoints) {
 		waypoints = ai_waypoints[getId() - 1];
 	};
 
