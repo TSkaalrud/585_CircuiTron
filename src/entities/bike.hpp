@@ -59,23 +59,42 @@ class Bike : public GameObject {
 	int getId() { return id; }
 
 	virtual void update(float deltaTime) override {
-		model->setTransform(convertTransform(getBikeTransform(getId())) * glm::scale(glm::mat4(1.0f), glm::vec3(2.0f)));
 
-		this->wall.append_wall(convertTransform(getBikeTransform(getId())), {0, 0, -4.8}, {0.1, 1});
+		if (!menuActive) {
 
-		spawnWall(deltaTime, getId());
-		if (!getLocked()) {
-			// reduce CD's
-			if (BoostCD > 0) {	BoostCD--;	}
-			if (StrafeCD > 0) {	StrafeCD--;	}
-			if (FRAGCD > 0) {	FRAGCD--;	}
-			if (collisionCD > 0) {	collisionCD--;	}
-			if (resettingCD > 0) {	resettingCD--;	}
-			// off track auto reset
-			if (getBikeTransform(getId()).p.y < 0) {resetBike();}
-			slipstreaming();
-			wallCollision();
-			engineSounds();
+			model->setTransform(
+				convertTransform(getBikeTransform(getId())) * glm::scale(glm::mat4(1.0f), glm::vec3(2.0f)));
+
+			this->wall.append_wall(convertTransform(getBikeTransform(getId())), {0, 0, -4.8}, {0.1, 1});
+
+			spawnWall(deltaTime, getId());
+			if (!getLocked()) {
+				// reduce CD's
+				if (BoostCD > 0) {
+					BoostCD--;
+				}
+				if (StrafeCD > 0) {
+					StrafeCD--;
+				}
+				if (FRAGCD > 0) {
+					FRAGCD--;
+				}
+				if (collisionCD > 0) {
+					collisionCD--;
+				}
+				if (resettingCD > 0) {
+					resettingCD--;
+				}
+				// off track auto reset
+				if (getBikeTransform(getId()).p.y < 0) {
+					resetBike();
+				}
+				slipstreaming();
+				wallCollision();
+				engineSounds();
+			}
+		} else {
+			//pause sounds?
 		}
 	}
 

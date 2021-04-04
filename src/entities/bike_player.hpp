@@ -36,98 +36,107 @@ class BikePlayer : public Bike {
 	//functions use glfw keyboard #defines @https : // www.glfw.org/docs/3.3/group__keys.html
 	void checkInput() {
 		//Driving
-		if (window.keyPressed(87)) { // w
-			if (Slipstreaming) {
-				bikeAcceleratePrecise(0, 1.0f);
+		if (!menuActive) {
+
+			if (window.keyPressed(87)) { // w
+				if (Slipstreaming) {
+					bikeAcceleratePrecise(0, 1.0f);
+				} else {
+					bikeAcceleratePrecise(0, 0.875f);
+				}
 			} else {
-				bikeAcceleratePrecise(0, 0.875f);
+				if (!window.keyPressed(83)) {
+					bikeReleaseGas(0);
+				}
 			}
-		} else {
-			if (!window.keyPressed(83)) {
-				bikeReleaseGas(0);
+			if (window.keyPressed(65)) { // a
+				bikeTurnLeft(0);
+			} else {
+				if (!window.keyPressed(68)) {
+					bikeReleaseSteer(0);
+				}
 			}
-		}
-		if (window.keyPressed(65)) { // a
-			bikeTurnLeft(0);
-		} else {
-			if (!window.keyPressed(68)) {
-				bikeReleaseSteer(0);
+			if (window.keyPressed(83)) { // s
+				bikeReverse(0);
+			} else {
+				if (!window.keyPressed(87)) {
+					bikeReleaseBrake(0);
+				}
 			}
-		}
-		if (window.keyPressed(83)) { // s
-			bikeReverse(0);
-		} else {
-			if (!window.keyPressed(87)) {
-				bikeReleaseBrake(0);
+			if (window.keyPressed(68)) { // d
+				bikeTurnRight(0);
+			} else {
+				if (!window.keyPressed(65)) {
+					bikeReleaseSteer(0);
+				}
 			}
-		}
-		if (window.keyPressed(68)) { // d
-			bikeTurnRight(0);
-		} else {
-			if (!window.keyPressed(65)) {
-				bikeReleaseSteer(0);
-			}
-		}
 
-		//Reset bike
-		if (window.keyPressed(82) && resettingCD < 1) { // r
-			resetBike();
-		}
-
-		//Handbrake
-		if (window.keyPressed(340)) { // left shift
-			bikeHandbrake(0);
-		} else {
-			bikeReleaseHandbrake(0);
-		}
-
-		// <^> Arrows - bike Booster (jump) 
-		if (window.keyPressed(265)) { // up arrow - boost up
-			if (BoostCD < 1 && getHealth() > 10) {
-				modifyHealth(-10);
-				bikeBooster(0, 265);
-				BoostCD += 30;
-				JumpAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_BOOST_SFX]);
-
-				std::cout << "health: " << getHealth() << std::endl;
+			// Reset bike
+			if (window.keyPressed(82) && resettingCD < 1) { // r
+				resetBike();
 			}
-		}
-		if (window.keyPressed(263)) { // left arrow - strafe left
-			if (StrafeCD < 1 && getHealth() > 10) {
-				modifyHealth(-10);
-				bikeBooster(0, 263);
-				StrafeCD += 30;
-				StrafeAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_BOOST_SFX]);
+
+			// Handbrake
+			if (window.keyPressed(340)) { // left shift
+				bikeHandbrake(0);
+			} else {
+				bikeReleaseHandbrake(0);
 			}
-		}
-		if (window.keyPressed(262)) { // right arrow - strafe right
-			if (StrafeCD < 1 && getHealth() > 10) {
-				modifyHealth(-10);
-				bikeBooster(0, 262);
-				StrafeCD += 30;
-				StrafeAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_BOOST_SFX]);
+
+			// <^> Arrows - bike Booster (jump)
+			if (window.keyPressed(265)) { // up arrow - boost up
+				if (BoostCD < 1 && getHealth() > 10) {
+					modifyHealth(-10);
+					bikeBooster(0, 265);
+					BoostCD += 30;
+					JumpAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_BOOST_SFX]);
+
+					std::cout << "health: " << getHealth() << std::endl;
+				}
 			}
-		}
-
-		// down arrow - WAD
-		if (window.keyPressed(264)) { // charge WAD
-			WADCharge++;
-
-		} else if (WADCharge > 0 && window.keyReleased(264)) { // release charged WAD
-			WADRelease = true;
-		}
-
-		// spacebar - Forward Projector Cannon (shoot)
-		if (window.keyPressed(32)) {
-			if (FRAGCD < 1) {
-				FRAGCD += 30;
-				modifyHealth(-5);
-				fragFire(getId()); // if true, a wall was hit! Plays fire or impact sound
+			if (window.keyPressed(263)) { // left arrow - strafe left
+				if (StrafeCD < 1 && getHealth() > 10) {
+					modifyHealth(-10);
+					bikeBooster(0, 263);
+					StrafeCD += 30;
+					StrafeAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_BOOST_SFX]);
+				}
 			}
-		}
+			if (window.keyPressed(262)) { // right arrow - strafe right
+				if (StrafeCD < 1 && getHealth() > 10) {
+					modifyHealth(-10);
+					bikeBooster(0, 262);
+					StrafeCD += 30;
+					StrafeAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_BOOST_SFX]);
+				}
+			}
 
-		// left Control - "Control" chassis to right itself
-		if (window.keyPressed(341)) {	bikeControl(0);		}
+			// down arrow - WAD
+			if (window.keyPressed(264)) { // charge WAD
+				WADCharge++;
+
+			} else if (WADCharge > 0 && window.keyReleased(264)) { // release charged WAD
+				WADRelease = true;
+			}
+
+			// spacebar - Forward Projector Cannon (shoot)
+			if (window.keyPressed(32)) {
+				if (FRAGCD < 1) {
+					FRAGCD += 30;
+					modifyHealth(-5);
+					fragFire(getId()); // if true, a wall was hit! Plays fire or impact sound
+				}
+			}
+
+			// left Control - "Control" chassis to right itself
+			if (window.keyPressed(341)) {	bikeControl(0);	}
+
+			if (window.keyPressed(256)) {	menuActive = true;	}
+		} else { // menu
+			if (window.keyPressed(257)) {	menuActive = false;	}
+
+
+		}
 	}
 
 	void updateWaypoint() {
