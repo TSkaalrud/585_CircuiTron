@@ -1,10 +1,10 @@
-// Audio
 #include "Audio/audioEngine.h"
 #include "Audio/audioInstance.h"
 #include "entities/entity_manager.hpp"
 #include "entities/game.hpp"
 #include "entities/model_view.hpp"
 #include "entities/orbit_cam.hpp"
+#include "entities/ui_test.hpp"
 #include "physics/physics.h"
 #include "window.hpp"
 #include <chrono>
@@ -18,10 +18,6 @@ int main(int argc, char* argv[]) {
 	Window window;
 
 	Render::Render& render = window.getRender();
-	// render.set_skybox_rect_texture(importSkybox("assets/skyboxes/5TH_AVENUE.hdr", render));
-	// render.set_skybox_rect_texture(importSkybox("assets/skyboxes/BROADWAY_LAFAYETTE_STATION_2.hdr", render));
-	// render.set_skybox_rect_texture(importSkybox("assets/neurathen_rock_castle_4k.hdr", render));
-	render.set_skybox_rect_texture(importSkybox("assets/skyboxes/SPACE-1.hdr", render));
 
 	// Create entitity manager
 	EntityManager e_manager;
@@ -34,21 +30,24 @@ int main(int argc, char* argv[]) {
 	// initialize physics
 	initPhysics();
 
-		// initialize audio
+	// initialize audio
 	Audio::AudioEngine stereo = Audio::AudioEngine();
 	stereo.initialize();
-	AudioInstance* bgm = new AudioInstance();
-	bgm->gain = 0.0;
-	bgm->playSound(stereo.buffer[Audio::SOUND_FILE_CYBERSONG_BGM]); // Song
-	AudioInstance* ambiance = new AudioInstance();
-	ambiance->gain = 0.0;
-	ambiance->playSound(stereo.buffer[Audio::SOUND_FILE_AMBIENCE_BGM]); // ambient environment sounds
 
-	if (args.size() > 1) {
+	//initialize UI
+	//std::vector<UiGame*> game_UI;
+	std::unique_ptr<UiGame> UI = std::make_unique<UiGame>(render, window);
+	//game_UI.push_back(UI.get());
+	UiGame* game_UI = UI.get();
+	e_manager.addEntity(std::move(UI));
+
+
+	if (args.size() > 1) {//render test
 		e_manager.addEntity(std::make_unique<ModelView>(render, args.at(1)));
 		e_manager.addEntity(std::make_unique<OrbitCam>(render, window));
-	} else {
-		e_manager.addEntity(std::make_unique<Game>(window, render, 1, e_manager, stereo));
+		e_manager.addEntity(std::make_unique<UiTest>(render, window));
+	} else {//game
+		e_manager.addEntity(std::make_unique<Game>(window, render, 4, e_manager, stereo, game_UI));
 	}
 
 	// Loop will continue until "X" on window is clicked.

@@ -10,4 +10,6 @@ Model importModel(std::string filename, Render&);
 
 TextureHandle importSkybox(std::string filename, Render&);
 
-}
+MaterialHandle importUI(std::string filename, Render& render);
+
+} // namespace Render

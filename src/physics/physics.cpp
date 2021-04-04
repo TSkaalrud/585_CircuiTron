@@ -59,6 +59,7 @@
 #include <iostream>
 #include <math.h>
 #include <stdio.h>
+#include <cstring>
 #include <string>
 #include <vector>
 
@@ -176,7 +177,7 @@ VehicleDesc initVehicleDesc() {
 		(chassisDims.y * chassisDims.y + chassisDims.z * chassisDims.z) * 1.f * chassisMass / 12.0f,
 		(chassisDims.x * chassisDims.x + chassisDims.z * chassisDims.z) * 1.1f * chassisMass / 12.0f,
 		(chassisDims.x * chassisDims.x + chassisDims.y * chassisDims.y) * 1.3f * chassisMass / 12.0f);
-	const PxVec3 chassisCMOffset(0.0f, -chassisDims.y * 0.5f + 0.5f, 0.35f);
+	const PxVec3 chassisCMOffset(0.0f, -chassisDims.y * 0.5f + 0.20f, 0.35f);
 
 	// Set up the wheel mass, radius, width, moment of inertia, and number of wheels.
 	// Moment of inertia is just the moment of inertia of a cylinder.
@@ -357,7 +358,7 @@ void deleteWallSeg(int i, int j) {
 }
 
 // cast a ray from a bike in a given direction and at a given range
-PxRaycastBuffer castRay(int bike, int dir, int range) { 
+PxRaycastBuffer* castRay(int bike, int dir, int range) { 
 	int FRONT = 0;
 	int BACK = 1;
 	int LEFT = 2;
@@ -373,6 +374,7 @@ PxRaycastBuffer castRay(int bike, int dir, int range) {
 
 	if (dir == FRONT) {
 		heading = getBikeTransform(bike).q.getBasisVector2();
+	}else if (dir == BACK) {
 	}else if (dir == BACK) {
 		heading = -getBikeTransform(bike).q.getBasisVector2();
 	}else if (dir == LEFT) {
@@ -392,10 +394,86 @@ PxRaycastBuffer castRay(int bike, int dir, int range) {
 	// https://gameworksdocs.nvidia.com/PhysX/4.1/documentation/physxguide/Manual/SceneQueries.html?highlight=ray#multiple-hits
 		
 	for (PxU32 i = 0; i < buf.nbTouches; i++) {
-		std::cout << "RAY CAST RESULTS ON OBJECT: " << buf.touches[i].actor->getName() << "\n";
+		//std::cout << "RAY CAST RESULTS ON OBJECT: " << buf.touches[i].actor->getName() << "\n";
 	}
 
-	return buf;
+	return &buf;
+}
+
+bool slipstreamRay(int bike, int dir, int range) {
+	int FRONT = 0;
+	int BACK = 1;
+	int LEFT = 2;
+	int RIGHT = 3;
+
+	PxVehicleDrive4W* vehicle = CTbikes[bike];
+	auto origin = vehicle->getRigidDynamicActor()->getGlobalPose().p;
+	auto quat = vehicle->getRigidDynamicActor()->getGlobalPose().q;
+
+	PxVec3 heading;
+
+	// https://www.gamedev.net/forums/topic/56471-extracting-direction-vectors-from-quaternion/1273785
+
+	if (dir == FRONT) {
+		heading = getBikeTransform(bike).q.getBasisVector2();
+	} else if (dir == BACK) {
+		heading = -getBikeTransform(bike).q.getBasisVector2();
+	} else if (dir == LEFT) {
+		heading = getBikeTransform(bike).q.getBasisVector0();
+	} else if (dir == RIGHT) {
+		heading = -getBikeTransform(bike).q.getBasisVector0();
+	}
+
+	heading.normalize();
+
+	const PxU32 bufferSize = 1;                 // [in] size of 'hitBuffer'
+	PxRaycastHit hitBuffer[bufferSize];         // [out] User provided buffer for results
+	PxRaycastBuffer buf(hitBuffer, bufferSize); // [out] Blocking and touching hits stored here
+
+	gScene->raycast(origin, heading, range, buf);
+
+	// https://gameworksdocs.nvidia.com/PhysX/4.1/documentation/physxguide/Manual/SceneQueries.html?highlight=ray#multiple-hits
+
+	// std::cout << "RAY CAST RESULTS ON OBJECT: " << buf.touches[i].actor->getName() << "\n";
+	const char* name = buf.touches[0].actor->getName();
+	return std::strcmp(name, "wall") == 0;
+}
+
+void * fragRay(int bike, int range) {
+	PxVehicleDrive4W* vehicle = CTbikes[bike];
+	auto origin = vehicle->getRigidDynamicActor()->getGlobalPose().p;
+	auto quat = vehicle->getRigidDynamicActor()->getGlobalPose().q;
+
+	PxVec3 heading = getBikeTransform(bike).q.getBasisVector2();
+
+	heading.normalize();
+
+	const PxU32 bufferSize = 100;                 // [in] size of 'hitBuffer'
+	PxRaycastHit hitBuffer[bufferSize];         // [out] User provided buffer for results
+	PxRaycastBuffer buf(hitBuffer, bufferSize); // [out] Blocking and touching hits stored here
+
+	gScene->raycast(origin, heading, range, buf);
+
+	// https://gameworksdocs.nvidia.com/PhysX/4.1/documentation/physxguide/Manual/SceneQueries.html?highlight=ray#multiple-hits
+
+	for (PxU32 i = 0; i < buf.nbTouches; i++) {
+		std::cout << "RAY CAST RESULTS ON OBJECT: " << buf.touches[i].actor->getName() << "\n";
+		const char* name = buf.touches[i].actor->getName();
+		if (std::strcmp(name, "wall") == 0) {
+			return buf.touches[i].actor->userData;
+			break;
+		}
+	}
+	return nullptr;
+}
+
+
+bool collision(int bike) { 
+	bikeUserData* bikeData = (bikeUserData*)CTbikes[bike]->getRigidDynamicActor()->userData;
+	if (bikeData->collided) {
+		return true;
+	} else
+		return false;
 }
 
 
@@ -586,7 +664,7 @@ void initVehicle() {
 	gVehicle4W->getRigidDynamicActor()->setName("bike");
 
 	// userdata
-	bikeUserData* bikeData = new bikeUserData{(int)CTbikes.size() - 1};
+	bikeUserData* bikeData = new bikeUserData{(int)CTbikes.size() - 1, false};
 	gVehicle4W->getRigidDynamicActor()->userData = bikeData;
 
 	gScene->addActor(*gVehicle4W->getRigidDynamicActor());
@@ -648,7 +726,7 @@ void initPhysics() {
 	gPhysics = PxCreatePhysics(PX_PHYSICS_VERSION, *gFoundation, PxTolerancesScale(), true, gPvd);
 
 	PxSceneDesc sceneDesc(gPhysics->getTolerancesScale());
-	sceneDesc.gravity = PxVec3(0.0f, -9.81f * 1.5, 0.0f);
+	sceneDesc.gravity = PxVec3(0.0f, -9.81f * 2, 0.0f);
 
 	PxU32 numWorkers = 1;
 	gDispatcher = PxDefaultCpuDispatcherCreate(numWorkers);
@@ -658,7 +736,6 @@ void initPhysics() {
 	// set collision callback in order to use trigger volumes
 	CTColliderCallback* colliderCallback = new CTColliderCallback();
 	sceneDesc.simulationEventCallback = colliderCallback;
-
 	gScene = gPhysics->createScene(sceneDesc);
 	PxPvdSceneClient* pvdClient = gScene->getScenePvdClient();
 	if (pvdClient) {
@@ -688,7 +765,7 @@ void initPhysics() {
 	PxFilterData groundPlaneSimFilterData(COLLISION_FLAG_GROUND, COLLISION_FLAG_GROUND_AGAINST, 0, 0);
 	gGroundPlane = createDrivablePlane(groundPlaneSimFilterData, gMaterial, gPhysics);
 	gGroundPlane->setName("Ground Plane");
-	gScene->addActor(*gGroundPlane);
+	//gScene->addActor(*gGroundPlane);
 
 	// Cook track
 	PxTriangleMesh* trackMesh = cookTrack();
@@ -713,6 +790,12 @@ void initPhysics() {
 
 void stepPhysics(float timestep) {
 	//const PxF32 timestep = 1.0f / 60.0f;
+
+	//reset the bike collision status
+	for (int i = 0; i < CTbikes.size(); i++) {
+		bikeUserData* bikeData = (bikeUserData*)CTbikes[i]->getRigidDynamicActor()->userData;
+		bikeData->collided = false;
+	}
 
 	for (int i = 0; i < CTbikes.size(); i++) {
 		if (gMimicKeyInputs) {
@@ -780,3 +863,4 @@ void keyPress(unsigned char key, const PxTransform& camera) {
 	PX_UNUSED(camera);
 	PX_UNUSED(key);
 }
+
