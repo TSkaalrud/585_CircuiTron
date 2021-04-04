@@ -10,12 +10,13 @@
 
 class BikePlayer : public Bike {
   private:
+	bool& menuActive;
 
   public:
 	BikePlayer(
 		Window& window, Render::Render& render, int start_place, Render::Group& group, std::vector<glm::vec3> waypoints,
-		Audio::AudioEngine& audio, Render::MaterialHandle wallMaterialHandle, UiGame* UI)
-		: Bike(window, render, start_place, group, audio, wallMaterialHandle, UI) {
+		Audio::AudioEngine& audio, Render::MaterialHandle wallMaterialHandle, UiGame* UI, bool& menuActive)
+		: Bike(window, render, start_place, group, audio, wallMaterialHandle, UI), menuActive(menuActive) {
 
 		this->waypoints = waypoints;
 	};

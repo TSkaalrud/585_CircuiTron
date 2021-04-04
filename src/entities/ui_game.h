@@ -12,6 +12,8 @@ class UiGame : public Entity {
   private:
 	Render::Render& render;
 	Window& window;
+	bool& menuActive;
+
 	//UI instanceHandles
 	Render::InstanceHandle SI_Bar = -1;
 	Render::InstanceHandle SI_Fill = -1;
@@ -30,7 +32,6 @@ class UiGame : public Entity {
 	Render::InstanceHandle Instructions = -1;
 
 	//UI MaterialHandles
-	//H = hilight, U = Unselected, R = Ready
 	Render::MaterialHandle SI_Bar_png;
 	Render::MaterialHandle SI_Critical_png;
 	Render::MaterialHandle SI_Damaged_png;
@@ -46,8 +47,8 @@ class UiGame : public Entity {
 	Render::MaterialHandle P3_Wins_png;
 	Render::MaterialHandle P4_Wins_png;
 
-
 	//Menu MaterialHandles
+	// H = hilight, U = Unselected, R = Ready
 	Render::MaterialHandle Background_png;
 	Render::MaterialHandle Circuitron_Title_png;
 	Render::MaterialHandle Exit_H_png;
@@ -67,8 +68,8 @@ class UiGame : public Entity {
 	int currentPlace = 4;
 	int currentLap = 1;
 
-	UiGame(Render::Render& render, Window& window)
-		: render(render), window(window),
+	UiGame(Render::Render& render, Window& window, bool& menuActive)
+		: render(render), window(window), menuActive(menuActive),
 		  // Load all images into Materials
 		  SI_Bar_png(Render::importUI("assets/UI/SI_Bar.png", render)),
 		  SI_Critical_png(Render::importUI("assets/UI/SI_Bar_Critical.png", render)),

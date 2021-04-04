@@ -64,11 +64,12 @@ class Game : public Entity {
 	Audio::AudioEngine& stereo;
 	
 	bool gameover = false;
+	bool& menuActive;
 
   public:
 	Game(
-		Window& window, Render::Render& render, int players, EntityManager& em, Audio::AudioEngine& audio, UiGame* UI)
-		: window(window), render(render), e_manager(em), players(players),
+		Window& window, Render::Render& render, int players, EntityManager& em, Audio::AudioEngine& audio, UiGame* UI, bool& menuActive)
+		: window(window), render(render), e_manager(em), players(players), menuActive(menuActive),
 		  game_UI(UI),
 		  car_model(importModel("assets/Bike_Final.glb", render)),
 		  wall_model(importModel("assets/Wall_blob.glb", render)),
@@ -136,7 +137,8 @@ class Game : public Entity {
 
 		//make the player's bike
 		std::unique_ptr<Bike> b = std::make_unique<BikePlayer>(
-			window, render, 1, BikeModels[0], ai_waypoints[1], stereo, playerWallMaterials[0], game_UI);
+			window, render, 1, BikeModels[0], ai_waypoints[1], stereo, playerWallMaterials[0], game_UI,
+			menuActive);
 		bikes.push_back(b.get());
 		order.push_back(b.get());
 
@@ -159,6 +161,7 @@ class Game : public Entity {
 	}
 
 	void update(float deltaTime) override {
+		// check values of UI elements to figure out menu status when pressing enter
 		if (!gameover) {
 			updatePlaces();
 			checkWin();

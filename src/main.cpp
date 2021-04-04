@@ -35,9 +35,8 @@ int main(int argc, char* argv[]) {
 	stereo.initialize();
 
 	//initialize UI
-	//std::vector<UiGame*> game_UI;
-	std::unique_ptr<UiGame> UI = std::make_unique<UiGame>(render, window);
-	//game_UI.push_back(UI.get());
+	bool menuActive = true;
+	std::unique_ptr<UiGame> UI = std::make_unique<UiGame>(render, window, menuActive);
 	UiGame* game_UI = UI.get();
 	e_manager.addEntity(std::move(UI));
 
@@ -47,7 +46,7 @@ int main(int argc, char* argv[]) {
 		e_manager.addEntity(std::make_unique<OrbitCam>(render, window));
 		e_manager.addEntity(std::make_unique<UiTest>(render, window));
 	} else {//game
-		e_manager.addEntity(std::make_unique<Game>(window, render, 4, e_manager, stereo, game_UI));
+		e_manager.addEntity(std::make_unique<Game>(window, render, 4, e_manager, stereo, game_UI, menuActive));
 	}
 
 	// Loop will continue until "X" on window is clicked.
@@ -63,9 +62,10 @@ int main(int argc, char* argv[]) {
 			timestep = std::chrono::duration_cast<std::chrono::duration<float>>(now - past).count();
 			past = now;
 		}
-		// simulate();
-		stepPhysics(timestep);
-
+		if (!menuActive) {// pause physics while in menu
+			// simulate;
+			stepPhysics(timestep);
+		}
 		time += timestep;
 
 		// Calls the update function all of the entities added to the manager

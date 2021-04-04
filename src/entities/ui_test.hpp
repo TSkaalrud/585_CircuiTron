@@ -15,7 +15,7 @@ class UiTest : public Entity {
 
   public:
 	UiTest(Render::Render& render, Window& window)
-		: render(render), window(window),
+		: render(render), window(window), 
 		  // Load all images into Materials
 		  play_ready(Render::importUI("assets/UI/Play (ready).png", render)),
 		  play_highlight(Render::importUI("assets/UI/Play (hilighted).png", render)){};
