@@ -166,97 +166,100 @@ class UiGame : public Entity {
 		}
 		//The menu background, this is opaque/has no transparency*
 		if (Background == -1) {
-			auto position = glm::vec3{1920, 1080, 0} / 4.0f;
-			auto scale = glm::vec2{401, 41} / 2.0f;
+			auto position = glm::vec3{0, 0, 0} / 4.0f;
+			auto scale = glm::vec2{1920, 1080} / 2.0f;
 			auto depth = 0.0f;
 			auto transform = Render::ui_transform(position, scale, depth);
 
-			//Background = render.create_instance(render.ui_mesh(), Background_png, transform);
+			Background = render.create_instance(render.ui_mesh(), Background_png, transform);
 		}
 		//CircuiTron
 		if (TitleCard == -1) {
-			auto position = glm::vec3{1920, 1080, 0} / 4.0f;
-			auto scale = glm::vec2{401, 41} / 2.0f;
+			auto position = glm::vec3{0, 0, 0} / 4.0f;
+			auto scale = glm::vec2{1440, 176} / 2.0f;
 			auto depth = 0.0f;
 			auto transform = Render::ui_transform(position, scale, depth);
 
-			//TitleCard = render.create_instance(render.ui_mesh(), Circuitron_Title_png, transform);
+			TitleCard = render.create_instance(render.ui_mesh(), Circuitron_Title_png, transform);
 		}
 		//Menu_Items 1-3 make up the 3 locations for menu buttons to be placed
 		if (Menu_Item_1 == -1) {
-			auto position = glm::vec3{1920, 1080, 0} / 4.0f;
-			auto scale = glm::vec2{401, 41} / 2.0f;
+			auto position = glm::vec3{0, 1080, 0} / 6.0f;
+			auto scale = glm::vec2{315, 94} / 2.0f;
 			auto depth = 0.0f;
 			auto transform = Render::ui_transform(position, scale, depth);
 
-			//Menu_Item_1 = render.create_instance(render.ui_mesh(), Play_H_png, transform);
+			Menu_Item_1 = render.create_instance(render.ui_mesh(), Play_H_png, transform);
 		}
 		if (Menu_Item_2 == -1) {
-			auto position = glm::vec3{1920, 1080, 0} / 4.0f;
-			auto scale = glm::vec2{401, 41} / 2.0f;
+			auto position = glm::vec3{0, 1080, 0} / 4.0f;
+			auto scale = glm::vec2{315, 94} / 2.0f;
 			auto depth = 0.0f;
 			auto transform = Render::ui_transform(position, scale, depth);
 
-			//Menu_Item_2 = render.create_instance(render.ui_mesh(), Options_U_png, transform);
+			Menu_Item_2 = render.create_instance(render.ui_mesh(), Options_U_png, transform);
 		}
 		if (Menu_Item_3 == -1) {
-			auto position = glm::vec3{1920, 1080, 0} / 4.0f;
-			auto scale = glm::vec2{401, 41} / 2.0f;
+			auto position = glm::vec3{0, 1080, 0} / 3.0f;
+			auto scale = glm::vec2{315, 94} / 2.0f;
 			auto depth = 0.0f;
 			auto transform = Render::ui_transform(position, scale, depth);
 
-			//Menu_Item_3 = render.create_instance(render.ui_mesh(), Exit_U_png, transform);
+			Menu_Item_3 = render.create_instance(render.ui_mesh(), Exit_U_png, transform);
 		}
 		//Instructions covers the span of the screen during pause/loading
 		if (Instructions == -1) {
-			auto position = glm::vec3{1920, 1080, 0} / 4.0f;
-			auto scale = glm::vec2{401, 41} / 2.0f;
+			auto position = glm::vec3{0, 0, 0} / 4.0f;
+			auto scale = glm::vec2{1920, 1080} / 2.0f;
 			auto depth = 0.0f;
 			auto transform = Render::ui_transform(position, scale, depth);
 
-			//Instructions = render.create_instance(render.ui_mesh(), Instructions_png, transform);
+			Instructions = render.create_instance(render.ui_mesh(), Instructions_png, transform);
 		}
 	}
 #pragma endregion
 
 	void update(float) override {
+#pragma region UI tutorial
 		// All measurements assume a 1920 by 1080 screen
 		// This can be adjusted with the global_scale paremeter in ui_transform
 		// The default value 2.0f / vec2{1920, -1080} corresponds to a 1920x1080 resolution
 
 		// Position of the center of the element from the center of the screen
 		// In this case, if the screen is 1920x1080, the element will be centered on the mouse
-		//auto position = glm::vec3{window.cursor.xpos, window.cursor.ypos, 0} - glm::vec3{1920, 1080, 0} / 2.0f;
-		//auto position = glm::vec3{1920, 1080, 0} / 4.0f;
+		// auto position = glm::vec3{window.cursor.xpos, window.cursor.ypos, 0} - glm::vec3{1920, 1080, 0} / 2.0f;
+		// auto position = glm::vec3{1920, 1080, 0} / 4.0f;
 		// Half-size of the element
 		// In this case the element should be 146x76 so we divide it by 2 to get the half-size
-		//auto scale = glm::vec2{146, 76} / 2.0f;
+		// auto scale = glm::vec2{146, 76} / 2.0f;
 
 		// (Optional) ranges from -1 to 1. Determines what objects should be on top
 		// I don't actually know if -1 or 1 is on top. ¯\_(ツ)_/¯
 		// -1 is on the bottom; 1 is on the top
-		//auto depth = 0.0f;
+		// auto depth = 0.0f;
 
 		// Radians
-		//auto rotation = window.scroll.ypos / 5.0f;
-		//auto rotation = 0.f;
+		// auto rotation = window.scroll.ypos / 5.0f;
+		// auto rotation = 0.f;
 
 		// You can define the transform manually if you're feeling brave
 		// but you should probably just use this helper function
-		//auto transform = Render::ui_transform(position, scale, depth, rotation);
+		// auto transform = Render::ui_transform(position, scale, depth, rotation);
 
-		//render.instance_set_trans(SI_Bar, transform);
-		render.instance_set_material(SI_Bar, SI_Bar_png);
-		//render.instance_set_material(SI_Fill, SI_Secure_png);
-		//render.instance_set_material(Lap_UI, UI_Lap_png);
-		//updatePlace(currentPlace);
-		//updateLap(currentPlace);
+		// render.instance_set_trans(SI_Bar, transform);
+		// render.instance_set_material(SI_Fill, SI_Secure_png);
+		// render.instance_set_material(Lap_UI, UI_Lap_png);
+		// updatePlace(currentPlace);
+		// updateLap(currentPlace);
 		// Set the material
-		//if (window.mouseButton(GLFW_MOUSE_BUTTON_LEFT)) {
+		// if (window.mouseButton(GLFW_MOUSE_BUTTON_LEFT)) {
 		//	render.instance_set_material(instance, play_highlight);
 		//} else {
 		//	render.instance_set_material(instance, play_ready);
 		//}
+#pragma endregion
+		render.instance_set_material(SI_Bar, SI_Bar_png);
+
 	}
 
 	void updateLap(int currentLap) {
