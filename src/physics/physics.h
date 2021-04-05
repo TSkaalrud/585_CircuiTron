@@ -4,7 +4,7 @@
 #include <foundation/Px.h>
 #include <PxPhysicsAPI.h>
 #include <vector>
-#include "Render/wall.hpp"
+#include "render/wall.hpp"
 
 struct wallUserData {
 	int bikeNumber;
@@ -20,13 +20,6 @@ struct wallUserData {
 	Render::Wall& graphicReference;
 };
 
-struct wallSpawnInfo {
-	physx::PxF32 timer;
-	physx::PxF32 wallTime;
-	physx::PxTransform wallFront;
-	physx::PxTransform wallBack;
-};
-
 struct bikeUserData {
 	int bikeNumber;
 	bool collided;
@@ -40,8 +33,6 @@ float getSpeed(int i);
 
 physx::PxVehicleDrive4W* getVehicle(int i);
 
-wallSpawnInfo* getWallInfo(int i);
-
 void makeWallSeg(
 	int i, physx::PxTransform a, physx::PxTransform b, float width, float height, std::vector<uint32_t> graphicIndex,
 	Render::Wall& graphicReference);
@@ -51,8 +42,6 @@ void deleteWallSeg(int i, int j);
 physx::PxRaycastBuffer* castRay(int bike, int dir, int range);
 
 bool slipstreamRay(int bike, int dir, int range);
-
-void * fragRay(int bike, int range);
 
 void* fragRay(int bike, int range);
 

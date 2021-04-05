@@ -92,7 +92,6 @@ std::vector<PxVehicleDrive4W*> CTbikes;
 std::vector<std::vector<wallUserData*>> walls;
 std::vector<PxVehicleDrive4WRawInputData> inputDatas;
 std::vector<bool> isVehicleInAir;
-std::vector<wallSpawnInfo> wallSpawnTimers;
 
 float impulseBase = 2500;
 
@@ -320,7 +319,7 @@ void makeWallSeg(int i, PxTransform a, PxTransform b, float width, float height,
 	wallSeg.q = wallQuat;
 
 	// make wall segment
-	PxShape* wallShape = gPhysics->createShape(PxBoxGeometry(0.1f, 0.6f, length / 2.0f), *gMaterial);
+	PxShape* wallShape = gPhysics->createShape(PxBoxGeometry(width, height, length / 2.0f), *gMaterial);
 
 	// set query filter data of the wall so that the vehicle raycasts can hit the wall
 	PxFilterData qryFilterData(COLLISION_FLAG_OBSTACLE, COLLISION_FLAG_OBSTACLE_AGAINST, 0, 0);
@@ -353,12 +352,12 @@ void makeWallSeg(int i, PxTransform a, PxTransform b, float width, float height,
 	gScene->addActor(*aWall);
 }
 
-void deleteWallSeg(int i, int j) { 
+void deleteWallSeg(int i, int j) {
 	walls[i].erase(walls[i].begin() + j);
 }
 
 // cast a ray from a bike in a given direction and at a given range
-PxRaycastBuffer* castRay(int bike, int dir, int range) { 
+PxRaycastBuffer* castRay(int bike, int dir, int range) {
 	int FRONT = 0;
 	int BACK = 1;
 	int LEFT = 2;
@@ -390,9 +389,9 @@ PxRaycastBuffer* castRay(int bike, int dir, int range) {
 	PxRaycastBuffer buf(hitBuffer, bufferSize); // [out] Blocking and touching hits stored here
 
 	gScene->raycast(origin, heading, range, buf);
-	
+
 	// https://gameworksdocs.nvidia.com/PhysX/4.1/documentation/physxguide/Manual/SceneQueries.html?highlight=ray#multiple-hits
-		
+
 	for (PxU32 i = 0; i < buf.nbTouches; i++) {
 		//std::cout << "RAY CAST RESULTS ON OBJECT: " << buf.touches[i].actor->getName() << "\n";
 	}
@@ -468,7 +467,7 @@ void * fragRay(int bike, int range) {
 }
 
 
-bool collision(int bike) { 
+bool collision(int bike) {
 	bikeUserData* bikeData = (bikeUserData*)CTbikes[bike]->getRigidDynamicActor()->userData;
 	if (bikeData->collided) {
 		return true;
@@ -486,8 +485,6 @@ float getSpeed(int i) { return CTbikes[i]->computeForwardSpeed(); }
 int getNumBikes() { return CTbikes.size(); }
 
 PxVehicleDrive4W* getVehicle(int i) { return CTbikes[i]; }
-
-wallSpawnInfo* getWallInfo(int i) { return &wallSpawnTimers[i]; }
 
 // get bike transforms (i = bike number)
 PxTransform getBikeTransform(int i) { return CTbikes[i]->getRigidDynamicActor()->getGlobalPose(); }
@@ -546,8 +543,8 @@ void bikeTurnLeft(int i) { inputDatas[i].setAnalogSteer(glm::min(inputDatas[i].g
 void bikeTurnPrecise(int i, float n) { inputDatas[i].setAnalogSteer(n); }
 
 // gas/turn/brake release functions used for input
-void bikeReleaseGas(int i) { 
-	inputDatas[i].setAnalogAccel(glm::min(0.8, inputDatas[i].getAnalogAccel()*0.992)); 
+void bikeReleaseGas(int i) {
+	inputDatas[i].setAnalogAccel(glm::min(0.8, inputDatas[i].getAnalogAccel()*0.992));
 }
 
 void bikeReleaseSteer(int i) { inputDatas[i].setAnalogSteer(0.0f); }
@@ -607,10 +604,10 @@ void bikeControl(int bike) {
 PxTransform startPos;
 
 //reset bike to start position
-void resetBikePos(int bike, PxTransform location) { 
+void resetBikePos(int bike, PxTransform location) {
 	CTbikes[bike]->getRigidDynamicActor()->setGlobalPose(location);
 	CTbikes[bike]->setToRestState();
-	
+
 }
 
 // fetch bike gear
@@ -636,12 +633,6 @@ void initVehicle() {
 	bool gIsVehicleInAir = true;
 	isVehicleInAir.push_back(gIsVehicleInAir);
 
-	wallSpawnInfo wallInfo;
-	wallInfo.timer = 0.0f;
-	wallInfo.wallTime = 1.0f / 6.0f;
-
-	wallSpawnTimers.push_back(wallInfo);
-
 	PxVehicleDrive4W* gVehicle4W;
 
 	VehicleDesc vehicleDesc = initVehicleDesc();
@@ -659,7 +650,7 @@ void initVehicle() {
 	CTbikes.push_back(gVehicle4W);
 
 	gVehicle4W->getRigidDynamicActor()->setGlobalPose(startTransform);
-	
+
 	// set the actor name
 	gVehicle4W->getRigidDynamicActor()->setName("bike");
 

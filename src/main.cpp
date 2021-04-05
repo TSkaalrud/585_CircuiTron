@@ -34,19 +34,19 @@ int main(int argc, char* argv[]) {
 	Audio::AudioEngine stereo = Audio::AudioEngine();
 	stereo.initialize();
 
-	//initialize UI
-	//std::vector<UiGame*> game_UI;
-	std::unique_ptr<UiGame> UI = std::make_unique<UiGame>(render, window);
-	//game_UI.push_back(UI.get());
-	UiGame* game_UI = UI.get();
-	e_manager.addEntity(std::move(UI));
-
-
-	if (args.size() > 1) {//render test
+	if (args.size() > 1) {
+		// render test
 		e_manager.addEntity(std::make_unique<ModelView>(render, args.at(1)));
 		e_manager.addEntity(std::make_unique<OrbitCam>(render, window));
 		e_manager.addEntity(std::make_unique<UiTest>(render, window));
-	} else {//game
+	} else {
+		// game
+		// initialize UI
+		// std::vector<UiGame*> game_UI;
+		std::unique_ptr<UiGame> UI = std::make_unique<UiGame>(render, window);
+		// game_UI.push_back(UI.get());
+		UiGame* game_UI = UI.get();
+		e_manager.addEntity(std::move(UI));
 		e_manager.addEntity(std::make_unique<Game>(window, render, 4, e_manager, stereo, game_UI));
 	}
 

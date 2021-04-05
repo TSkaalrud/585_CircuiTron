@@ -27,17 +27,15 @@ class Wall {
 	Wall(Render& render, MaterialHandle material) : render(render), mat(material){};
 	Wall(Wall& wall) = delete;
 
-	void update_wall(mat4 bikeTransform, vec3 position, vec2 scale) {
-		append_wall(bikeTransform, position, scale, false);
-	}
-	uint commit_wall(mat4 bikeTransform, vec3 position, vec2 scale) {
-		append_wall(bikeTransform, position, scale, true);
+	void update_wall(mat4 bikeTransform, vec2 scale) { append_wall(bikeTransform, scale, false); }
+	uint commit_wall(mat4 bikeTransform, vec2 scale) {
+		append_wall(bikeTransform, scale, true);
 		return current_wall_count - 1;
 	}
 
 	void delete_wall(uint wall);
 
   private:
-	void append_wall(mat4 bikeTransform, vec3 position, vec2 scale, bool commit);
+	void append_wall(mat4 bikeTransform, vec2 scale, bool commit);
 };
 } // namespace Render

@@ -5,18 +5,15 @@
 #include "game_object.hpp"
 #include "physics/physics.h"
 #include "render/wall.hpp"
-#include "window.hpp"
 #include "ui_game.h"
-
+#include "wall_spawner.hpp"
+#include "window.hpp"
 
 class Bike : public GameObject {
-  private:
-
   protected:
 	//Game
 	Window& window;
 	UiGame* UI;
-	Render::Wall wall;
 
 	//Race
 	int place, lap = 1, waypoint = 0, currentWaypoint = 0, nextWaypoint = 1;
@@ -33,6 +30,8 @@ class Bike : public GameObject {
 	bool resetting = false, Slipstreaming = false, WADRelease = false;
 	int Slipstreams = 0, WADCharge = 0;
 
+	WallSpawner wallSpawner;
+
   public:
 	Audio::AudioEngine& stereo;
 	AudioInstance* engineAudio = new AudioInstance();
@@ -48,7 +47,7 @@ class Bike : public GameObject {
 	Bike(Window& window, Render::Render & render, int start_place, Render::Group& group, Audio::AudioEngine& audio,
 		Render::MaterialHandle wallMaterialHandle, UiGame* UI)
 		: window(window), GameObject(render, group), place(start_place), id(start_place - 1), stereo(audio),
-		  wall(render, wallMaterialHandle), UI(UI) {
+		  wallSpawner(render, wallMaterialHandle), UI(UI) {
 		FRAGAudio->gain = 1.f;
 		engineAudio->loop = true;
 		gearAudio->loop = false;
@@ -60,9 +59,28 @@ class Bike : public GameObject {
 	virtual void update(float deltaTime) override {
 		model->setTransform(convertTransform(getBikeTransform(getId())) * glm::scale(glm::mat4(1.0f), glm::vec3(2.0f)));
 
-		// this->wall.append_wall(convertTransform(getBikeTransform(getId())), {0, 0, -4.8}, {0.1, 1});
+		{
+			physx::PxVehicleDrive4W* vehicle = getVehicle(getId());
+			wallSpawner.shouldSpawnWall = vehicle->computeForwardSpeed() >= 10.0f &&
+				vehicle->mDriveDynData.getCurrentGear() != physx::PxVehicleGearsData::eREVERSE;
+		}
+		if (WADRelease) {
+			wallSpawner.spawnWad.emplace(0.5 * WADCharge);
 
-		spawnWall(deltaTime, getId());
+			WADAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_SIZZLE_SFX]);
+			WADAudio->loop = false;
+
+			modifyHealth(-WADCharge / 5);
+			WADCharge = 0;
+			WADRelease = false;
+		}
+		if (WADCharge > 0) {
+			WADAudio->loop = true;
+			WADAudio->playSound(stereo.buffer[Audio::SOUND_FILE_WAD_SFX]);
+		}
+
+		wallSpawner.spawnWalls(deltaTime, getId());
+
 		if (!getLocked()) {
 			// reduce CD's
 			if (BoostCD > 0) {	BoostCD--;	}
@@ -129,7 +147,7 @@ class Bike : public GameObject {
 	int getWaypoint() { return waypoint; }
 
 	int getHealth() { return health; }
-	void modifyHealth(float amount) { 
+	void modifyHealth(float amount) {
 		if (amount > 0) {
 			if (health + amount > 100) {
 				health = 100;
@@ -160,61 +178,6 @@ class Bike : public GameObject {
 				collisionCD = 60;
 				chassisAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_BIKE_IMPACT_SFX]);
 			}
-		}
-	}
-
-	//Wall generation for driving and WAD 
-	void spawnWall(float timestep, int i) {
-		//Standard Wall generation
-		physx::PxVehicleDrive4W* vehicle = getVehicle(i);
-		wallSpawnInfo* wall = getWallInfo(i);
-
-		wall->timer += timestep;
-
-		if (vehicle->computeForwardSpeed() >= 10.0f &&
-			vehicle->mDriveDynData.getCurrentGear() != physx::PxVehicleGearsData::eREVERSE) {
-			if (wall->timer >= wall->wallTime) {
-				if (wall->wallFront.p.x != NULL) {
-					wall->wallBack = wall->wallFront;
-					wall->wallFront.p = getBikeTransform(i).p - 4.8f * getBikeTransform(i).q.getBasisVector2();
-					wall->wallFront.q = getBikeTransform(i).q;
-
-					makeWallSeg(i, wall->wallBack, wall->wallFront);
-				}
-				wall->wallFront.p = getBikeTransform(i).p - 4.8f * getBikeTransform(i).q.getBasisVector2();
-				wall->wallFront.q = getBikeTransform(i).q;
-				wall->timer = 0.0f;
-			}
-		} else {
-			wall->wallFront.p.x = NULL;
-		}
-
-		//WAD wall generation
-		if (WADRelease) {
-			physx::PxTransform start = getBikeTransform(getId());
-			physx::PxTransform end = getBikeTransform(getId());
-			// origin behind the bike's +Z then, with a length based on WADcharge,
-			// extend out +/- x-axes of the bike to create the start and end points
-			physx::PxVec3 z = -start.q.getBasisVector2();
-			physx::PxVec3 x = start.q.getBasisVector0();
-			physx::PxVec3 wallCentre = start.p + 4.8 * z;
-
-			start.q *= physx::PxQuat(0, -1, 0, 0);
-
-			start.p = wallCentre + 0.5 * x * WADCharge;
-			end.p = wallCentre + -0.5 * x * WADCharge;
-			makeWallSeg(0, start, end);
-
-			WADAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_SIZZLE_SFX]);
-			WADAudio->loop = false;
-			
-			modifyHealth(-WADCharge / 5);
-			WADCharge = 0;
-			WADRelease = false;
-		}
-		if (WADCharge > 0) {
-			WADAudio->loop = true;
-			WADAudio->playSound(stereo.buffer[Audio::SOUND_FILE_WAD_SFX]);
 		}
 	}
 
