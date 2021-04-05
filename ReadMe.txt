@@ -1,4 +1,4 @@
-BE SURE YOU HAVE UPDATED YOUR GRAPHICS DRIVERS BEFORE RUNNING.
+BE SURE YOU HAVE UPDATED YOUR GRAPHICS DRIVERS BEFORE RUNNING. CircuiTron uses the most recent version of OpenGL.
 Bike shadows are present* you just need the right lighting to see them on the floor. They're easily seen on the wall segments, however.
 
 MS4 features:
