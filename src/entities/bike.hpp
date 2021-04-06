@@ -94,7 +94,7 @@ class Bike : public GameObject {
 				engineSounds();
 			}
 		} else {
-			//pause sounds?
+			//pause sounds
 		}
 	}
 
