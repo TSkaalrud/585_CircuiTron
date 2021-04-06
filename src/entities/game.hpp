@@ -163,9 +163,11 @@ class Game : public Entity {
 
 	void update(float deltaTime) override {
 		// check values of UI elements to figure out menu status when pressing enter
-		if (!gameover) {
-			updatePlaces();
-			checkWin();
+		if (!menuActive) {
+			if (!gameover) {
+				updatePlaces();
+				checkWin();
+			}
 		}
 	}
 
@@ -174,7 +176,6 @@ class Game : public Entity {
 		// this will most likely be implemented by comparing cars by lap
 		// if lap is equal compare by checkpoint (divide the track up invisibly)
 		// finally if equal again compare by distance to next checkpoint
-
 		std::sort(order.begin(), order.end(), place_sort);
 		for (int i = 0; i < bikes.size(); i++) {
 			order[i]->setPlace(i + 1);
