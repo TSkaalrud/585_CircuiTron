@@ -36,7 +36,7 @@ void CTColliderCallback::onTrigger(PxTriggerPair* pairs, PxU32 count) {
 					//std::cout << bikeData->collided << std::endl;
 
 				}
-				//deleteWallSeg(w->segmentInfo.bikeNumber, w->wallIndex);
+				markWallBroken(w->bikeNumber, w->wallIndex);
 			}
 
 		}

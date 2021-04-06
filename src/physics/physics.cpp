@@ -92,6 +92,7 @@ std::vector<PxVehicleDrive4W*> CTbikes;
 std::vector<std::vector<wallUserData*>> walls;
 std::vector<PxVehicleDrive4WRawInputData> inputDatas;
 std::vector<bool> isVehicleInAir;
+std::vector<PxRigidStatic*> brokenWalls;
 
 float impulseBase = 2500;
 
@@ -342,7 +343,7 @@ void makeWallSeg(int i, PxTransform a, PxTransform b, float width, float height,
 	aWall->setName("wall");
 
 	// wall user data
-	wallUserData* wallData = new wallUserData{i,(int) walls[i].size(), 0, aWall, b, a, graphicIndex, graphicReference};
+	wallUserData* wallData = new wallUserData{i,(int) walls[i].size(), 0, aWall, b, a, graphicIndex, graphicReference, false};
 	aWall->userData = wallData;
 
 	// wall segment data
@@ -352,8 +353,19 @@ void makeWallSeg(int i, PxTransform a, PxTransform b, float width, float height,
 	gScene->addActor(*aWall);
 }
 
-void deleteWallSeg(int i, int j) {
-	walls[i].erase(walls[i].begin() + j);
+void markWallBroken(int i, int j) {
+	walls[i][j]->broken = true;
+	brokenWalls.push_back(walls[i][j]->wall);
+}
+
+void deleteWalls() {
+	for (int i = 0; i < brokenWalls.size(); i++) {
+		for (auto j : static_cast<wallUserData*>(brokenWalls[i]->userData)->graphicIndex) {
+			static_cast<wallUserData*>(brokenWalls[i]->userData)->graphicReference.delete_wall(j);
+		}
+		gScene->removeActor(*brokenWalls[i]);
+	}
+	brokenWalls.clear();
 }
 
 // cast a ray from a bike in a given direction and at a given range
@@ -787,6 +799,8 @@ void stepPhysics(float timestep) {
 		bikeUserData* bikeData = (bikeUserData*)CTbikes[i]->getRigidDynamicActor()->userData;
 		bikeData->collided = false;
 	}
+
+	deleteWalls();
 
 	for (int i = 0; i < CTbikes.size(); i++) {
 		if (gMimicKeyInputs) {

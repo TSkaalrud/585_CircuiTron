@@ -18,6 +18,8 @@ struct wallUserData {
 
 	std::vector<uint32_t> graphicIndex;
 	Render::Wall& graphicReference;
+
+	bool broken;
 };
 
 struct bikeUserData {
@@ -37,7 +39,7 @@ void makeWallSeg(
 	int i, physx::PxTransform a, physx::PxTransform b, float width, float height, std::vector<uint32_t> graphicIndex,
 	Render::Wall& graphicReference);
 
-void deleteWallSeg(int i, int j);
+void markWallBroken(int i, int j);
 
 physx::PxRaycastBuffer* castRay(int bike, int dir, int range);
 
