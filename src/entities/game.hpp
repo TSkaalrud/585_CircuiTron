@@ -26,6 +26,8 @@
 
 #include "entities/ui_game.h"
 
+#include <chrono>
+
 struct {
 	bool operator()(Bike* a, Bike* b) const {
 		if (a->getLap() != b->getLap())
