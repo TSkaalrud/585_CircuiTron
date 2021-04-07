@@ -59,43 +59,56 @@ class Bike : public GameObject {
 
 	virtual void update(float deltaTime) override {
 		model->setTransform(convertTransform(getBikeTransform(getId())) * glm::scale(glm::mat4(1.0f), glm::vec3(2.0f)));
+		if (!menuActive) {
 
-		{
-			physx::PxVehicleDrive4W* vehicle = getVehicle(getId());
-			wallSpawner.shouldSpawnWall = vehicle->computeForwardSpeed() >= 10.0f &&
-				vehicle->mDriveDynData.getCurrentGear() != physx::PxVehicleGearsData::eREVERSE;
-		}
-		if (WADRelease) {
-			wallSpawner.spawnWad.emplace(0.5 * WADCharge);
+			{
+				physx::PxVehicleDrive4W* vehicle = getVehicle(getId());
+				wallSpawner.shouldSpawnWall = vehicle->computeForwardSpeed() >= 10.0f &&
+					vehicle->mDriveDynData.getCurrentGear() != physx::PxVehicleGearsData::eREVERSE;
+			}
+			if (WADRelease) {
+				wallSpawner.spawnWad.emplace(0.5 * WADCharge);
 
-			WADAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_SIZZLE_SFX]);
-			WADAudio->loop = false;
+				WADAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_SIZZLE_SFX]);
+				WADAudio->loop = false;
 
-			modifyHealth(-WADCharge / 5);
-			WADCharge = 0;
-			WADRelease = false;
-		}
-		if (WADCharge > 0) {
-			WADAudio->loop = true;
-			WADAudio->playSound(stereo.buffer[Audio::SOUND_FILE_WAD_SFX]);
-		}
+				modifyHealth(-WADCharge / 5);
+				WADCharge = 0;
+				WADRelease = false;
+			}
+			if (WADCharge > 0) {
+				WADAudio->loop = true;
+				WADAudio->playSound(stereo.buffer[Audio::SOUND_FILE_WAD_SFX]);
+			}
 
-		wallSpawner.spawnWalls(deltaTime, getId());
+			wallSpawner.spawnWalls(deltaTime, getId());
 
-		if (!getLocked()) {
-			// reduce CD's
-			if (BoostCD > 0) {	BoostCD--;	}
-			if (StrafeCD > 0) {	StrafeCD--;	}
-			if (FRAGCD > 0) {	FRAGCD--;	}
-			if (collisionCD > 0) {	collisionCD--;	}
-			if (resettingCD > 0) {	resettingCD--;	}
-			// off track auto reset
-			if (getBikeTransform(getId()).p.y < 0) {resetBike();}
-			slipstreaming();
-			wallCollision();
-			engineSounds();
-		}
-		else {
+			if (!getLocked()) {
+				// reduce CD's
+				if (BoostCD > 0) {
+					BoostCD--;
+				}
+				if (StrafeCD > 0) {
+					StrafeCD--;
+				}
+				if (FRAGCD > 0) {
+					FRAGCD--;
+				}
+				if (collisionCD > 0) {
+					collisionCD--;
+				}
+				if (resettingCD > 0) {
+					resettingCD--;
+				}
+				// off track auto reset
+				if (getBikeTransform(getId()).p.y < 0) {
+					resetBike();
+				}
+				slipstreaming();
+				wallCollision();
+				engineSounds();
+			}
+		} else {
 			//pause sounds
 		}
 	}
