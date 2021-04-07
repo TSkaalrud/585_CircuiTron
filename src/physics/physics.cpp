@@ -768,7 +768,7 @@ void initPhysics() {
 	PxFilterData groundPlaneSimFilterData(COLLISION_FLAG_GROUND, COLLISION_FLAG_GROUND_AGAINST, 0, 0);
 	gGroundPlane = createDrivablePlane(groundPlaneSimFilterData, gMaterial, gPhysics);
 	gGroundPlane->setName("Ground Plane");
-	gScene->addActor(*gGroundPlane);
+	//gScene->addActor(*gGroundPlane);
 
 	// Cook track
 	PxTriangleMesh* trackMesh = cookTrack();
