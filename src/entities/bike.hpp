@@ -58,6 +58,7 @@ class Bike : public GameObject {
 	int getId() { return id; }
 
 	virtual void update(float deltaTime) override {
+		model->setTransform(convertTransform(getBikeTransform(getId())) * glm::scale(glm::mat4(1.0f), glm::vec3(2.0f)));
 
 		{
 			physx::PxVehicleDrive4W* vehicle = getVehicle(getId());
