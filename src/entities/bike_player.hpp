@@ -129,21 +129,9 @@ class BikePlayer : public Bike {
 			}
 
 			// left Control - "Control" chassis to right itself
-			if (window.keyPressed(341)) {	bikeControl(0);	}
-
-			if (window.keyPressed(256)) {	UI->pause();	}
-		} else { // menu
-			if (window.keyPressed(257)) {	
-				UI->enterMenuItem();
+			if (window.keyPressed(341)) {
+				bikeControl(0);
 			}
-			if (window.keyPressed(87) || window.keyPressed(265)) {//w or up
-				UI->selectMenuItem(-1);
-			}
-			if (window.keyPressed(83) || window.keyPressed(264)) { // s or down
-				UI->selectMenuItem(1);
-			}			
-
-
 		}
 	}
 
