@@ -42,7 +42,7 @@ class Game : public Entity {
 	// std::vector<Checkpoint> checkpoints;
 	// Checkpoint finish = new Checkpoint();
 
-	std::vector<Render::Group> BikeModels; //a list of bike models
+	std::vector<Render::Group> BikeModels; // a list of bike models
 	Render::Group car_model;
 
 	Render::Group wall_model;
@@ -62,15 +62,15 @@ class Game : public Entity {
 	UiGame* game_UI;
 
 	Audio::AudioEngine& stereo;
-	
+
 	bool gameover = false;
 	bool& menuActive;
 
   public:
 	Game(
-		Window& window, Render::Render& render, int players, EntityManager& em, Audio::AudioEngine& audio, UiGame* UI, bool& menuActive)
-		: window(window), render(render), e_manager(em), players(players), menuActive(menuActive),
-		  game_UI(UI),
+		Window& window, Render::Render& render, int players, EntityManager& em, Audio::AudioEngine& audio, UiGame* UI,
+		bool& menuActive)
+		: window(window), render(render), e_manager(em), players(players), menuActive(menuActive), game_UI(UI),
 		  car_model(importModel("assets/Bike_Final.glb", render)),
 		  wall_model(importModel("assets/Wall_blob.glb", render)),
 		  track_model(importModel("assets/The_Coffin_render.glb", render)), stereo(audio) {
@@ -78,23 +78,22 @@ class Game : public Entity {
 		uploadMap("assets/AI_waypoints_1.obj");
 		uploadMap("assets/AI_waypoints_2.obj");
 		uploadMap("assets/AI_waypoints_3.obj");
-		//load in the 4 bike models
+		// load in the 4 bike models
 		uploadBike("assets/Bike_P1.glb", render);
 		uploadBike("assets/Bike_P2.glb", render);
 		uploadBike("assets/Bike_P3.glb", render);
 		uploadBike("assets/Bike_P4.glb", render);
-
-		}
+	}
 
 	void enter() override {
-		//set the skybox texture asset
+		// set the skybox texture asset
 		render.set_skybox_rect_texture(importSkybox("assets/skyboxes/SPACE-1.hdr", render));
 
-		//Create and pushback the 4 playerWallMaterials
+		// Create and pushback the 4 playerWallMaterials
 		Render::MaterialPBR p1_wall_pbr = {
-			.albedoFactor = glm::vec4(0.f, 0.000520f, 0.266f, 1.f), 
-			.metalFactor = 0.5f, 
-			.roughFactor = 0.05f, 
+			.albedoFactor = glm::vec4(0.f, 0.000520f, 0.266f, 1.f),
+			.metalFactor = 0.5f,
+			.roughFactor = 0.05f,
 			.emissiveFactor = glm::vec3(0, 0, 0)};
 		p1_wall = render.create_pbr_material(p1_wall_pbr);
 		playerWallMaterials.push_back(p1_wall);
@@ -123,7 +122,7 @@ class Game : public Entity {
 		p4_wall = render.create_pbr_material(p4_wall_pbr);
 		playerWallMaterials.push_back(p4_wall);
 
-		//Run the looping bgm and ambiance tracks
+		// Run the looping bgm and ambiance tracks
 		srand((unsigned int)time(NULL));
 		AudioInstance* bgm = new AudioInstance();
 		bgm->gain = 0.0;
@@ -132,19 +131,18 @@ class Game : public Entity {
 		ambiance->gain = 0.0;
 		ambiance->playSound(stereo.buffer[Audio::SOUND_FILE_AMBIENCE_BGM]); // ambient environment sounds
 
-		//make the track 
+		// make the track
 		e_manager.addEntity(std::make_unique<Track>(render, track_model));
 
-		//make the player's bike
+		// make the player's bike
 		std::unique_ptr<Bike> b = std::make_unique<BikePlayer>(
-			window, render, 1, BikeModels[0], ai_waypoints[1], stereo, playerWallMaterials[0], game_UI,
-			menuActive);
+			window, render, 1, BikeModels[0], ai_waypoints[1], stereo, playerWallMaterials[0], game_UI, menuActive);
 		bikes.push_back(b.get());
 		order.push_back(b.get());
 
 		e_manager.addEntity(std::move(b));
 
-		//make the AI bikes
+		// make the AI bikes
 		for (int i = 0; i < players - 1; i++) {
 			initVehicle();
 
@@ -157,7 +155,7 @@ class Game : public Entity {
 			e_manager.addEntity(std::move(b));
 		}
 
-		//make the camera
+		// make the camera
 		e_manager.addEntity(std::make_unique<Camera>(window, render));
 	}
 
@@ -168,7 +166,9 @@ class Game : public Entity {
 				updatePlaces();
 				checkWin();
 			}
+			menuInput();
 		}
+		menuInput();
 	}
 
 	void updatePlaces() {
@@ -179,10 +179,10 @@ class Game : public Entity {
 		std::sort(order.begin(), order.end(), place_sort);
 		for (int i = 0; i < bikes.size(); i++) {
 			order[i]->setPlace(i + 1);
-			//std::cout << bikes[0]->getPlace() << std::endl;
-			//std::cout << bikes[0]->getPlace() << std::endl;
+			// std::cout << bikes[0]->getPlace() << std::endl;
+			// std::cout << bikes[0]->getPlace() << std::endl;
 		}
-		//game_UI->currentPlace = bikes[0]->getPlace();
+		// game_UI->currentPlace = bikes[0]->getPlace();
 		game_UI->updatePlace(bikes[0]->getPlace());
 		game_UI->updateLap(bikes[0]->getLap());
 	}
@@ -243,7 +243,27 @@ class Game : public Entity {
 
 	void wallCollision(int i) { bikes[i]->wallCollision(); }
 
-	std::vector<glm::vec3> getWaypoints(int middle) { 
-		//middle is ai_waypoints[1]
-		return ai_waypoints[middle];}
+	std::vector<glm::vec3> getWaypoints(int middle) {
+		// middle is ai_waypoints[1]
+		return ai_waypoints[middle];
+	}
+
+	//this input can be checked while bikes are locked
+	void menuInput() {
+		if (window.keyPressed(256)) { // esc
+			game_UI->pause();
+		} // menu
+		if (game_UI->getMenuActive()) {
+
+			if (window.keyPressed(257)) { // enter
+				game_UI->enterMenuItem();
+			}
+			if (window.keyPressed(87) || window.keyPressed(265)) { // w or up
+				game_UI->selectMenuItem(-1);
+			}
+			if (window.keyPressed(83) || window.keyPressed(264)) { // s or down
+				game_UI->selectMenuItem(1);
+			}
+		}
+	}
 };
