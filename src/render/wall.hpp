@@ -11,9 +11,6 @@ class Wall {
 	const uint alloc_wall_count = 1000;
 	uint current_wall_count = -1;
 
-	const uint frame_delay = 10;
-	uint frame = -1;
-
 	struct Vertex {
 		vec3 pos, normal;
 	};
@@ -30,6 +27,15 @@ class Wall {
 	Wall(Render& render, MaterialHandle material) : render(render), mat(material){};
 	Wall(Wall& wall) = delete;
 
-	void append_wall(mat4 bikeTransform, vec3 position, vec2 scale);
+	void update_wall(mat4 bikeTransform, vec2 scale) { append_wall(bikeTransform, scale, false); }
+	uint commit_wall(mat4 bikeTransform, vec2 scale) {
+		append_wall(bikeTransform, scale, true);
+		return current_wall_count - 1;
+	}
+
+	void delete_wall(uint wall);
+
+  private:
+	void append_wall(mat4 bikeTransform, vec2 scale, bool commit);
 };
 } // namespace Render

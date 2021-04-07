@@ -3,12 +3,11 @@
 #include <gl.hpp>
 
 namespace Render {
-void Wall::append_wall(mat4 bikeTransform, vec3 position, vec2 scale) {
+void Wall::append_wall(mat4 bikeTransform, vec2 scale, bool commit) {
 	vec3 points[] = {
 		{-scale.x, -scale.y, 0.0}, {-scale.x, scale.y, 0.0}, {scale.x, scale.y, 0.0}, {scale.x, -scale.y, 0.0}};
 
 	for (auto& point : points) {
-		point += position;
 		vec4 temp = bikeTransform * vec4{point.x, point.y, point.z, 1};
 		point = {temp.x, temp.y, temp.z};
 	}
@@ -40,9 +39,9 @@ void Wall::append_wall(mat4 bikeTransform, vec3 position, vec2 scale) {
 		glNamedBufferSubData(wall.vertex_buffer, bufferSlot * sizeof(Vertex) * 8, sizeof(Vertex) * 8, vertices.data());
 	}
 
-	if (frame++ < frame_delay)
+	if (!commit)
 		return;
-	frame = 0;
+
 	current_wall_count++;
 
 	if (current_wall_count % alloc_wall_count == 0) {
@@ -88,14 +87,26 @@ void Wall::append_wall(mat4 bikeTransform, vec3 position, vec2 scale) {
 			0 + 6 + offset, 8 + 6 + offset, 1 + 6 + offset, 1 + 6 + offset, 8 + 6 + offset, 9 + 6 + offset,
 		};
 		glNamedBufferSubData(
-			wall.index_buffer, (current_wall_count % alloc_wall_count) * sizeof(uint32_t) * 24, sizeof(uint32_t) * 24,
-			indicies.data());
+			wall.index_buffer, bufferSlot * sizeof(uint32_t) * 24, sizeof(uint32_t) * 24, indicies.data());
 		render.meshes[wall.mesh].count += 24;
-	}
-	{
-		auto bufferSlot = ((current_wall_count % alloc_wall_count) + 1);
 
-		glNamedBufferSubData(wall.vertex_buffer, bufferSlot * sizeof(Vertex) * 8, sizeof(Vertex) * 8, vertices.data());
+		glNamedBufferSubData(
+			wall.vertex_buffer, (bufferSlot + 1) * sizeof(Vertex) * 8, sizeof(Vertex) * 8, vertices.data());
 	}
 }
+
+void Wall::delete_wall(uint wall) {
+	if (wall == -1)
+		return;
+	auto wallChunk = wall / alloc_wall_count;
+	auto bufferSlot = wall % alloc_wall_count;
+	std::array<uint32_t, 24> indicies = {
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		// -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+	};
+	glNamedBufferSubData(
+		wall_segements[wallChunk].index_buffer, bufferSlot * sizeof(uint32_t) * 24, sizeof(uint32_t) * 24,
+		indicies.data());
+}
+
 } // namespace Render

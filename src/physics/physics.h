@@ -3,29 +3,23 @@
 #include <foundation/PxTransform.h>
 #include <foundation/Px.h>
 #include <PxPhysicsAPI.h>
+#include <vector>
+#include "render/wall.hpp"
 
-struct wallSegment {
+struct wallUserData {
 	int bikeNumber;
+	int wallIndex;
+	int collisions;
 
 	physx::PxRigidStatic* wall;
 
 	physx::PxTransform front;
 	physx::PxTransform back;
-};
 
-struct wallUserData {
-	wallSegment segmentInfo;
+	std::vector<uint32_t> graphicIndex;
+	Render::Wall& graphicReference;
 
-	int wallIndex;
-	
-	int collisions;
-};
-
-struct wallSpawnInfo {
-	physx::PxF32 timer;
-	physx::PxF32 wallTime;
-	physx::PxTransform wallFront;
-	physx::PxTransform wallBack;
+	bool broken;
 };
 
 struct bikeUserData {
@@ -41,17 +35,15 @@ float getSpeed(int i);
 
 physx::PxVehicleDrive4W* getVehicle(int i);
 
-wallSpawnInfo* getWallInfo(int i);
+void makeWallSeg(
+	int i, physx::PxTransform a, physx::PxTransform b, float width, float height, std::vector<uint32_t> graphicIndex,
+	Render::Wall& graphicReference);
 
-void makeWallSeg(int i, physx::PxTransform a, physx::PxTransform b);
-
-void deleteWallSeg(int i, int j);
+void markWallBroken(int i, int j);
 
 physx::PxRaycastBuffer* castRay(int bike, int dir, int range);
 
 bool slipstreamRay(int bike, int dir, int range);
-
-void * fragRay(int bike, int range);
 
 void* fragRay(int bike, int range);
 
