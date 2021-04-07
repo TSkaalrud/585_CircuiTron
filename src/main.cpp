@@ -42,10 +42,11 @@ int main(int argc, char* argv[]) {
 		e_manager.addEntity(std::make_unique<OrbitCam>(render, window));
 		e_manager.addEntity(std::make_unique<UiTest>(render, window));
 	} else {//game
-			//initialize UI
+		//initialize UI
 		std::unique_ptr<UiGame> UI = std::make_unique<UiGame>(render, window, menuActive);
 		UiGame* game_UI = UI.get();
 		e_manager.addEntity(std::move(UI));
+		//initialize game
 		e_manager.addEntity(std::make_unique<Game>(window, render, 4, e_manager, stereo, game_UI, menuActive));
 	}
 
