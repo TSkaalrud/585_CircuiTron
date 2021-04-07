@@ -4,6 +4,8 @@
 #include "render/import.hpp"
 #include "render/ui_util.hpp"
 #include "window.hpp"
+#include <chrono>
+#include <thread>
 
 
 class UiGame : public Entity {
@@ -13,6 +15,9 @@ class UiGame : public Entity {
 	Render::Render& render;
 	Window& window;
 	bool& menuActive;
+	bool paused;
+	int currentlySelectedMenuItem = 1;//of 3
+	int currentlyActiveMenu = 1;//of 3
 
 	//UI instanceHandles
 	Render::InstanceHandle SI_Bar = -1;
@@ -100,7 +105,6 @@ class UiGame : public Entity {
 		  Play_R_png(Render::importUI("assets/UI/Play (ready).png", render)),
 		  Play_U_png(Render::importUI("assets/UI/Play (unselected).png", render)){};
 
-		  //play_highlight(Render::importUI("assets/UI/Play (hilighted).png", render)){};
 	void enter() override {
 		// You can pass the transform as a 3rd param
 		// I set the transform in update so I don't need to set it here.
@@ -116,7 +120,7 @@ class UiGame : public Entity {
 		if (SI_Fill == -1) {
 			auto position = glm::vec3{1920 * -0.35, 1080 * 0.45, 0};
 			auto scale = glm::vec2{401, 41} / 1.5f;
-			auto depth = 1.0f;
+			auto depth = 0.1f;
 			auto transform = Render::ui_transform(position, scale, depth);
 
 			SI_Fill = render.create_instance(render.ui_mesh(), SI_Secure_png, transform);
@@ -157,7 +161,7 @@ class UiGame : public Entity {
 		}
 		//Winner shows who won the race at the end
 		if (Winner == -1) {
-			auto position = glm::vec3{0, 0, 0};
+			auto position = glm::vec3{0, -1080, 0} / 6.0f;
 			auto scale = glm::vec2{212, 51} / 2.0f;
 			auto depth = 0.0f;
 			auto transform = Render::ui_transform(position, scale, depth);
@@ -168,7 +172,7 @@ class UiGame : public Entity {
 		if (Background == -1) {
 			auto position = glm::vec3{0, 0, 0} / 4.0f;
 			auto scale = glm::vec2{1920, 1080} / 2.0f;
-			auto depth = 0.0f;
+			auto depth = 0.5f;
 			auto transform = Render::ui_transform(position, scale, depth);
 
 			Background = render.create_instance(render.ui_mesh(), Background_png, transform);
@@ -177,7 +181,7 @@ class UiGame : public Entity {
 		if (TitleCard == -1) {
 			auto position = glm::vec3{0, 0, 0} / 4.0f;
 			auto scale = glm::vec2{1440, 176} / 2.0f;
-			auto depth = 0.0f;
+			auto depth = 1.0f;
 			auto transform = Render::ui_transform(position, scale, depth);
 
 			TitleCard = render.create_instance(render.ui_mesh(), Circuitron_Title_png, transform);
@@ -186,7 +190,7 @@ class UiGame : public Entity {
 		if (Menu_Item_1 == -1) {
 			auto position = glm::vec3{0, 1080, 0} / 6.0f;
 			auto scale = glm::vec2{315, 94} / 2.0f;
-			auto depth = 0.0f;
+			auto depth = 1.0f;
 			auto transform = Render::ui_transform(position, scale, depth);
 
 			Menu_Item_1 = render.create_instance(render.ui_mesh(), Play_H_png, transform);
@@ -194,7 +198,7 @@ class UiGame : public Entity {
 		if (Menu_Item_2 == -1) {
 			auto position = glm::vec3{0, 1080, 0} / 4.0f;
 			auto scale = glm::vec2{315, 94} / 2.0f;
-			auto depth = 0.0f;
+			auto depth = 1.0f;
 			auto transform = Render::ui_transform(position, scale, depth);
 
 			Menu_Item_2 = render.create_instance(render.ui_mesh(), Options_U_png, transform);
@@ -202,7 +206,7 @@ class UiGame : public Entity {
 		if (Menu_Item_3 == -1) {
 			auto position = glm::vec3{0, 1080, 0} / 3.0f;
 			auto scale = glm::vec2{315, 94} / 2.0f;
-			auto depth = 0.0f;
+			auto depth = 1.0f;
 			auto transform = Render::ui_transform(position, scale, depth);
 
 			Menu_Item_3 = render.create_instance(render.ui_mesh(), Exit_U_png, transform);
@@ -211,16 +215,17 @@ class UiGame : public Entity {
 		if (Instructions == -1) {
 			auto position = glm::vec3{0, 0, 0} / 4.0f;
 			auto scale = glm::vec2{1920, 1080} / 2.0f;
-			auto depth = 0.0f;
+			auto depth = 0.6f;
 			auto transform = Render::ui_transform(position, scale, depth);
 
 			Instructions = render.create_instance(render.ui_mesh(), Instructions_png, transform);
+			render.instance_set_material(Instructions, -1);
 		}
 	}
 #pragma endregion
 
 	void update(float) override {
-#pragma region UI tutorial
+	#pragma region UI tutorial
 		// All measurements assume a 1920 by 1080 screen
 		// This can be adjusted with the global_scale paremeter in ui_transform
 		// The default value 2.0f / vec2{1920, -1080} corresponds to a 1920x1080 resolution
@@ -257,12 +262,13 @@ class UiGame : public Entity {
 		//} else {
 		//	render.instance_set_material(instance, play_ready);
 		//}
-#pragma endregion
-		render.instance_set_material(SI_Bar, SI_Bar_png);
-
+	#pragma endregion
+		//if the paused or menuActive bools have changed, call toggleGameUI
 	}
 
-	void updateLap(int currentLap) {
+	#pragma region race functions
+	void updateLap(int lap) {
+		currentLap = lap;
 		if (currentLap == 1) {
 			render.instance_set_material(Lap_Num, First_png);
 		} else if (currentLap == 2) {
@@ -274,7 +280,8 @@ class UiGame : public Entity {
 		}
 	}
 
-	void updatePlace(int currentPlace) {
+	void updatePlace(int place) {
+		currentPlace = place;
 		if (currentPlace == 1) {
 			render.instance_set_material(Place_Num, First_png);
 		} else if (currentPlace == 2) {
@@ -316,5 +323,258 @@ class UiGame : public Entity {
 			render.instance_set_material(Winner, P4_Wins_png);
 		}
 	}
+	#pragma endregion
 
+	#pragma region menu functions
+	void pause() { 
+		paused = true;
+		menuActive = true;
+		currentlySelectedMenuItem = 1;
+		currentlyActiveMenu = 4;
+		selectMenuItem(0);
+
+		//UI element toggle
+		//render.instance_set_material(Instructions, Instructions_png);
+
+	}
+
+	void unpause() { 
+		paused = false;
+		menuActive = false;
+		currentlyActiveMenu = 0;// 0 is no menu
+
+		//UI element toggle
+		//render.instance_set_material(Instructions, -1);
+
+	}
+
+	void play() { 
+		paused = false;
+		menuActive = false;
+		//UI element toggle
+	}
+
+	bool getMenuActive() { return menuActive;	}
+
+
+	//sets/switches menu selection hilight
+	//1 for next, -1 for previous, anything else defaults
+	void selectMenuItem(int direction) {
+		if (direction == 1) {	// switch downwards
+			if (currentlySelectedMenuItem == 3) {
+				currentlySelectedMenuItem = 1;
+			} else
+				currentlySelectedMenuItem++;
+		} else if (direction == -1) { // switch upwards
+			if (currentlySelectedMenuItem == 1) {
+				currentlySelectedMenuItem = 3;
+			} else
+				currentlySelectedMenuItem--;
+		}
+		//std::cout << currentlySelectedMenuItem << std::endl;
+
+		if (currentlyActiveMenu == 1) { // main menu
+			if (currentlySelectedMenuItem == 1) { // Play
+				render.instance_set_material(Menu_Item_1, Play_H_png);
+				render.instance_set_material(Menu_Item_2, Options_U_png);
+				render.instance_set_material(Menu_Item_3, Exit_U_png);
+
+			} else if (currentlySelectedMenuItem == 2) { // Options
+				render.instance_set_material(Menu_Item_1, Play_U_png);
+				render.instance_set_material(Menu_Item_2, Options_H_png);
+				render.instance_set_material(Menu_Item_3, Exit_U_png);
+
+			} else if (currentlySelectedMenuItem == 3) { // Exit
+				render.instance_set_material(Menu_Item_1, Play_U_png);
+				render.instance_set_material(Menu_Item_2, Options_U_png);
+				render.instance_set_material(Menu_Item_3, Exit_H_png);
+			}
+		} else if (currentlyActiveMenu == 2) { // Options (currently no options
+			if (currentlySelectedMenuItem == 1) {
+				render.instance_set_material(Menu_Item_1, -1);
+				render.instance_set_material(Menu_Item_2, -1);
+				render.instance_set_material(Menu_Item_3, Main_Menu_H_png);
+
+			} else if (currentlySelectedMenuItem == 2) {
+				render.instance_set_material(Menu_Item_1, -1);
+				render.instance_set_material(Menu_Item_2, -1);
+				render.instance_set_material(Menu_Item_3, Main_Menu_H_png);
+
+			} else if (currentlySelectedMenuItem == 3) {
+				render.instance_set_material(Menu_Item_1, -1);
+				render.instance_set_material(Menu_Item_2, -1);
+				render.instance_set_material(Menu_Item_3, Main_Menu_H_png);
+			}
+		} else if (currentlyActiveMenu == 3) { // loading screen
+			render.instance_set_material(Menu_Item_1, Paused_png);
+			render.instance_set_material(Menu_Item_2, Play_R_png);
+			render.instance_set_material(Menu_Item_3, -1);
+
+		} else if (currentlyActiveMenu == 4) { // pause screen uses menu item 1 for pause text
+			if (currentlySelectedMenuItem == 1) {
+				currentlySelectedMenuItem = 2;
+			}
+			if (currentlySelectedMenuItem == 2) {
+				render.instance_set_material(Menu_Item_1, Paused_png);
+				render.instance_set_material(Menu_Item_2, Play_H_png);
+				render.instance_set_material(Menu_Item_3, Main_Menu_U_png);
+
+			} else if (currentlySelectedMenuItem == 3) {
+				render.instance_set_material(Menu_Item_1, Paused_png);
+				render.instance_set_material(Menu_Item_2, Play_U_png);
+				render.instance_set_material(Menu_Item_3, Main_Menu_H_png);
+			}
+		}
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+	}
+
+	// activates a menu selection
+	void enterMenuItem() {
+		//reset bikes, health, race, 
+
+		if (currentlyActiveMenu == 1) {//main menu
+
+			menuActive = true;
+			paused = false;
+
+			if (currentlySelectedMenuItem == 1) {//Play
+				//go to loading page
+				currentlyActiveMenu = 3;
+				render.instance_set_material(Instructions, Instructions_png);
+				render.instance_set_material(TitleCard, -1);
+				menuActive = true;
+				paused = true;
+				//reset the game here---------------------------------------------------------
+
+			} else if (currentlySelectedMenuItem == 2) {//Options
+				//go to options page
+				currentlyActiveMenu = 2;
+			} else if (currentlySelectedMenuItem == 3) {//Exit
+				//close app--------------------------------------------------------------------
+				exit(1);
+			}
+		} else if (currentlyActiveMenu == 2) {//Options
+			render.instance_set_material(Background, Background_png);
+			render.instance_set_material(TitleCard, Circuitron_Title_png);
+
+			if (currentlySelectedMenuItem == 1) {//since no options in, they all just default to main menu
+				//option 1
+				currentlyActiveMenu = 1;
+
+			} else if (currentlySelectedMenuItem == 2) {
+				//option 2
+				currentlyActiveMenu = 1;
+
+			} else if (currentlySelectedMenuItem == 3) {
+				//go to main menu
+				currentlyActiveMenu = 1;
+			}
+		} else if (currentlyActiveMenu == 3) {//loading screen
+			render.instance_set_material(Background, -1);
+			render.instance_set_material(TitleCard, -1);
+			//player must have hit the play button/enter to start the game
+			unpause();
+		} else if (currentlyActiveMenu == 4) {//pause screen uses menu item 1 for pause text	
+			render.instance_set_material(Background, -1);
+			render.instance_set_material(TitleCard, -1);
+
+			if (currentlySelectedMenuItem == 1) {	currentlySelectedMenuItem = 2;	} 
+			if (currentlySelectedMenuItem == 2) {
+				//Play
+				currentlyActiveMenu = 0;
+				menuActive = false;
+				paused = false;
+			} else if (currentlySelectedMenuItem == 3) {
+				//Main Menu
+				currentlyActiveMenu = 1;
+			}
+		}
+		toggleGameUI();
+		selectMenuItem(0);
+		//currentlySelectedMenuItem = 1;
+
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+	}
+
+	void toggleGameUI() {
+		//currentlySelectedMenuItem = 1;
+
+		if (currentlyActiveMenu == 1 || currentlyActiveMenu == 2) {//if main menu/options menuActive && !paused
+			//toggle off
+			render.instance_set_material(SI_Bar, -1);
+			render.instance_set_material(SI_Fill, -1);
+			render.instance_set_material(Place_Num, -1);
+			render.instance_set_material(Place_UI, -1);
+			render.instance_set_material(Lap_Num, -1);
+			render.instance_set_material(Lap_UI, -1);
+			render.instance_set_material(Instructions, -1);
+			render.instance_set_material(Winner, -1);
+			//toggle on
+			render.instance_set_material(Background, Background_png);
+			render.instance_set_material(TitleCard, Circuitron_Title_png);
+			//render.instance_set_material(Background, -1);
+			//render.instance_set_material(TitleCard, -1);
+			//render.instance_set_material(Menu_Item_1, -1);
+			//render.instance_set_material(Menu_Item_2, -1);
+			//render.instance_set_material(Menu_Item_3, -1);
+		} else if (currentlyActiveMenu == 3) {//loading screen !menuActive && paused
+			//toggle off
+
+			render.instance_set_material(SI_Bar, -1);
+			render.instance_set_material(SI_Fill, -1);
+			render.instance_set_material(Place_Num, -1);
+			render.instance_set_material(Place_UI, -1);
+			render.instance_set_material(Lap_Num, -1);
+			render.instance_set_material(Lap_UI, -1);
+			render.instance_set_material(Winner, -1);
+			render.instance_set_material(TitleCard, -1);
+			render.instance_set_material(Menu_Item_2, -1);
+			render.instance_set_material(Menu_Item_3, -1);
+			//toggle on
+			render.instance_set_material(SI_Bar, SI_Bar_png);
+			render.instance_set_material(SI_Fill, SI_Secure_png);
+			render.instance_set_material(Place_Num, UI_Place_png);
+			render.instance_set_material(Place_UI, UI_Place_png);
+			render.instance_set_material(Lap_Num, First_png); // might need to make dynamic
+			render.instance_set_material(Lap_UI, UI_Lap_png);
+			//render.instance_set_material(Background, -1);
+			//render.instance_set_material(Menu_Item_1, -1);
+			//render.instance_set_material(Instructions, -1);
+		} else if (currentlyActiveMenu == 4){//paused menuActive && paused
+			// toggle off
+			render.instance_set_material(TitleCard, -1);
+			render.instance_set_material(Background, -1);
+			// toggle on
+			//render.instance_set_material(SI_Bar, -1);
+			//render.instance_set_material(SI_Fill, -1);
+			//render.instance_set_material(Place_Num, -1);
+			//render.instance_set_material(Place_UI, -1);
+			//render.instance_set_material(Lap_Num, -1);
+			//render.instance_set_material(Lap_UI, -1);
+			//render.instance_set_material(Winner, -1);
+			//render.instance_set_material(Menu_Item_1, -1);
+			//render.instance_set_material(Menu_Item_2, -1);
+			//render.instance_set_material(Menu_Item_3, -1);
+			//render.instance_set_material(Instructions, -1);
+		} else if (!menuActive && !paused) { // game on 
+			// toggle off
+			render.instance_set_material(Menu_Item_1, -1);
+			render.instance_set_material(Menu_Item_2, -1);
+			render.instance_set_material(Menu_Item_3, -1);
+			render.instance_set_material(Instructions, -1);
+			render.instance_set_material(TitleCard, -1);
+			render.instance_set_material(Background, -1);
+			// toggle on
+			render.instance_set_material(SI_Bar, SI_Bar_png);
+			render.instance_set_material(SI_Fill, SI_Secure_png);
+			updatePlace(currentPlace);
+			render.instance_set_material(Place_UI, UI_Place_png);
+			updateLap(currentLap);
+			render.instance_set_material(Lap_UI, UI_Lap_png);
+			//render.instance_set_material(Winner, -1);
+		} 
+	}
+
+	#pragma endregion
 };
