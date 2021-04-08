@@ -88,13 +88,26 @@ class BikeAI : public Bike {
 			if (d > 0) { //left
 				bikeReleaseSteer(getId());
 				bikeTurnPrecise(getId(), glm::min(2 * radius, 1.f));
-				bikeAcceleratePrecise(getId(), 0.825f);
+				if (Slipstreaming) {
+					bikeAcceleratePrecise(getId(), 0.9);
+				} else {
+					bikeAcceleratePrecise(getId(), 0.825f);
+				}
 			} else if (d < 0) { //right
 				bikeReleaseSteer(getId());
 				bikeTurnPrecise(getId(), glm::max(-2 * radius, -1.f));
-				bikeAcceleratePrecise(getId(), 0.825f);
-			} else {//on
+				if (Slipstreaming) {
+					bikeAcceleratePrecise(getId(), 0.9);
+				} else {
+					bikeAcceleratePrecise(getId(), 0.825f);
+				}
+			} else { // on
 				bikeReleaseSteer(getId());
+				if (Slipstreaming) {
+					bikeAcceleratePrecise(getId(), 0.9);
+				} else {
+					bikeAcceleratePrecise(getId(), 0.825f);
+				}
 			}
 		} else {
 			bikeReleaseAll(getId());
