@@ -27,7 +27,7 @@ class Bike : public GameObject {
 	bool locked = false;
 
 	//Abilities
-	int BoostCD = 0, collisionCD = 60, FRAGCD = 0, resettingCD = 0, SlipstreamCD = 30, StrafeCD = 0;
+	int BoostCD = 0, collisionCD = 45, FRAGCD = 0, resettingCD = 0, SlipstreamCD = 30, StrafeCD = 0;
 	bool resetting = false, Slipstreaming = false, WADRelease = false;
 	int Slipstreams = 0, WADCharge = 0;
 
@@ -67,12 +67,12 @@ class Bike : public GameObject {
 					vehicle->mDriveDynData.getCurrentGear() != physx::PxVehicleGearsData::eREVERSE;
 			}
 			if (WADRelease) {
-				wallSpawner.spawnWad.emplace(0.5 * WADCharge);
+				wallSpawner.spawnWad.emplace(1 + 0.05 * WADCharge);
 
 				WADAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_SIZZLE_SFX]);
 				WADAudio->loop = false;
 
-				modifyHealth(-WADCharge / 5);
+				modifyHealth(- 5 - WADCharge / 4);
 				WADCharge = 0;
 				WADRelease = false;
 			}
@@ -102,6 +102,7 @@ class Bike : public GameObject {
 				}
 				// off track auto reset
 				if (getBikeTransform(getId()).p.y < 0) {
+					modifyHealth(-8);//tax for not resetting yourself upping total cost to 33
 					resetBike();
 				}
 				slipstreaming();
@@ -110,6 +111,15 @@ class Bike : public GameObject {
 			}
 		} else {
 			//pause sounds
+			engineAudio->pauseSound();
+			gearAudio->pauseSound();
+			JumpAudio->pauseSound();
+			StrafeAudio->pauseSound();
+			WADAudio->pauseSound();
+			FRAGAudio->pauseSound();
+			FRAGImpactAudio->pauseSound();
+			chassisAudio->pauseSound();
+			SlipstreamingAudio->pauseSound();
 		}
 	}
 
@@ -173,11 +183,16 @@ class Bike : public GameObject {
 				SlipstreamingAudio->playSound(stereo.buffer[Audio::SOUND_FILE_HEALING_SFX]);
 			}
 		} else if (amount < 0) {
-			if (health + amount < 0) {
-				health = 0;
-				engineAudio->playSound(stereo.buffer[Audio::SOUND_FILE_DESPAWN_SFX]);
 
-				lockBike();
+			if (health + amount < 0) {
+				if (health <= 5) {
+					health = 0;
+					engineAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_DESPAWN_SFX]);
+					lockBike();
+				} else {
+					health = 1;
+				}
+
 			} else {
 				health += amount;
 			}
@@ -192,7 +207,7 @@ class Bike : public GameObject {
 		if (getId() == 0) {
 			if (collision(getId()) && collisionCD <= 0) {
 				modifyHealth(-10);
-				collisionCD = 60;
+				collisionCD = 45;
 				chassisAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_BIKE_IMPACT_SFX]);
 			}
 		}
@@ -221,7 +236,7 @@ class Bike : public GameObject {
 		resetLocation.q.z = 0;
 		resetLocation.q.w = cos(rads / 2);
 		resetBikePos(getId(), resetLocation);
-		modifyHealth(-33);
+		modifyHealth(-25);
 		resettingCD += 60;
 	}
 

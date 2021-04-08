@@ -56,7 +56,8 @@ class AudioInstance {
 	  };
 
 	  void changePitch(float desiredValue) { alSourcef(source, AL_PITCH, desiredValue);  }
-	  void stopSound(){};
+	  void pauseSound() { alSourcePause(source);	  };
+	  void continueSound() { alSourcePlay(source); }
 	  bool isSoundPlaying() { return source_state == AL_PLAYING; }
 	  void cleanup(){};
 	
