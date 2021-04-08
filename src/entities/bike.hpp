@@ -251,6 +251,8 @@ class Bike : public GameObject {
 
 		if (wallPointer != NULL) {
 			// Possibly put wall deletion here
+			markWallBroken(static_cast<wallUserData*>(wallPointer)->bikeNumber, static_cast<wallUserData*>(wallPointer)->wallIndex);
+
 			FRAGImpactAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_GUN_IMPACT2_SFX]);
 			return true;
 		} else {

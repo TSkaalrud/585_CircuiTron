@@ -354,8 +354,32 @@ void makeWallSeg(int i, PxTransform a, PxTransform b, float width, float height,
 }
 
 void markWallBroken(int i, int j) {
-	walls[i][j]->broken = true;
-	brokenWalls.push_back(walls[i][j]->wall);
+	// if wall is first or last segment, delete only itself
+	if (walls[i][j]->wallIndex == 0 || walls[i][j]->wallIndex == walls[i].size() - 1) {
+		walls[i][j]->broken = true;
+		brokenWalls.push_back(walls[i][j]->wall);
+
+	} else if (walls[i][j - 1]->broken) { //else if walls previous segment is already removed, delete only itself and the next segment
+		walls[i][j]->broken = true;
+		brokenWalls.push_back(walls[i][j]->wall);
+		walls[i][j + 1]->broken = true;
+		brokenWalls.push_back(walls[i][j + 1]->wall);
+
+	} else if (walls[i][j + 1]->broken) { // else if walls next segment is already removed, delete only itself and the previous segment
+		walls[i][j]->broken = true;
+		brokenWalls.push_back(walls[i][j]->wall);
+		walls[i][j - 1]->broken = true;
+		brokenWalls.push_back(walls[i][j - 1]->wall); 
+
+	} else {	// else delete itself, previous, and next wall segment
+		walls[i][j]->broken = true;
+		brokenWalls.push_back(walls[i][j]->wall);
+		walls[i][j + 1]->broken = true;
+		brokenWalls.push_back(walls[i][j + 1]->wall);
+		walls[i][j - 1]->broken = true;
+		brokenWalls.push_back(walls[i][j - 1]->wall);
+
+	}
 }
 
 void deleteWalls() {
