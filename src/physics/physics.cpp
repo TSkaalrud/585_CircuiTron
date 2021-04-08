@@ -94,7 +94,7 @@ std::vector<PxVehicleDrive4WRawInputData> inputDatas;
 std::vector<bool> isVehicleInAir;
 std::vector<PxRigidStatic*> brokenWalls;
 
-float impulseBase = 2500;
+float impulseBase = 3000;
 
 PxF32 gSteerVsForwardSpeedData[2 * 8] = {0.0f,       0.35f,      5.0f,       0.30f,      30.0f,      0.25f,
 										 120.0f,     0.1f,       PX_MAX_F32, PX_MAX_F32, PX_MAX_F32, PX_MAX_F32,
@@ -172,7 +172,7 @@ VehicleDesc initVehicleDesc() {
 	// The moment of inertia is just the moment of inertia of a cuboid but modified for easier steering.
 	// Center of mass offset is 0.65m above the base of the chassis and 0.55m towards the front.
 	const PxF32 chassisMass = 250.0f;
-	const PxVec3 chassisDims(1.0f, 1.2f, 4.63f);
+	const PxVec3 chassisDims(0.9f*2, 1.2f, 4.5f*2);
 	const PxVec3 chassisMOI(
 		(chassisDims.y * chassisDims.y + chassisDims.z * chassisDims.z) * 1.f * chassisMass / 12.0f,
 		(chassisDims.x * chassisDims.x + chassisDims.z * chassisDims.z) * 1.1f * chassisMass / 12.0f,
@@ -650,14 +650,14 @@ void initVehicle() {
 	VehicleDesc vehicleDesc = initVehicleDesc();
 	gVehicle4W = createVehicle4W(vehicleDesc, gPhysics, gCooking);
 	PxTransform startTransform(
-		PxVec3(-165.0f - spawnOffset, (vehicleDesc.chassisDims.y * 1.f + vehicleDesc.wheelRadius + 3.0f), -110.0f),
+		PxVec3(-165.0f - spawnOffset, (vehicleDesc.chassisDims.y * 1.f + vehicleDesc.wheelRadius + 3.0f), -100.0f - spawnOffset),
 		PxQuat(0.0f, 0.999f, 0.0f, -0.052f));
 
 	if (CTbikes.size() == 0) {
 		startPos = startTransform;
 	}
 
-	spawnOffset += 5.0f;
+	spawnOffset += 6.0f;
 
 	CTbikes.push_back(gVehicle4W);
 
