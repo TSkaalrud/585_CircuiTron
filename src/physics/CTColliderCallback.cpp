@@ -29,7 +29,7 @@ void CTColliderCallback::onTrigger(PxTriggerPair* pairs, PxU32 count) {
 					bikeData->collided = true;
 					std::cout << bikeData->collided << std::endl;
 					auto b = getVehicle(bikeData->bikeNumber)->getRigidDynamicActor();
-					b->setAngularVelocity(b->getAngularVelocity() * 0.8);
+					b->setAngularVelocity(b->getAngularVelocity() * 0.5);
 					b->setLinearVelocity(b->getLinearVelocity() * 0.8);
 				} else {
 					//bikeData->collided = false;
