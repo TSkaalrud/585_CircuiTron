@@ -16,7 +16,14 @@ class BikePlayer : public Bike {
 		Window& window, Render::Render& render, int start_place, Render::Group& group, std::vector<glm::vec3> waypoints,
 		Audio::AudioEngine& audio, Render::MaterialHandle wallMaterialHandle, UiGame* UI, bool& menuActive)
 		: Bike(window, render, start_place, group, audio, wallMaterialHandle, UI, menuActive)  {
-
+		engineAudio->changeGain(0.05);
+		FRAGAudio->changeGain(0.3);
+		JumpAudio->changeGain(0.15);
+		StrafeAudio->changeGain(0.15);
+		WADAudio->changeGain(0.25);
+		FRAGImpactAudio->changeGain(0.3);
+		chassisAudio->changeGain(0.2);
+		SlipstreamingAudio->changeGain(1.0);
 		this->waypoints = waypoints;
 	};
 

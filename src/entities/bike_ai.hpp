@@ -24,8 +24,16 @@ class BikeAI : public Bike {
 		Render::MaterialHandle wallMaterialHandle, UiGame* UI, bool& menuActive, std::vector<int>& waypointOptions)
 		: Bike(window, render, start_place, group, audio, wallMaterialHandle, UI, menuActive),
 		  ai_waypoints(ai_waypoints), waypointOptions(waypointOptions) {
+		engineAudio->changeGain(0.025);
+		FRAGAudio->changeGain(0.15);
+		JumpAudio->changeGain(0.075);
+		StrafeAudio->changeGain(0.075);
+		WADAudio->changeGain(0.125);
+		FRAGImpactAudio->changeGain(0.15);
+		chassisAudio->changeGain(0.1);
+		SlipstreamingAudio->changeGain(0.5);
+		
 		srand((unsigned int)time(NULL));
-
 		getNewLane(waypointOptions);
 
 	};

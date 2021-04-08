@@ -49,10 +49,15 @@ class Bike : public GameObject {
 		Render::MaterialHandle wallMaterialHandle, UiGame* UI, bool& menuActive)
 		: window(window), GameObject(render, group), place(start_place), id(start_place - 1), stereo(audio),
 		  wallSpawner(render, wallMaterialHandle), UI(UI), menuActive(menuActive) {
-		FRAGAudio->gain = 1.f;
-		engineAudio->loop = true;
-		gearAudio->loop = false;
-		FRAGAudio->loop = false;
+		
+		gearAudio->changeLoop(false);
+		FRAGAudio->changeLoop(false);
+		JumpAudio->changeLoop(false);
+		StrafeAudio->changeLoop(false);
+		WADAudio->changeLoop(false);
+		FRAGImpactAudio->changeLoop(false);
+		chassisAudio->changeLoop(false);
+
 	};
 
 	int getId() { return id; }
@@ -300,6 +305,7 @@ class Bike : public GameObject {
 			} else {
 				modifyHealth(0.25 * Slipstreams);
 				Slipstreaming = true;
+				SlipstreamingAudio->playSound(stereo.buffer[Audio::SOUND_FILE_HEALING_SFX]);
 				/*
 				physx::PxVec3 forward = getBikeTransform(getId()).q.getBasisVector2() * 50;
 				getVehicle(getId())->getRigidDynamicActor()->addForce(
@@ -309,6 +315,7 @@ class Bike : public GameObject {
 		} else if (SlipstreamCD < 30) {
 			SlipstreamCD++;
 			Slipstreaming = false;
+			SlipstreamingAudio->pauseSound();
 		}
 	}
 };
