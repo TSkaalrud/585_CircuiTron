@@ -2,6 +2,7 @@
 #include "physics.h"
 #include <string>
 #include <iostream>
+#include <PxScene.h>
 
 void CTColliderCallback::onContact(const PxContactPairHeader& pairHeader, const PxContactPair* pairs, PxU32 nbPairs){}
 
@@ -25,17 +26,19 @@ void CTColliderCallback::onTrigger(PxTriggerPair* pairs, PxU32 count) {
 
 				bikeUserData* bikeData = (bikeUserData*)pairs[i].otherActor->userData;
 
-				if (bikeData->bikeNumber == 0) {
+				//if (bikeData->bikeNumber == 0) {
 					bikeData->collided = true;
 					std::cout << bikeData->collided << std::endl;
 					auto b = getVehicle(bikeData->bikeNumber)->getRigidDynamicActor();
+					//b->getScene()->lockWrite();
 					b->setAngularVelocity(b->getAngularVelocity() * 0.5);
 					b->setLinearVelocity(b->getLinearVelocity() * 0.8);
-				} else {
+					//b->getScene()->unlockWrite();
+				//} else {
 					//bikeData->collided = false;
 					//std::cout << bikeData->collided << std::endl;
 
-				}
+				//}
 				markWallBroken(w->bikeNumber, w->wallIndex);
 			}
 
