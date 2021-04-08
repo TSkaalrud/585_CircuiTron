@@ -57,6 +57,7 @@ class Game : public Entity {
 	Render::MaterialHandle p4_wall;
 
 	std::vector<std::vector<glm::vec3>> ai_waypoints; // a list of waypoints for each ai bike
+	std::vector<int> waypointOptions{1, 2, 3, 4, 5, 6, 7, 8, 9};
 
 	Window& window;
 	Render::Render& render;
@@ -80,6 +81,13 @@ class Game : public Entity {
 		uploadMap("assets/AI_waypoints_1.obj");
 		uploadMap("assets/AI_waypoints_2.obj");
 		uploadMap("assets/AI_waypoints_3.obj");
+		uploadMap("assets/AI_waypoints_4.obj");
+		uploadMap("assets/AI_waypoints_5.obj");
+		uploadMap("assets/AI_waypoints_6.obj");
+		uploadMap("assets/AI_waypoints_7.obj");
+		uploadMap("assets/AI_waypoints_8.obj");
+		uploadMap("assets/AI_waypoints_9.obj");
+
 		// load in the 4 bike models
 		uploadBike("assets/Bike_P1.glb", render);
 		uploadBike("assets/Bike_P2.glb", render);
@@ -138,7 +146,7 @@ class Game : public Entity {
 
 		// make the player's bike
 		std::unique_ptr<Bike> b = std::make_unique<BikePlayer>(
-			window, render, 1, BikeModels[0], ai_waypoints[1], stereo, playerWallMaterials[0], game_UI, menuActive);
+			window, render, 1, BikeModels[0], ai_waypoints[4], stereo, playerWallMaterials[0], game_UI, menuActive);
 		bikes.push_back(b.get());
 		order.push_back(b.get());
 
@@ -150,7 +158,7 @@ class Game : public Entity {
 
 			std::unique_ptr<Bike> b = std::make_unique<BikeAI>(
 				window, render, i + 2, BikeModels[i + 1], ai_waypoints, stereo, playerWallMaterials[i + 1], game_UI,
-				menuActive);
+				menuActive, waypointOptions);
 			bikes.push_back(b.get());
 			order.push_back(b.get());
 

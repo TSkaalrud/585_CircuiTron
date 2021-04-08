@@ -6,6 +6,7 @@
 
 
 #include <iostream>
+#include <vector>
 
 class BikeAI : public Bike {
   private:
@@ -14,15 +15,19 @@ class BikeAI : public Bike {
 	bool left = false;
 	bool right = false;
 	int buffer = 60; // timer before AI bikes will start driving
-
+	std::vector<int>& waypointOptions;
 
   public:
 	BikeAI(
 		Window& window, Render::Render& render, int start_place, Render::Group& group,
 		std::vector<std::vector<glm::vec3>> ai_waypoints, Audio::AudioEngine& audio,
-		Render::MaterialHandle wallMaterialHandle, UiGame* UI, bool& menuActive)
-		: Bike(window, render, start_place, group, audio, wallMaterialHandle, UI, menuActive), ai_waypoints(ai_waypoints) {
-		waypoints = ai_waypoints[getId() - 1];
+		Render::MaterialHandle wallMaterialHandle, UiGame* UI, bool& menuActive, std::vector<int>& waypointOptions)
+		: Bike(window, render, start_place, group, audio, wallMaterialHandle, UI, menuActive),
+		  ai_waypoints(ai_waypoints), waypointOptions(waypointOptions) {
+		srand((unsigned int)time(NULL));
+
+		getNewLane(waypointOptions);
+
 	};
 
 	void update(float deltaTime) override {
@@ -52,12 +57,13 @@ class BikeAI : public Bike {
 			if (nextWaypoint == waypoints.size()) {
 				currentWaypoint = 0;
 				nextWaypoint = 1;
-				std::cout << getLap() << std::endl;
+				//std::cout << getLap() << std::endl;
 				addLap();
 				resetWaypoint();
+				getNewLane(waypointOptions);
 			} else {
 				nextWaypoint++;
-				std::cout << currentWaypoint << std::endl;
+				//std::cout << currentWaypoint << std::endl;
 				addWaypoint();
 			}
 		}
@@ -95,4 +101,16 @@ class BikeAI : public Bike {
 		}
 	}
 
+	void getNewLane(std::vector<int>& waypointOptions) {
+		if (waypointOptions.size() > 0) {
+			//std::cout << waypointOptions.size() << std::endl;
+			int waypointChoice = rand() % waypointOptions.size();
+			waypoints = ai_waypoints[waypointChoice];
+			waypointOptions.erase(waypointOptions.begin() + waypointChoice);
+			for (auto& waypoint : waypointOptions) {
+				std::cout << waypoint << " ";
+			}
+			std::cout << std::endl;
+		}
+	}
 };
