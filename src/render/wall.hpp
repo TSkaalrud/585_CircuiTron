@@ -27,6 +27,12 @@ class Wall {
 	Wall(Render& render, MaterialHandle material) : render(render), mat(material){};
 	Wall(Wall& wall) = delete;
 
+	~Wall() {
+		for (auto& segment : wall_segements) {
+			render.delete_instance(segment.instance);
+		}
+	}
+
 	void update_wall(mat4 bikeTransform, vec2 scale) { append_wall(bikeTransform, scale, false); }
 	uint commit_wall(mat4 bikeTransform, vec2 scale) {
 		append_wall(bikeTransform, scale, true);
