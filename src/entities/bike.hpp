@@ -30,6 +30,7 @@ class Bike : public GameObject {
 	int BoostCD = 0, collisionCD = 45, FRAGCD = 0, resettingCD = 0, SlipstreamCD = 30, StrafeCD = 0;
 	bool resetting = false, Slipstreaming = false, WADRelease = false;
 	int Slipstreams = 0, WADCharge = 0;
+	bool BoostOn = false, strafeOn = false;
 
 	WallSpawner wallSpawner;
 
@@ -247,7 +248,7 @@ class Bike : public GameObject {
 
 	//Hitscan bike cannon, the FRAG
 	bool fragFire(int bike) {
-		auto wallPointer = fragRay(bike, 100);
+		auto wallPointer = fragRay(bike, 200);
 
 		if (wallPointer != NULL) {
 			// Possibly put wall deletion here
