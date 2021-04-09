@@ -20,6 +20,8 @@ class BikeAI : public Bike {
 	float slowSlip = 0.9;
 	float fast = 0.95;
 	float fastSlip = 1.f;
+	bool cornering = false;
+	int lane;
 
   public:
 	BikeAI(
@@ -29,11 +31,12 @@ class BikeAI : public Bike {
 		: Bike(window, render, start_place, group, audio, wallMaterialHandle, UI, menuActive),
 		  ai_waypoints(ai_waypoints), waypointOptions(waypointOptions) {
 		engineAudio->changeGain(0.025);
-		FRAGAudio->changeGain(0.15);
+		gearAudio->changeGain(0.025);
+		FRAGAudio->changeGain(0.10);
 		JumpAudio->changeGain(0.075);
 		StrafeAudio->changeGain(0.075);
-		WADAudio->changeGain(0.125);
-		FRAGImpactAudio->changeGain(0.15);
+		WADAudio->changeGain(0.1);
+		FRAGImpactAudio->changeGain(0.10);
 		chassisAudio->changeGain(0.1);
 		SlipstreamingAudio->changeGain(0.5);
 		
@@ -47,7 +50,9 @@ class BikeAI : public Bike {
 		Bike::update(deltaTime);
 		if (!getLocked()) {
 			if (buffer < 0) {
+				isCornering();
 				followWaypoint();
+				useAbilities();
 			} else {
 				buffer--;
 			}
@@ -93,27 +98,38 @@ class BikeAI : public Bike {
 		float mag = glm::length(toTarget) * glm::length(toHeading);
 
 		float angle = glm::acos(dot / mag);
+		std::cout << angle << std::endl;
 
 		float angleRange = (3.14f - 0.0f);
 		float radiusRange = (1.0f - 0.0f);
 
 		float radius = (((angle - 0.0f) * radiusRange) / angleRange) - 0.0f;
-		//if radius too high booster?
-
-		if (dist > 25.0f) {//~20-90 big curve 140-185 little curve? 20-76 and 130-180
+		//if radius too high booster? utilize waypoint lane position? angle?
+		if (BoostCD <= 0) {
+			if (angle > 0.45) {
+				if (d > 0) { // left
+					bikeBooster(getId(), 263);
+					BoostCD += 60;
+					StrafeAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_BOOST_SFX]);
+				} else if (d < 0) { // right
+					bikeBooster(getId(), 262);
+					BoostCD += 60;
+					StrafeAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_BOOST_SFX]);
+				}
+			}
+		}
+		if (dist > 25.0f) {
 			if (d > 0) { //left
 				bikeReleaseSteer(getId());
 				bikeTurnPrecise(getId(), glm::min(3.5f * radius, 1.f));
-				if (Slipstreaming) {//hardcoded estimates of where the curves are to slow down for
-					if ((currentWaypoint > 30 && currentWaypoint < 85) ||
-						(currentWaypoint > 135 && currentWaypoint < 190)) {
+				if (Slipstreaming) {
+					if (cornering) {
 						bikeAcceleratePrecise(getId(), slowSlip);
 					} else {
 						bikeAcceleratePrecise(getId(), fastSlip);
 					}
-				} else {// hardcoded estimates of where the curves are to slow down for
-					if ((currentWaypoint > 30 && currentWaypoint < 85) ||
-						(currentWaypoint > 135 && currentWaypoint < 190)) { 
+				} else {
+					if (cornering) { 
 						bikeAcceleratePrecise(getId(), slow);
 					} else {
 						bikeAcceleratePrecise(getId(), fast);
@@ -143,13 +159,67 @@ class BikeAI : public Bike {
 	void getNewLane(std::vector<int>& waypointOptions) {
 		if (waypointOptions.size() > 0) {
 			//std::cout << waypointOptions.size() << std::endl;
-			int waypointChoice = rand() % waypointOptions.size();
-			waypoints = ai_waypoints[waypointChoice];
-			waypointOptions.erase(waypointOptions.begin() + waypointChoice);
+			lane = rand() % waypointOptions.size();
+			waypoints = ai_waypoints[lane];
+			waypointOptions.erase(waypointOptions.begin() + lane);
 			//for (auto& waypoint : waypointOptions) {
 			//	std::cout << waypoint << " ";
 			//}
 			//std::cout << std::endl;
 		}
+	}
+
+	// Hitscan bike cannon, the FRAG but for AI's
+	bool AIfragFire(int bike, int range) {
+		auto wallPointer = fragRay(bike, range);
+
+		if (wallPointer != NULL) {
+			// Possibly put wall deletion here
+			markWallBroken(
+				static_cast<wallUserData*>(wallPointer)->bikeNumber,
+				static_cast<wallUserData*>(wallPointer)->wallIndex);
+
+			FRAGImpactAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_GUN_IMPACT2_SFX]);
+			modifyHealth(-5);
+			FRAGCD += 150;
+
+			return true;
+		} else {
+			// AI doesn't fire if it won't hit
+			//FRAGAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_GUN_IMPACT_SFX]);
+			return false;
+		}
+	}
+
+	void AIBooster() {
+		auto wallPointer = fragRay(getId(), 15);
+		if (wallPointer != NULL) {
+			AIbikeBooster(getId(), 265);
+			BoostCD += 150;
+			//std::cout << "jump" << std::endl;
+		}
+	}
+
+	void useAbilities() { 
+		if (FRAGCD <= 0 ) {
+			if (health > 75) {
+				AIfragFire(getId(), 50);
+			} else if (health > 25 || (health > 5 && Slipstreaming) ) {
+				AIfragFire(getId(), 5);
+			}
+		} 
+		if (BoostCD <= 0 && !cornering && health > 25) {
+			AIBooster(); 
+		} 
+		if (health == 100 && WADCharge < 120) {
+			WADCharge++;
+		} else if (WADCharge > 0 && WADRelease == false) {
+			WADRelease = true;
+		}
+	}
+
+	// experimental estimates of where the curves are to slow down for
+	void isCornering() {//~20-90 big curve 140-185 little curve? 20-76 and 130-180?
+		cornering = (currentWaypoint > 30 && currentWaypoint < 85) || (currentWaypoint > 135 && currentWaypoint < 190);
 	}
 };

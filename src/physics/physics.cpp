@@ -493,7 +493,7 @@ void * fragRay(int bike, int range) {
 	// https://gameworksdocs.nvidia.com/PhysX/4.1/documentation/physxguide/Manual/SceneQueries.html?highlight=ray#multiple-hits
 
 	for (PxU32 i = 0; i < buf.nbTouches; i++) {
-		std::cout << "RAY CAST RESULTS ON OBJECT: " << buf.touches[i].actor->getName() << "\n";
+		//std::cout << "RAY CAST RESULTS ON OBJECT: " << buf.touches[i].actor->getName() << "\n";
 		const char* name = buf.touches[i].actor->getName();
 		if (std::strcmp(name, "wall") == 0) {
 			return buf.touches[i].actor->userData;
@@ -652,6 +652,33 @@ void bikeBoosterHold(int bike, int keyPressed) {
 	
 }
 
+// bikeBooster tuned for AI usage
+void AIbikeBooster(int bike, int keyPressed) {
+	if (keyPressed == 265) { // up
+		physx::PxVec3 up = getBikeTransform(bike).q.getBasisVector1() * 1.f * impulseBase;
+		CTbikes[bike]->getRigidDynamicActor()->addForce(up, PxForceMode::eIMPULSE);
+
+		physx::PxVec3 forward = getBikeTransform(bike).q.getBasisVector2() * 1.f * impulseBase / 5;
+		CTbikes[bike]->getRigidDynamicActor()->addForce(forward, PxForceMode::eIMPULSE);
+
+	} else if (keyPressed == 263) { // left
+		physx::PxVec3 left;
+		if (isVehicleInAir[bike]) {
+			left = getBikeTransform(bike).q.getBasisVector0() * 0.25f * impulseBase;
+		} else {
+			left = getBikeTransform(bike).q.getBasisVector0() * 0.75f * impulseBase;
+		}
+		CTbikes[bike]->getRigidDynamicActor()->addForce(left, PxForceMode::eIMPULSE);
+	} else if (keyPressed == 262) { // right
+		physx::PxVec3 right;
+		if (isVehicleInAir[bike]) {
+			right = getBikeTransform(bike).q.getBasisVector0() * -0.25f * impulseBase;
+		} else {
+			right = getBikeTransform(bike).q.getBasisVector0() * -0.75f * impulseBase;
+		}
+		CTbikes[bike]->getRigidDynamicActor()->addForce(right, PxForceMode::eIMPULSE);
+	}
+}
 /* keep bike in euler angle terms between
 -0.5 and +0.5 rads in the x (pitch)
 don't care about y (yaw)
@@ -706,14 +733,14 @@ void initVehicle() {
 	VehicleDesc vehicleDesc = initVehicleDesc();
 	gVehicle4W = createVehicle4W(vehicleDesc, gPhysics, gCooking);
 	PxTransform startTransform(
-		PxVec3(-165.0f - spawnOffset, (vehicleDesc.chassisDims.y * 1.f + vehicleDesc.wheelRadius + 3.0f), -100.0f - spawnOffset),
+		PxVec3(-150.0f - spawnOffset, (vehicleDesc.chassisDims.y * 1.f + vehicleDesc.wheelRadius + 3.0f), -75.0f - spawnOffset*1.5),
 		PxQuat(0.0f, 0.999f, 0.0f, -0.052f));
 
 	if (CTbikes.size() == 0) {
 		startPos = startTransform;
 	}
 
-	spawnOffset += 6.0f;
+	spawnOffset += 8.0f;
 
 	CTbikes.push_back(gVehicle4W);
 

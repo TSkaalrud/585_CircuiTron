@@ -95,6 +95,8 @@ void bikeBooster(int i, int keyPressed);
 
 void bikeBoosterHold(int bike, int keyPressed);
 
+void AIbikeBooster(int i, int keyPressed);
+
 void bikeControl(int i);
 
 void resetBikePos(int i, physx::PxTransform position);

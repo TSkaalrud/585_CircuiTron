@@ -27,7 +27,7 @@ class Bike : public GameObject {
 	bool locked = false;
 
 	//Abilities
-	int BoostCD = 0, collisionCD = 45, FRAGCD = 0, resettingCD = 0, SlipstreamCD = 30, StrafeCD = 0;
+	int BoostCD = 60, collisionCD = 45, FRAGCD = 30, resettingCD = 30, SlipstreamCD = 30, StrafeCD = 60;
 	bool resetting = false, Slipstreaming = false, WADRelease = false;
 	int Slipstreams = 0, WADCharge = 0;
 	bool BoostOn = false, strafeOn = false;
@@ -261,7 +261,7 @@ class Bike : public GameObject {
 		} else if (angle < -pi) {
 			angle += 2 * pi;
 		}
-		std::cout << angle << std::endl;
+		//std::cout << angle << std::endl;
 
 		float temp = 0.0f;
 		if (angle < 0) {
@@ -308,6 +308,7 @@ class Bike : public GameObject {
 			return false;
 		}
 	}
+
 
 	int slipstreams(int bike) {
 		int slipstreamCount = 0;
@@ -367,4 +368,5 @@ class Bike : public GameObject {
 			SlipstreamingAudio->pauseSound();
 		}
 	}
+
 };
