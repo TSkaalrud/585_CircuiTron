@@ -236,10 +236,56 @@ class Bike : public GameObject {
 		float rads;
 		physx::PxVec3 axis;
 		resetLocation.q.toRadiansAndUnitAxis(rads, axis);
+
+		glm::vec3 heading(
+			resetLocation.q.getBasisVector2().x, 
+			resetLocation.q.getBasisVector2().y,
+			resetLocation.q.getBasisVector2().z
+		);
+
+		glm::vec3 cur(glm::normalize(waypoints[waypoint]));
+
+		glm::vec3 to;
+		if (waypoint+1 >= waypoints.size()) {
+			to = glm::normalize(waypoints[0]);
+		} else {
+			to = glm::normalize(waypoints[waypoint+1]);
+		}
+		
+		float angle = glm::atan(to.z - cur.z, to.x - cur.x);
+
+		const float pi = glm::pi<float>();
+		if (angle > pi) {
+			angle -= 2 * pi;
+		} else if (angle < -pi) {
+			angle += 2 * pi;
+		}
+		std::cout << angle << std::endl;
+
+		float temp = 0.0f;
+		if (angle < 0) {
+			if (angle > -0.75f) {
+				temp = 1.15f;
+			} else if (angle < -2.75) {
+				temp = -1.15f;
+			} else {
+				temp = pi / 2.0f;
+			}
+		} else {
+			if (angle > 2.75f) {
+				temp = 2.75f;
+			} else if (angle < 0.75f) {
+				temp = -2.75f;
+			} else {
+				temp = 0.0f;
+			}
+		}
+		
 		resetLocation.q.x = 0;
-		resetLocation.q.y = sin(rads / 2);
+		resetLocation.q.y = sin(temp);
 		resetLocation.q.z = 0;
-		resetLocation.q.w = cos(rads / 2);
+		resetLocation.q.w = cos(temp);
+
 		resetBikePos(getId(), resetLocation);
 		modifyHealth(-25);
 		resettingCD += 60;
