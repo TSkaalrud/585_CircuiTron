@@ -56,6 +56,7 @@ int main(int argc, char* argv[]) {
 		window.beginFrame();
 
 		e_manager.addEntitiesAfterFrame();
+		e_manager.removeEntitiesAfterFrame();
 
 		// 1 for variable, 0 for fixed
 		if (0) {
