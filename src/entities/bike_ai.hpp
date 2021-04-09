@@ -98,7 +98,7 @@ class BikeAI : public Bike {
 		float mag = glm::length(toTarget) * glm::length(toHeading);
 
 		float angle = glm::acos(dot / mag);
-		std::cout << angle << std::endl;
+		//std::cout << angle << std::endl;
 
 		float angleRange = (3.14f - 0.0f);
 		float radiusRange = (1.0f - 0.0f);
