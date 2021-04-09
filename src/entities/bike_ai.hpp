@@ -16,6 +16,10 @@ class BikeAI : public Bike {
 	bool right = false;
 	int buffer = 60; // timer before AI bikes will start driving
 	std::vector<int>& waypointOptions;
+	float slow = 0.85;
+	float slowSlip = 0.9;
+	float fast = 0.95;
+	float fastSlip = 1.f;
 
   public:
 	BikeAI(
@@ -35,6 +39,7 @@ class BikeAI : public Bike {
 		
 		srand((unsigned int)time(NULL));
 		getNewLane(waypointOptions);
+		//waypoints = ai_waypoints[8];
 
 	};
 
@@ -66,6 +71,8 @@ class BikeAI : public Bike {
 				currentWaypoint = 0;
 				nextWaypoint = 1;
 				//std::cout << getLap() << std::endl;
+				//waypoints = ai_waypoints[4+getLap()];
+
 				addLap();
 				resetWaypoint();
 				getNewLane(waypointOptions);
@@ -91,19 +98,30 @@ class BikeAI : public Bike {
 		float radiusRange = (1.0f - 0.0f);
 
 		float radius = (((angle - 0.0f) * radiusRange) / angleRange) - 0.0f;
+		//if radius too high booster?
 
-		if (dist > 25.0f) {
+		if (dist > 25.0f) {//~20-90 big curve 140-185 little curve? 20-76 and 130-180
 			if (d > 0) { //left
 				bikeReleaseSteer(getId());
-				bikeTurnPrecise(getId(), glm::min(2 * radius, 1.f));
-				if (Slipstreaming) {
-					bikeAcceleratePrecise(getId(), 0.9);
-				} else {
-					bikeAcceleratePrecise(getId(), 0.825f);
+				bikeTurnPrecise(getId(), glm::min(3.5f * radius, 1.f));
+				if (Slipstreaming) {//hardcoded estimates of where the curves are to slow down for
+					if ((currentWaypoint > 30 && currentWaypoint < 85) ||
+						(currentWaypoint > 135 && currentWaypoint < 190)) {
+						bikeAcceleratePrecise(getId(), slowSlip);
+					} else {
+						bikeAcceleratePrecise(getId(), fastSlip);
+					}
+				} else {// hardcoded estimates of where the curves are to slow down for
+					if ((currentWaypoint > 30 && currentWaypoint < 85) ||
+						(currentWaypoint > 135 && currentWaypoint < 190)) { 
+						bikeAcceleratePrecise(getId(), slow);
+					} else {
+						bikeAcceleratePrecise(getId(), fast);
+					}
 				}
 			} else if (d < 0) { //right
 				bikeReleaseSteer(getId());
-				bikeTurnPrecise(getId(), glm::max(-2 * radius, -1.f));
+				bikeTurnPrecise(getId(), glm::max(-3.5f * radius, -1.f));
 				if (Slipstreaming) {
 					bikeAcceleratePrecise(getId(), 0.9);
 				} else {
@@ -128,10 +146,10 @@ class BikeAI : public Bike {
 			int waypointChoice = rand() % waypointOptions.size();
 			waypoints = ai_waypoints[waypointChoice];
 			waypointOptions.erase(waypointOptions.begin() + waypointChoice);
-			for (auto& waypoint : waypointOptions) {
-				std::cout << waypoint << " ";
-			}
-			std::cout << std::endl;
+			//for (auto& waypoint : waypointOptions) {
+			//	std::cout << waypoint << " ";
+			//}
+			//std::cout << std::endl;
 		}
 	}
 };
