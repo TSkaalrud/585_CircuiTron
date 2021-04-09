@@ -180,7 +180,7 @@ class BikeAI : public Bike {
 				static_cast<wallUserData*>(wallPointer)->wallIndex);
 
 			FRAGImpactAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_GUN_IMPACT2_SFX]);
-			modifyHealth(-5);
+			modifyHealth(-6);
 			FRAGCD += 150;
 
 			return true;

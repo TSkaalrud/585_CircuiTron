@@ -166,7 +166,7 @@ class BikePlayer : public Bike {
 			if (window.keyPressed(32)) {
 				if (FRAGCD < 1) {
 					FRAGCD += 30;
-					modifyHealth(-5);
+					modifyHealth(-6);
 					fragFire(getId()); // if true, a wall was hit! Plays fire or impact sound
 				}
 			}

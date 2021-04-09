@@ -214,6 +214,7 @@ class Bike : public GameObject {
 			if (collision(getId()) && collisionCD <= 0) {
 				modifyHealth(-10);
 				collisionCD = 45;
+				SlipstreamCD = 30;
 				chassisAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_BIKE_IMPACT_SFX]);
 			}
 		}
