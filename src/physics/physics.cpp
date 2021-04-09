@@ -208,90 +208,6 @@ VehicleDesc initVehicleDesc() {
 	return vehicleDesc;
 }
 
-/*
-
-void startAccelerateForwardsMode() {
-	if (gMimicKeyInputs) {
-		gVehicleInputData.setDigitalAccel(true);
-	} else {
-		gVehicleInputData.setAnalogAccel(1.0f);
-	}
-}
-
-void startAccelerateReverseMode() {
-
-	if (gMimicKeyInputs) {
-		gVehicleInputData.setDigitalAccel(true);
-	} else {
-		gVehicleInputData.setAnalogAccel(1.0f);
-	}
-}
-
-void startBrakeMode() {
-	if (gMimicKeyInputs) {
-		gVehicleInputData.setDigitalBrake(true);
-	} else {
-		gVehicleInputData.setAnalogBrake(1.0f);
-	}
-}
-
-void startTurnHardLeftMode() {
-	if (gMimicKeyInputs) {
-		gVehicleInputData.setDigitalAccel(true);
-		gVehicleInputData.setDigitalSteerLeft(true);
-	} else {
-		gVehicleInputData.setAnalogAccel(true);
-		gVehicleInputData.setAnalogSteer(-1.0f);
-	}
-}
-
-void startTurnHardRightMode() {
-	if (gMimicKeyInputs) {
-		gVehicleInputData.setDigitalAccel(true);
-		gVehicleInputData.setDigitalSteerRight(true);
-	} else {
-		gVehicleInputData.setAnalogAccel(1.0f);
-		gVehicleInputData.setAnalogSteer(1.0f);
-	}
-}
-
-void startHandbrakeTurnLeftMode() {
-	if (gMimicKeyInputs) {
-		gVehicleInputData.setDigitalSteerLeft(true);
-		gVehicleInputData.setDigitalHandbrake(true);
-	} else {
-		gVehicleInputData.setAnalogSteer(-1.0f);
-		gVehicleInputData.setAnalogHandbrake(1.0f);
-	}
-}
-
-void startHandbrakeTurnRightMode() {
-	if (gMimicKeyInputs) {
-		gVehicleInputData.setDigitalSteerRight(true);
-		gVehicleInputData.setDigitalHandbrake(true);
-	} else {
-		gVehicleInputData.setAnalogSteer(1.0f);
-		gVehicleInputData.setAnalogHandbrake(1.0f);
-	}
-}
-
-void releaseAllControls() {
-	if (gMimicKeyInputs) {
-		gVehicleInputData.setDigitalAccel(false);
-		gVehicleInputData.setDigitalSteerLeft(false);
-		gVehicleInputData.setDigitalSteerRight(false);
-		gVehicleInputData.setDigitalBrake(false);
-		gVehicleInputData.setDigitalHandbrake(false);
-	} else {
-		gVehicleInputData.setAnalogAccel(0.0f);
-		gVehicleInputData.setAnalogSteer(0.0f);
-		gVehicleInputData.setAnalogBrake(0.0f);
-		gVehicleInputData.setAnalogHandbrake(0.0f);
-	}
-}
-
-*/
-
 void makeWallSeg(int i, PxTransform a, PxTransform b, float width, float height, std::vector<uint32_t> graphicIndex, Render::Wall &graphicReference) {
 	PxTransform wallSeg;
 
@@ -919,6 +835,14 @@ void stepPhysics(float timestep) {
 	gScene->fetchResults(true);
 }
 
+void clearCTData() {
+	CTbikes.clear();
+	walls.clear();
+	inputDatas.clear();
+	isVehicleInAir.clear();
+	brokenWalls.clear();
+}
+
 void cleanupPhysics() {
 	for (int i = 0; i < CTbikes.size(); i++) {
 		CTbikes[i]->getRigidDynamicActor()->release();
@@ -944,7 +868,9 @@ void cleanupPhysics() {
 	}
 	PX_RELEASE(gFoundation);
 
-	printf("SnippetVehicle4W done.\n");
+	clearCTData();
+
+	printf("Physics cleanup done.\n");
 }
 
 void keyPress(unsigned char key, const PxTransform& camera) {
