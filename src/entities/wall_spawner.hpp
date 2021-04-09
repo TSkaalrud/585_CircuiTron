@@ -15,6 +15,8 @@ class WallSpawner {
 
 	Render::Wall wall;
 
+	physx::PxTransform lastFrame;
+
 	physx::PxTransform offsetTransform(physx::PxTransform t, glm::vec3 o) {
 		physx::PxTransform result = t;
 		result.p += o.x * result.q.getBasisVector0();
@@ -39,6 +41,10 @@ class WallSpawner {
 			auto emitTransform = offsetTransform(getBikeTransform(id), emitPoint);
 
 			physx::PxTransform firstSegEnd = emitTransform;
+			if (didSpawnWall && !shouldSpawnWall) {
+				firstSegEnd = lastFrame;
+			}
+			lastFrame = emitTransform;
 			if (spawnWad.has_value()) {
 				firstSegEnd.p += -wadDepth * firstSegEnd.q.getBasisVector2();
 			}
