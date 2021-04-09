@@ -601,10 +601,7 @@ don't care about y (yaw)
 pi/3 and 2*pi/3 rads (roll)
 */
 void bikeControl(int bike) {
-
-	// std::cout << getBikeTransform(bike).q.getBasisVector1().dot(physx::PxVec3{0,1,0}) << std::endl;
 	physx::PxTransform quat = getBikeTransform(bike);
-	// std::cout << quat.q.getAngle() << std::endl;
 	float angleRadians;
 	PxVec3 unitAxis;
 	quat.q.toRadiansAndUnitAxis(angleRadians, unitAxis);
@@ -623,8 +620,6 @@ void resetBikePos(int bike, PxTransform location) {
 
 // fetch bike gear
 PxU32 getBikeGear(int bike) {
-	// std::cout << PxVehicleGearsData::eGEARSRATIO_COUNT << std::endl;
-	// std::cout << CTbikes[bike]->mDriveDynData.getCurrentGear() << std::endl;
 	return CTbikes[bike]->mDriveDynData.getCurrentGear();
 }
 
@@ -791,8 +786,6 @@ void initPhysics() {
 
 
 void stepPhysics(float timestep) {
-	//const PxF32 timestep = 1.0f / 60.0f;
-
 	//reset the bike collision status
 	for (int i = 0; i < CTbikes.size(); i++) {
 		bikeUserData* bikeData = (bikeUserData*)CTbikes[i]->getRigidDynamicActor()->userData;
