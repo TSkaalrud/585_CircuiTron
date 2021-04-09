@@ -8,6 +8,7 @@ class EntityManager {
   private:
 	std::vector<std::unique_ptr<Entity>> entities;
 	std::vector<std::unique_ptr<Entity>> entities_to_add;
+	std::vector<Entity*> entities_to_remove;
 
   public:
 	EntityManager();
@@ -16,4 +17,6 @@ class EntityManager {
 	void addEntitiesAfterFrame();
 
 	void update(float dTime);
+
+	void removeEntity(Entity* e);
 };
