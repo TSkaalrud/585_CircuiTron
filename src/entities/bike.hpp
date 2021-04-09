@@ -67,29 +67,29 @@ class Bike : public GameObject {
 		model->setTransform(convertTransform(getBikeTransform(getId())) * glm::scale(glm::mat4(1.0f), glm::vec3(2.0f)));
 		if (!menuActive) {
 
-			{
-				physx::PxVehicleDrive4W* vehicle = getVehicle(getId());
-				wallSpawner.shouldSpawnWall = vehicle->computeForwardSpeed() >= 10.0f &&
-					vehicle->mDriveDynData.getCurrentGear() != physx::PxVehicleGearsData::eREVERSE;
-			}
-			if (WADRelease) {
-				wallSpawner.spawnWad.emplace(1 + 0.05 * WADCharge);
-
-				WADAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_SIZZLE_SFX]);
-				WADAudio->loop = false;
-
-				modifyHealth(- 5 - WADCharge / 4);
-				WADCharge = 0;
-				WADRelease = false;
-			}
-			if (WADCharge > 0) {
-				WADAudio->loop = true;
-				WADAudio->playSound(stereo.buffer[Audio::SOUND_FILE_WAD_SFX]);
-			}
-
-			wallSpawner.spawnWalls(deltaTime, getId());
-
 			if (!getLocked()) {
+				{
+					physx::PxVehicleDrive4W* vehicle = getVehicle(getId());
+					wallSpawner.shouldSpawnWall = vehicle->computeForwardSpeed() >= 10.0f &&
+						vehicle->mDriveDynData.getCurrentGear() != physx::PxVehicleGearsData::eREVERSE;
+				}
+				if (WADRelease) {
+					wallSpawner.spawnWad.emplace(1 + 0.05 * WADCharge);
+
+					WADAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_SIZZLE_SFX]);
+					WADAudio->loop = false;
+
+					modifyHealth(-5 - WADCharge / 4);
+					WADCharge = 0;
+					WADRelease = false;
+				}
+				if (WADCharge > 0) {
+					WADAudio->loop = true;
+					WADAudio->playSound(stereo.buffer[Audio::SOUND_FILE_WAD_SFX]);
+				}
+
+				wallSpawner.spawnWalls(deltaTime, getId());
+
 				// reduce CD's
 				if (BoostCD > 0) {
 					BoostCD--;
