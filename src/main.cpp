@@ -43,11 +43,11 @@ int main(int argc, char* argv[]) {
 		e_manager.addEntity(std::make_unique<UiTest>(render, window));
 	} else {//game
 		//initialize UI
-		std::unique_ptr<UiGame> UI = std::make_unique<UiGame>(render, window, menuActive);
+		std::unique_ptr<UiGame> UI = std::make_unique<UiGame>(render, window, menuActive, e_manager, stereo);
 		UiGame* game_UI = UI.get();
 		e_manager.addEntity(std::move(UI));
 		//initialize game
-		e_manager.addEntity(std::make_unique<Game>(window, render, 4, e_manager, stereo, game_UI, menuActive));
+		//e_manager.addEntity(std::make_unique<Game>(window, render, 4, e_manager, stereo, game_UI, menuActive));
 	}
 
 	// Loop will continue until "X" on window is clicked.

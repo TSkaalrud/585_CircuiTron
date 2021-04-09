@@ -6,6 +6,8 @@
 #include "window.hpp"
 #include <chrono>
 #include <thread>
+#include "Audio/audioEngine.h"
+#include "game.hpp"
 
 
 class UiGame : public Entity {
@@ -15,9 +17,13 @@ class UiGame : public Entity {
 	Render::Render& render;
 	Window& window;
 	bool& menuActive;
+	EntityManager& e_manager;
+	Audio::AudioEngine& stereo;
+
 	bool paused;
 	int currentlySelectedMenuItem = 1;//of 3
 	int currentlyActiveMenu = 1;//of 3
+	
 
 	//UI instanceHandles
 	Render::InstanceHandle SI_Bar = -1;
@@ -73,8 +79,8 @@ class UiGame : public Entity {
 	int currentPlace = 4;
 	int currentLap = 1;
 
-	UiGame(Render::Render& render, Window& window, bool& menuActive)
-		: render(render), window(window), menuActive(menuActive),
+	UiGame(Render::Render& render, Window& window, bool& menuActive, EntityManager& e_manager, Audio::AudioEngine& stereo)
+		: render(render), window(window), menuActive(menuActive), e_manager(e_manager), stereo(stereo), 
 		  // Load all images into Materials
 		  SI_Bar_png(Render::importUI("assets/UI/SI_Bar.png", render)),
 		  SI_Critical_png(Render::importUI("assets/UI/SI_Bar_Critical.png", render)),
@@ -445,7 +451,8 @@ class UiGame : public Entity {
 				menuActive = true;
 				paused = true;
 				//reset the game here---------------------------------------------------------
-
+				// initialize game
+				e_manager.addEntity(std::make_unique<Game>(window, render, 4, e_manager, stereo, this, menuActive));
 			} else if (currentlySelectedMenuItem == 2) {//Options
 				//go to options page
 				currentlyActiveMenu = 2;
