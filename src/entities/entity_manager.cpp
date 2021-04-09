@@ -13,7 +13,18 @@ void EntityManager::addEntitiesAfterFrame() {
 		entities.back()->enter();
 	}
 
+	for (int i = 0; i < entities_to_remove.size(); i++) {
+		for (int j = 0; j < entities.size(); j++) {
+			if (entities_to_remove[i] == entities[j].get()) {
+				entities[j].reset();
+				entities.erase(entities.begin() + j);
+				break;
+			}
+		}
+	}
+
 	entities_to_add.clear();
+	entities_to_remove.clear();
 }
 
 void EntityManager::update(float dTime) {
@@ -23,14 +34,3 @@ void EntityManager::update(float dTime) {
 }
 
 void EntityManager::removeEntity(Entity* e) { entities_to_remove.push_back(e); }
-
-void EntityManager::removeEntitiesAfterFrame() {
-	for (int i = 0; i < entities_to_remove.size(); i++) {
-		for (int j = 0; j < entities.size(); j++) {
-			if (entities_to_remove[i] == entities[j].get()) {
-				entities[j].reset();
-			}
-		}
-	}
-	entities_to_remove.clear();
-}

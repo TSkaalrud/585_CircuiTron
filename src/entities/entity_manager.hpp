@@ -19,5 +19,4 @@ class EntityManager {
 	void update(float dTime);
 
 	void removeEntity(Entity* e);
-	void removeEntitiesAfterFrame();
 };
