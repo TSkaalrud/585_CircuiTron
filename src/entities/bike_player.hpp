@@ -77,6 +77,9 @@ class BikePlayer : public Bike {
 					bikeReleaseSteer(0);
 				}
 			}
+			if (window.keyPressed(65) && window.keyPressed(58)) {
+				bikeReleaseSteer(0);
+			}
 
 			// Reset bike
 			if (window.keyPressed(82) && resettingCD < 1) { // r
@@ -91,17 +94,16 @@ class BikePlayer : public Bike {
 			}
 
 			// <^> Arrows - bike Booster (jump)
-			if (window.keyPressed(265)) { // up arrow - boost up
-				if (BoostCD < 1 && getHealth() > 10) {
-					modifyHealth(-10);
-					bikeBooster(0, 265);
-					BoostCD += 30;
-					JumpAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_BOOST_SFX]);
+			//if (window.keyPressed(265)) { // up arrow - boost up
+			//	if (BoostCD < 1 && getHealth() > 10) {
+			//		modifyHealth(-10);
+			//		bikeBooster(0, 265);
+			//		BoostCD += 30;
+			//		JumpAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_BOOST_SFX]);
+			//	}
+			//}
 
-					std::cout << "health: " << getHealth() << std::endl;
-				}
-			}
-			if (window.keyPressed(263)) { // left arrow - strafe left
+			 if (window.keyPressed(263)) { // left arrow - strafe left
 				if (StrafeCD < 1 && getHealth() > 10) {
 					modifyHealth(-10);
 					bikeBooster(0, 263);
@@ -109,7 +111,7 @@ class BikePlayer : public Bike {
 					StrafeAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_BOOST_SFX]);
 				}
 			}
-			if (window.keyPressed(262)) { // right arrow - strafe right
+			 if (window.keyPressed(262)) { // right arrow - strafe right
 				if (StrafeCD < 1 && getHealth() > 10) {
 					modifyHealth(-10);
 					bikeBooster(0, 262);
@@ -117,6 +119,40 @@ class BikePlayer : public Bike {
 					StrafeAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_BOOST_SFX]);
 				}
 			}
+			if (window.keyPressed(265) && BoostOn == false) {
+				BoostOn = true;
+				bikeBooster(0, 265);
+				modifyHealth(-10);
+				JumpAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_BOOST_SFX]);
+			} else if (window.keyPressed(265) && BoostOn == true) {
+				bikeBoosterHold(0, 265);
+				modifyHealth(-0.5f);
+			} else {
+				BoostOn = false;
+			}
+			//if (window.keyPressed(263) && strafeOn == false) {
+			//	strafeOn = true;
+			//	bikeBooster(0, 263);
+			//	//modifyHealth(-10);
+			//	StrafeAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_BOOST_SFX]);
+			//} else if (window.keyPressed(263) && strafeOn == true) {
+			//	bikeBoosterHold(0, 263);
+			//	//modifyHealth(-0.5f);
+			//} else {
+			//	strafeOn = false;
+			//}
+			//if (window.keyPressed(262) && strafeOn == false) {
+			//	strafeOn = true;
+			//	bikeBooster(0, 262);
+			//	//modifyHealth(-10);
+			//	StrafeAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_BOOST_SFX]);
+			//} else if (window.keyPressed(262) && strafeOn == true) {
+			//	bikeBoosterHold(0, 262);
+			//	//modifyHealth(-0.5f);
+			//} else {
+			//	strafeOn = false;
+			//}
+
 
 			// down arrow - WAD
 			if (window.keyPressed(264)) { // charge WAD
@@ -147,7 +183,7 @@ class BikePlayer : public Bike {
 		physx::PxVec3 player = getBikeTransform(0).p;
 		float dist = glm::sqrt(glm::pow(target.x - player.x, 2) + glm::pow(target.z - player.z, 2));
 
-		if (dist < 30.0f) {// update to next WP if distance is less than 25
+		if (dist < 35.0f) {// update to next WP if distance is less than 35
 			currentWaypoint = nextWaypoint;
 			if (nextWaypoint == waypoints.size()) {
 				currentWaypoint = 0;

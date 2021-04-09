@@ -94,7 +94,8 @@ std::vector<PxVehicleDrive4WRawInputData> inputDatas;
 std::vector<bool> isVehicleInAir;
 std::vector<PxRigidStatic*> brokenWalls;
 
-float impulseBase = 3000;
+float impulseBase = 3750;
+float forceBase = 3750;
 
 PxF32 gSteerVsForwardSpeedData[2 * 8] = {0.0f,       0.35f,      5.0f,       0.30f,      30.0f,      0.25f,
 										 120.0f,     0.1f,       PX_MAX_F32, PX_MAX_F32, PX_MAX_F32, PX_MAX_F32,
@@ -177,7 +178,7 @@ VehicleDesc initVehicleDesc() {
 		(chassisDims.y * chassisDims.y + chassisDims.z * chassisDims.z) * 1.f * chassisMass / 12.0f,
 		(chassisDims.x * chassisDims.x + chassisDims.z * chassisDims.z) * 1.1f * chassisMass / 12.0f,
 		(chassisDims.x * chassisDims.x + chassisDims.y * chassisDims.y) * 1.3f * chassisMass / 12.0f);
-	const PxVec3 chassisCMOffset(0.0f, -chassisDims.y * 0.5f + 0.20f, 0.35f);
+	const PxVec3 chassisCMOffset(0.0f, -chassisDims.y * 0.5f + 0.10f, 0.35f);
 
 	// Set up the wheel mass, radius, width, moment of inertia, and number of wheels.
 	// Moment of inertia is just the moment of inertia of a cylinder.
@@ -599,25 +600,56 @@ void bikeReleaseAll(int i) {
 // bikeBooster provides a powerful impulse either to jump up, or strafe to the left or right of the bike's heading
 void bikeBooster(int bike, int keyPressed) {
 	if (keyPressed == 265) { // up
-		physx::PxVec3 up = getBikeTransform(bike).q.getBasisVector1() * impulseBase;
+		physx::PxVec3 up = getBikeTransform(bike).q.getBasisVector1() * 0.75 * impulseBase;
 		CTbikes[bike]->getRigidDynamicActor()->addForce(up, PxForceMode::eIMPULSE);
+
+		physx::PxVec3 forward = getBikeTransform(bike).q.getBasisVector2() * 0.9f * impulseBase / 5;
+		CTbikes[bike]->getRigidDynamicActor()->addForce(forward, PxForceMode::eIMPULSE);
+
 	} else if (keyPressed == 263) { // left
 		physx::PxVec3 left;
 		if (isVehicleInAir[bike]) {
-			left = getBikeTransform(bike).q.getBasisVector0() * 1 * impulseBase;
+			left = getBikeTransform(bike).q.getBasisVector0() * 1.f * impulseBase;
 		} else {
-			left = getBikeTransform(bike).q.getBasisVector0() * 2 * impulseBase;
+			left = getBikeTransform(bike).q.getBasisVector0() * 2.f * impulseBase;
 		}
 		CTbikes[bike]->getRigidDynamicActor()->addForce(left, PxForceMode::eIMPULSE);
 	} else if (keyPressed == 262) { // right
 		physx::PxVec3 right;
 		if (isVehicleInAir[bike]) {
-			right = getBikeTransform(bike).q.getBasisVector0() * -1 * impulseBase;
+			right = getBikeTransform(bike).q.getBasisVector0() * -1.f * impulseBase;
 		} else {
-			right = getBikeTransform(bike).q.getBasisVector0() * -2 * impulseBase;
+			right = getBikeTransform(bike).q.getBasisVector0() * -2.f * impulseBase;
 		}
 		CTbikes[bike]->getRigidDynamicActor()->addForce(right, PxForceMode::eIMPULSE);
 	}
+}
+
+void bikeBoosterHold(int bike, int keyPressed) {
+	if (keyPressed == 265) { // up
+		physx::PxVec3 up = getBikeTransform(bike).q.getBasisVector1() * 1.5f * forceBase;
+		CTbikes[bike]->getRigidDynamicActor()->addForce(up, PxForceMode::eFORCE);
+
+		physx::PxVec3 forward = getBikeTransform(bike).q.getBasisVector2() * 2.f * forceBase / 5;
+		CTbikes[bike]->getRigidDynamicActor()->addForce(forward, PxForceMode::eFORCE);
+	}
+	//}	else if (keyPressed == 263) { // left
+	//		physx::PxVec3 left;
+	//		if (isVehicleInAir[bike]) {
+	//			left = getBikeTransform(bike).q.getBasisVector0() * 0.1 * forceBase;
+	//		} else {
+	//			left = getBikeTransform(bike).q.getBasisVector0() * 0.1 * forceBase;
+	//		}
+	//		CTbikes[bike]->getRigidDynamicActor()->addForce(left, PxForceMode::eFORCE);
+	//}	else if (keyPressed == 262) { // right
+	//		physx::PxVec3 right;
+	//		if (isVehicleInAir[bike]) {
+	//			right = getBikeTransform(bike).q.getBasisVector0() * -0.1 * forceBase;
+	//		} else {
+	//			right = getBikeTransform(bike).q.getBasisVector0() * -0.1 * forceBase;
+	//		}
+	//		CTbikes[bike]->getRigidDynamicActor()->addForce(right, PxForceMode::eFORCE);
+	
 }
 
 /* keep bike in euler angle terms between
@@ -753,7 +785,7 @@ void initPhysics() {
 	gPhysics = PxCreatePhysics(PX_PHYSICS_VERSION, *gFoundation, PxTolerancesScale(), true, gPvd);
 
 	PxSceneDesc sceneDesc(gPhysics->getTolerancesScale());
-	sceneDesc.gravity = PxVec3(0.0f, -9.81f * 2, 0.0f);
+	sceneDesc.gravity = PxVec3(0.0f, -9.81f * 2.5, 0.0f);
 
 	PxU32 numWorkers = 1;
 	gDispatcher = PxDefaultCpuDispatcherCreate(numWorkers);
@@ -770,7 +802,7 @@ void initPhysics() {
 		pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_CONTACTS, true);
 		pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_SCENEQUERIES, true);
 	}
-	gMaterial = gPhysics->createMaterial(0.25f, 0.2f, 0.6f);
+	gMaterial = gPhysics->createMaterial(0.20f, 0.15f, 0.6f);
 
 	gCooking = PxCreateCooking(PX_PHYSICS_VERSION, *gFoundation, PxCookingParams(PxTolerancesScale()));
 
