@@ -50,11 +50,14 @@ class WallSpawner {
 			}
 
 			if (!didSpawnWall || !shouldSpawnWall || spawnWad.has_value() || timer >= wallTime) {
-				auto g = wall.commit_wall(convertTransform(firstSegEnd), scale);
-				if (didSpawnWall) {
-					makeWallSeg(id, wallLast, firstSegEnd, scale.x, scale.y, {g}, wall);
-				} else {
-					wall.delete_wall(g);
+
+				if (firstSegEnd != wallLast) {
+					auto g = wall.commit_wall(convertTransform(firstSegEnd), scale);
+					if (didSpawnWall) {
+						makeWallSeg(id, wallLast, firstSegEnd, scale.x, scale.y, {g}, wall);
+					} else {
+						wall.delete_wall(g);
+					}
 				}
 
 				timer = 0;
