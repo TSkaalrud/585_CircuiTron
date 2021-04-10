@@ -152,6 +152,7 @@ class UiGame : public Entity {
 		//}
 #pragma endregion
 		// if the paused or menuActive bools have changed, call toggleGameUI
+		menuInput();
 	}
 
 #pragma region race functions
@@ -249,5 +250,24 @@ class UiGame : public Entity {
 	void enterMenuItem();
 
 	void toggleGameUI();
+
+		////this input can be checked while bikes are locked
+	void menuInput() {
+		if (window.keyPressed(256)) { // esc
+			pause();
+		} // menu
+		if (getMenuActive()) {
+
+			if (window.keyPressed(257)) { // enter
+				enterMenuItem();
+			}
+			if (window.keyPressed(87) || window.keyPressed(265)) { // w or up
+				selectMenuItem(-1);
+			}
+			if (window.keyPressed(83) || window.keyPressed(264)) { // s or down
+				selectMenuItem(1);
+			}
+		}
+}
 #pragma endregion
 };

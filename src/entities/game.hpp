@@ -176,9 +176,9 @@ class Game : public Entity {
 				updatePlaces();
 				checkWin();
 			}
-			menuInput();
+			//menuInput();
 		}
-		menuInput();
+		//menuInput();
 	}
 
 	void updatePlaces() {
@@ -258,22 +258,22 @@ class Game : public Entity {
 		return ai_waypoints[middle];
 	}
 
-	//this input can be checked while bikes are locked
-	void menuInput() {
-		if (window.keyPressed(256)) { // esc
-			game_UI->pause();
-		} // menu
-		if (game_UI->getMenuActive()) {
+	////this input can be checked while bikes are locked
+	//void menuInput() {
+	//	if (window.keyPressed(256)) { // esc
+	//		game_UI->pause();
+	//	} // menu
+	//	if (game_UI->getMenuActive()) {
 
-			if (window.keyPressed(257)) { // enter
-				game_UI->enterMenuItem();
-			}
-			if (window.keyPressed(87) || window.keyPressed(265)) { // w or up
-				game_UI->selectMenuItem(-1);
-			}
-			if (window.keyPressed(83) || window.keyPressed(264)) { // s or down
-				game_UI->selectMenuItem(1);
-			}
-		}
-	}
+	//		if (window.keyPressed(257)) { // enter
+	//			game_UI->enterMenuItem();
+	//		}
+	//		if (window.keyPressed(87) || window.keyPressed(265)) { // w or up
+	//			game_UI->selectMenuItem(-1);
+	//		}
+	//		if (window.keyPressed(83) || window.keyPressed(264)) { // s or down
+	//			game_UI->selectMenuItem(1);
+	//		}
+	//	}
+	//}
 };
