@@ -67,6 +67,7 @@ class UiGame : public Entity {
 	Render::MaterialHandle Exit_H_png;
 	Render::MaterialHandle Exit_U_png;
 	Render::MaterialHandle Instructions_png;
+	Render::MaterialHandle Loading_png;
 	Render::MaterialHandle Main_Menu_H_png;
 	Render::MaterialHandle Main_Menu_U_png;
 	Render::MaterialHandle Options_H_png;
@@ -79,6 +80,9 @@ class UiGame : public Entity {
   public:
 	int currentPlace = 4;
 	int currentLap = 1;
+	bool physicsLoadingDone = true;
+	bool renderLoadingDone = true;
+
 
 	UiGame(
 		Render::Render& render, Window& window, bool& menuActive, EntityManager& e_manager, Audio::AudioEngine& stereo)
@@ -104,6 +108,7 @@ class UiGame : public Entity {
 		  Exit_H_png(Render::importUI("assets/UI/Exit (hilighted).png", render)),
 		  Exit_U_png(Render::importUI("assets/UI/Exit (unselected).png", render)),
 		  Instructions_png(Render::importUI("assets/UI/Instructions.png", render)),
+		  Loading_png(Render::importUI("assets/UI/Loading (hilighted).png", render)),
 		  Main_Menu_H_png(Render::importUI("assets/UI/Main Menu (hilighted).png", render)),
 		  Main_Menu_U_png(Render::importUI("assets/UI/Main Menu (unselected).png", render)),
 		  Options_H_png(Render::importUI("assets/UI/Options (hilighted).png", render)),
@@ -116,7 +121,7 @@ class UiGame : public Entity {
 	void enter() override;
 #pragma endregion
 
-	void update(float) override {
+	void update(float) override;
 #pragma region UI tutorial
 		// All measurements assume a 1920 by 1080 screen
 		// This can be adjusted with the global_scale paremeter in ui_transform
@@ -156,8 +161,8 @@ class UiGame : public Entity {
 		//}
 #pragma endregion
 		// if the paused or menuActive bools have changed, call toggleGameUI
-		menuInput();
-	}
+
+
 
 #pragma region race functions
 	void updateLap(int lap) {
