@@ -85,7 +85,6 @@ class BikeAI : public Bike {
 				getNewLane(waypointOptions);
 			} else {
 				nextWaypoint++;
-				//std::cout << currentWaypoint << std::endl;
 				addWaypoint();
 			}
 		}
@@ -100,13 +99,12 @@ class BikeAI : public Bike {
 		float mag = glm::length(toTarget) * glm::length(toHeading);
 
 		float angle = glm::acos(dot / mag);
-		//std::cout << angle << std::endl;
 
 		float angleRange = (3.14f - 0.0f);
 		float radiusRange = (1.0f - 0.0f);
 
 		float radius = (((angle - 0.0f) * radiusRange) / angleRange) - 0.0f;
-		//if radius too high booster? utilize waypoint lane position? angle?
+		//if angle to waypoint too high booster
 		if (BoostCD <= 0) {
 			if (angle > 0.45) {
 				if (d > 0) { // left
@@ -160,14 +158,9 @@ class BikeAI : public Bike {
 
 	void getNewLane(std::vector<int>& waypointOptions) {
 		if (waypointOptions.size() > 0) {
-			//std::cout << waypointOptions.size() << std::endl;
 			lane = rand() % waypointOptions.size();
 			waypoints = ai_waypoints[lane];
 			waypointOptions.erase(waypointOptions.begin() + lane);
-			//for (auto& waypoint : waypointOptions) {
-			//	std::cout << waypoint << " ";
-			//}
-			//std::cout << std::endl;
 		}
 	}
 
@@ -176,7 +169,7 @@ class BikeAI : public Bike {
 		auto wallPointer = fragRay(bike, range);
 
 		if (wallPointer != NULL) {
-			// Possibly put wall deletion here
+			// mark walls for deletion here
 			markWallBroken(
 				static_cast<wallUserData*>(wallPointer)->bikeNumber,
 				static_cast<wallUserData*>(wallPointer)->wallIndex);
@@ -188,7 +181,6 @@ class BikeAI : public Bike {
 			return true;
 		} else {
 			// AI doesn't fire if it won't hit
-			//FRAGAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_GUN_IMPACT_SFX]);
 			return false;
 		}
 	}
@@ -198,7 +190,6 @@ class BikeAI : public Bike {
 		if (wallPointer != NULL) {
 			AIbikeBooster(getId(), 265);
 			BoostCD += 150;
-			//std::cout << "jump" << std::endl;
 		}
 	}
 
@@ -213,14 +204,15 @@ class BikeAI : public Bike {
 		if (BoostCD <= 0 && !cornering && health > 25) {
 			AIBooster(); 
 		} 
-		if (health == 100 && WADCharge < 120) {
+		if (health > 95 && WADCharge < 120) {
 			WADCharge++;
+			modifyHealth(-0.25);
 		} else if (WADCharge > 0 && WADRelease == false) {
 			WADRelease = true;
 		}
 	}
 
-	// experimental estimates of where the curves are to slow down for
+	// experimental estimates of where the curves are to slow down for (on The Coffin map)
 	void isCornering() {//~20-90 big curve 140-185 little curve? 20-76 and 130-180?
 		cornering = (currentWaypoint > 30 && currentWaypoint < 85) || (currentWaypoint > 135 && currentWaypoint < 190);
 	}

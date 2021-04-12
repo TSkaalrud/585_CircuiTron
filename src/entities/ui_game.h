@@ -87,7 +87,7 @@ class UiGame : public Entity {
 	UiGame(
 		Render::Render& render, Window& window, bool& menuActive, EntityManager& e_manager, Audio::AudioEngine& stereo)
 		: render(render), window(window), menuActive(menuActive), e_manager(e_manager), stereo(stereo),
-		  // Load all images into Materials
+		  // Load all UI images into Materials
 		  SI_Bar_png(Render::importUI("assets/UI/SI_Bar.png", render)),
 		  SI_Critical_png(Render::importUI("assets/UI/SI_Bar_Critical.png", render)),
 		  SI_Damaged_png(Render::importUI("assets/UI/SI_Bar_Damaged.png", render)),
@@ -102,7 +102,7 @@ class UiGame : public Entity {
 		  P2_Wins_png(Render::importUI("assets/UI/P2_Wins..png", render)),
 		  P3_Wins_png(Render::importUI("assets/UI/P3_Wins..png", render)),
 		  P4_Wins_png(Render::importUI("assets/UI/P4_Wins..png", render)),
-
+		  // Load all menu images into Materials
 		  Background_png(Render::importUI("assets/UI/Background.png", render)),
 		  Circuitron_Title_png(Render::importUI("assets/UI/CircuiTron Title.png", render)),
 		  Exit_H_png(Render::importUI("assets/UI/Exit (hilighted).png", render)),
@@ -160,9 +160,8 @@ class UiGame : public Entity {
 		//	render.instance_set_material(instance, play_ready);
 		//}
 #pragma endregion
-		// if the paused or menuActive bools have changed, call toggleGameUI
 
-
+	void loadGame();
 
 #pragma region race functions
 	void updateLap(int lap) {
@@ -230,24 +229,17 @@ class UiGame : public Entity {
 		currentlySelectedMenuItem = 1;
 		currentlyActiveMenu = 4;
 		selectMenuItem(0);
-
-		// UI element toggle
-		// render.instance_set_material(Instructions, Instructions_png);
 	}
 
 	void unpause() {
 		paused = false;
 		menuActive = false;
 		currentlyActiveMenu = 0; // 0 is no menu
-
-		// UI element toggle
-		// render.instance_set_material(Instructions, -1);
 	}
 
 	void play() {
 		paused = false;
 		menuActive = false;
-		// UI element toggle
 	}
 
 	bool getMenuActive() { return menuActive; }
@@ -260,7 +252,7 @@ class UiGame : public Entity {
 
 	void toggleGameUI();
 
-		////this input can be checked while bikes are locked
+	//this input can be checked without a game
 	void menuInput() {
 		if (window.keyPressed(256)) { // esc
 			pause();

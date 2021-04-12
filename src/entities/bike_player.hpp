@@ -97,15 +97,6 @@ class BikePlayer : public Bike {
 			}
 
 			// <^> Arrows - bike Booster (jump)
-			//if (window.keyPressed(265)) { // up arrow - boost up
-			//	if (BoostCD < 1 && getHealth() > 10) {
-			//		modifyHealth(-10);
-			//		bikeBooster(0, 265);
-			//		BoostCD += 30;
-			//		JumpAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_BOOST_SFX]);
-			//	}
-			//}
-
 			 if (window.keyPressed(263)) { // left arrow - strafe left
 				if (StrafeCD < 1 && getHealth() > 10) {
 					modifyHealth(-10);
@@ -122,45 +113,22 @@ class BikePlayer : public Bike {
 					StrafeAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_BOOST_SFX]);
 				}
 			}
-			if (window.keyPressed(265) && BoostOn == false) {
+			if (window.keyPressed(265) && BoostOn == false) {// up arrow - boost up
 				BoostOn = true;
 				bikeBooster(0, 265);
 				modifyHealth(-10);
 				JumpAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_BOOST_SFX]);
-			} else if (window.keyPressed(265) && BoostOn == true) {
+			} else if (window.keyPressed(265) && BoostOn == true) {// held booster
 				bikeBoosterHold(0, 265);
 				modifyHealth(-0.5f);
 			} else {
 				BoostOn = false;
 			}
-			//if (window.keyPressed(263) && strafeOn == false) {
-			//	strafeOn = true;
-			//	bikeBooster(0, 263);
-			//	//modifyHealth(-10);
-			//	StrafeAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_BOOST_SFX]);
-			//} else if (window.keyPressed(263) && strafeOn == true) {
-			//	bikeBoosterHold(0, 263);
-			//	//modifyHealth(-0.5f);
-			//} else {
-			//	strafeOn = false;
-			//}
-			//if (window.keyPressed(262) && strafeOn == false) {
-			//	strafeOn = true;
-			//	bikeBooster(0, 262);
-			//	//modifyHealth(-10);
-			//	StrafeAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_BOOST_SFX]);
-			//} else if (window.keyPressed(262) && strafeOn == true) {
-			//	bikeBoosterHold(0, 262);
-			//	//modifyHealth(-0.5f);
-			//} else {
-			//	strafeOn = false;
-			//}
-
 
 			// down arrow - WAD
 			if (window.keyPressed(264)) { // charge WAD
 				WADCharge++;
-
+				modifyHealth(-0.25);
 			} else if (WADCharge > 0 && !window.keyPressed(264)) { // release charged WAD
 				WADRelease = true;
 			}
@@ -175,9 +143,9 @@ class BikePlayer : public Bike {
 			}
 
 			// left Control - "Control" chassis to right itself
-			if (window.keyPressed(341)) {
-				bikeControl(0);
-			}
+			//if (window.keyPressed(341)) {
+			//	bikeControl(0);
+			//}
 		}
 	}
 

@@ -35,8 +35,6 @@ class Game : public Entity {
 	int players;
 	Track* track_pointer;
 	Camera* camera_pointer;
-	// std::vector<Checkpoint> checkpoints;
-	// Checkpoint finish = new Checkpoint();
 
 	std::vector<Render::Group> BikeModels; // a list of bike models
 	Render::Group car_model;
@@ -176,9 +174,7 @@ class Game : public Entity {
 				updatePlaces();
 				checkWin();
 			}
-			// menuInput();
 		}
-		// menuInput();
 	}
 
 	void updatePlaces() {
@@ -193,10 +189,7 @@ class Game : public Entity {
 		});
 		for (int i = 0; i < bikes.size(); i++) {
 			order[i]->setPlace(i + 1);
-			// std::cout << bikes[0]->getPlace() << std::endl;
-			// std::cout << bikes[0]->getPlace() << std::endl;
 		}
-		// game_UI->currentPlace = bikes[0]->getPlace();
 		game_UI->updatePlace(bikes[0]->getPlace());
 		game_UI->updateLap(bikes[0]->getLap());
 	}
@@ -274,23 +267,4 @@ class Game : public Entity {
 		// middle is ai_waypoints[1]
 		return ai_waypoints[middle];
 	}
-
-	////this input can be checked while bikes are locked
-	// void menuInput() {
-	//	if (window.keyPressed(256)) { // esc
-	//		game_UI->pause();
-	//	} // menu
-	//	if (game_UI->getMenuActive()) {
-
-	//		if (window.keyPressed(257)) { // enter
-	//			game_UI->enterMenuItem();
-	//		}
-	//		if (window.keyPressed(87) || window.keyPressed(265)) { // w or up
-	//			game_UI->selectMenuItem(-1);
-	//		}
-	//		if (window.keyPressed(83) || window.keyPressed(264)) { // s or down
-	//			game_UI->selectMenuItem(1);
-	//		}
-	//	}
-	//}
 };

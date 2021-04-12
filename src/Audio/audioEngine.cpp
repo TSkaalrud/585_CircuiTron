@@ -207,40 +207,6 @@ void AudioEngine::initialize() {
 	loadWavFile("assets/audio/09 Aurora.wav", buffer + 107, &size, &freq, &format);
 	CheckError();
 
-	// alSourcef(source[1], AL_PITCH, 1.0f);
-	// alSourcef(source[1], AL_GAIN, 1.0f);
-	// alSourcefv(source[1], AL_POSITION, source0Pos);
-	// alSourcefv(source[1], AL_VELOCITY, source0Vel);
-	// alSourcei(source[24], AL_BUFFER, buffer[0]);
-	// alSourcei(source[1], AL_LOOPING, AL_TRUE);
-	// alSourcePlay(source[24]);
-
-	// alSourcei(source[24], AL_BUFFER, buffer[1]);
-	// alSourcePlay(source[24]);
-	/*
-	// BGM test
-	loadWavFile("assets/Cybersong.wav", buffer, &size, &freq, &format);
-	CheckError();
-
-	alSourcef(source[0], AL_PITCH, 1.0f);
-	alSourcef(source[0], AL_GAIN, 1.0f);
-	alSourcefv(source[0], AL_POSITION, source0Pos);
-	alSourcefv(source[0], AL_VELOCITY, source0Vel);
-	alSourcei(source[0], AL_BUFFER, buffer[0]);
-	alSourcei(source[0], AL_LOOPING, AL_TRUE);
-	alSourcePlay(source[0]);
-
-	for (int lx = 0; lx < 1000000000; lx++);
-	// SE test
-	loadWavFile("assets/GunImpact.wav", buffer + 1, &size, &freq, &format);
-	alSourcef(source[1], AL_PITCH, 1.0f);
-	alSourcef(source[1], AL_GAIN, 1.0f);
-	alSourcefv(source[1], AL_POSITION, source0Pos);
-	alSourcefv(source[1], AL_VELOCITY, source0Vel);
-	alSourcei(source[1], AL_BUFFER, buffer[1]);
-	// alSourcei(source[1], AL_LOOPING, AL_TRUE);
-	alSourcePlay(source[1]);
-	*/
 	return;
 }
 } // namespace Audio

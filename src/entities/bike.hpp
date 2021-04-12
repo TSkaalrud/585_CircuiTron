@@ -95,7 +95,7 @@ class Bike : public GameObject {
 						WADAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_SIZZLE_SFX]);
 						WADAudio->loop = false;
 
-						modifyHealth(-5 - WADCharge / 4);
+						modifyHealth(-5);
 						WADCharge = 0;
 						WADRelease = false;
 					}
@@ -201,26 +201,26 @@ class Bike : public GameObject {
 		if (amount > 0) {
 			if (health + amount > 100) {
 				health = 100;
-			} else {
+			} else {// you're slipstreaming
 				health += amount;
 				SlipstreamingAudio->playSound(stereo.buffer[Audio::SOUND_FILE_HEALING_SFX]);
 			}
 		} else if (amount < 0) {
 
-			if (health + amount < 0) {
-				if (health <= 5) {
+			if (health + amount < 0) {// if you would die
+				if (health <= 5) {// don't play with fire; you're dead
 					health = 0;
 					engineAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_DESPAWN_SFX]);
 					lockBike();
-				} else {
+				} else {// be a merciful god
 					health = 1;
 				}
 
-			} else {
+			} else {//take damage
 				health += amount;
 			}
 		}
-		if (getId() == 0) {
+		if (getId() == 0) {//update P1 UI
 			UI->updateSI(health);
 		}
 	}
@@ -279,7 +279,6 @@ class Bike : public GameObject {
 		} else if (angle < -pi) {
 			angle += 2 * pi;
 		}
-		//std::cout << angle << std::endl;
 
 		float temp = 0.0f;
 		if (angle < 0) {
@@ -338,28 +337,6 @@ class Bike : public GameObject {
 		if (slipstreamRay(bike, 3, 5)) {
 			slipstreamCount++;
 		}
-
-		/*
-		physx::PxRaycastBuffer* leftRay = castRay(bike, 2, 10);
-		physx::PxRaycastBuffer* rightRay = castRay(bike, 3, 10);
-
-		if (leftRay->nbTouches > 0) {
-			const char* leftName = leftRay->touches[0].actor->getName();
-			std::cout << leftName << std::endl;
-			if (std::strcmp(leftName, "wall") == 0) {
-				slipstreamCount++;
-			}
-		}
-
-		if (rightRay->nbTouches > 0) {
-			const char* rightName = rightRay->touches[0].actor->getName();
-			std::cout << rightName << std::endl;
-			if (std::strcmp(rightName, "wall") == 0) {
-				slipstreamCount++;
-			}
-		}
-		*/
-
 		return slipstreamCount;
 	}
 
@@ -374,11 +351,6 @@ class Bike : public GameObject {
 				modifyHealth(0.25 * Slipstreams);
 				Slipstreaming = true;
 				SlipstreamingAudio->playSound(stereo.buffer[Audio::SOUND_FILE_HEALING_SFX]);
-				/*
-				physx::PxVec3 forward = getBikeTransform(getId()).q.getBasisVector2() * 50;
-				getVehicle(getId())->getRigidDynamicActor()->addForce(
-					forward, physx::PxForceMode::eACCELERATION);
-				*/
 			}
 		} else if (SlipstreamCD < 30) {
 			SlipstreamCD++;

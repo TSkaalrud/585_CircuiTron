@@ -122,6 +122,11 @@ void UiGame::enter() {
 
 void UiGame::update(float) {
 
+	loadGame();
+	menuInput();
+}
+
+void UiGame::loadGame() {
 	if (!renderLoadingDone) {
 		if (!physicsLoadingDone) {
 			initPhysics();
@@ -130,19 +135,13 @@ void UiGame::update(float) {
 			std::unique_ptr<Game> g = std::make_unique<Game>(window, render, 4, e_manager, stereo, this, menuActive);
 			game_pointer = g.get();
 			e_manager.addEntity(std::move(g));
-		} else {
+		} else {// loading screen finished
 			renderLoadingDone = true;
-
-		}
-		if (renderLoadingDone) { // loading screen finished
 			render.instance_set_material(Menu_Item_1, Play_R_png);
 			render.instance_set_material(Menu_Item_2, -1);
 			render.instance_set_material(Menu_Item_3, -1);
 		}
 	}
-	menuInput();
-
-
 }
 
 void UiGame::selectMenuItem(int direction) {
@@ -215,7 +214,6 @@ void UiGame::selectMenuItem(int direction) {
 }
 // activates a menu selection
 void UiGame::enterMenuItem() {
-	// reset bikes, health, race,
 
 	if (currentlyActiveMenu == 1) { // main menu
 
@@ -229,17 +227,14 @@ void UiGame::enterMenuItem() {
 			render.instance_set_material(TitleCard, -1);
 			menuActive = true;
 			paused = true;
-			// reset the game here---------------------------------------------------------
-			// initialize game
+			// setting these to false will trigger loadGame() in update to build the game
 			physicsLoadingDone = false;
 			renderLoadingDone = false;
-			//renderLoadingDone = true;
 		} else if (currentlySelectedMenuItem == 2) { // Options
 			// go to options page
 			currentlyActiveMenu = 2;
 
 		} else if (currentlySelectedMenuItem == 3) { // Exit
-			// close app--------------------------------------------------------------------
 			window.close();
 		}
 	} else if (currentlyActiveMenu == 2) { // Options
@@ -257,14 +252,12 @@ void UiGame::enterMenuItem() {
 		} else if (currentlySelectedMenuItem == 3) {
 			// go to main menu
 			currentlyActiveMenu = 1;
-
 		}
 	} else if (currentlyActiveMenu == 3) { // loading screen
 		render.instance_set_material(Background, -1);
 		render.instance_set_material(TitleCard, -1);
-
-		// player must have hit the play button/enter to start the game
-		unpause();
+		updateSI(100);
+		unpause(); // player must have hit the play button/enter to start the game
 	} else if (currentlyActiveMenu == 4) { // pause screen uses menu item 1 for pause text
 		render.instance_set_material(Background, -1);
 		render.instance_set_material(TitleCard, -1);
@@ -290,13 +283,10 @@ void UiGame::enterMenuItem() {
 	toggleGameUI();
 	selectMenuItem(0);
 
-	// currentlySelectedMenuItem = 1;
-
 	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 }
 
 void UiGame::toggleGameUI() {
-	// currentlySelectedMenuItem = 1;
 
 	if (currentlyActiveMenu == 1 || currentlyActiveMenu == 2) { // if main menu/options menuActive && !paused
 		// toggle off
@@ -311,14 +301,8 @@ void UiGame::toggleGameUI() {
 		// toggle on
 		render.instance_set_material(Background, Background_png);
 		render.instance_set_material(TitleCard, Circuitron_Title_png);
-		// render.instance_set_material(Background, -1);
-		// render.instance_set_material(TitleCard, -1);
-		// render.instance_set_material(Menu_Item_1, -1);
-		// render.instance_set_material(Menu_Item_2, -1);
-		// render.instance_set_material(Menu_Item_3, -1);
 	} else if (currentlyActiveMenu == 3) { // loading screen !menuActive && paused
 		// toggle off
-
 		render.instance_set_material(SI_Bar, -1);
 		render.instance_set_material(SI_Fill, -1);
 		render.instance_set_material(Place_Num, -1);
@@ -330,31 +314,13 @@ void UiGame::toggleGameUI() {
 		render.instance_set_material(Menu_Item_2, -1);
 		render.instance_set_material(Menu_Item_3, -1);
 		// toggle on
-		//render.instance_set_material(SI_Bar, SI_Bar_png);
-		//render.instance_set_material(SI_Fill, SI_Secure_png);
-		//render.instance_set_material(Place_Num, UI_Place_png);
-		//render.instance_set_material(Place_UI, UI_Place_png);
-		//render.instance_set_material(Lap_Num, First_png); // might need to make dynamic
-		//render.instance_set_material(Lap_UI, UI_Lap_png);
-		// render.instance_set_material(Background, -1);
-		// render.instance_set_material(Menu_Item_1, -1);
-		// render.instance_set_material(Instructions, -1);
+
 	} else if (currentlyActiveMenu == 4) { // paused menuActive && paused
 		// toggle off
 		render.instance_set_material(TitleCard, -1);
 		render.instance_set_material(Background, -1);
 		// toggle on
-		// render.instance_set_material(SI_Bar, -1);
-		// render.instance_set_material(SI_Fill, -1);
-		// render.instance_set_material(Place_Num, -1);
-		// render.instance_set_material(Place_UI, -1);
-		// render.instance_set_material(Lap_Num, -1);
-		// render.instance_set_material(Lap_UI, -1);
-		// render.instance_set_material(Winner, -1);
-		// render.instance_set_material(Menu_Item_1, -1);
-		// render.instance_set_material(Menu_Item_2, -1);
-		// render.instance_set_material(Menu_Item_3, -1);
-		// render.instance_set_material(Instructions, -1);
+
 	} else if (!menuActive && !paused) { // game on
 		// toggle off
 		render.instance_set_material(Menu_Item_1, -1);
@@ -370,6 +336,5 @@ void UiGame::toggleGameUI() {
 		render.instance_set_material(Place_UI, UI_Place_png);
 		updateLap(currentLap);
 		render.instance_set_material(Lap_UI, UI_Lap_png);
-		// render.instance_set_material(Winner, -1);
 	}
 }
