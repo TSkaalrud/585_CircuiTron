@@ -837,10 +837,10 @@ void clearCTData() {
 }
 
 void cleanupPhysics() {
-	for (int i = 0; i < CTbikes.size(); i++) {
+	/*for (int i = 0; i < CTbikes.size(); i++) {
 		CTbikes[i]->getRigidDynamicActor()->release();
 		CTbikes[i]->free();
-	}
+	}*/
 
 	PX_RELEASE(gGroundPlane);
 	PX_RELEASE(gBatchQuery);

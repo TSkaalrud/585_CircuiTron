@@ -206,6 +206,7 @@ void UiGame::enterMenuItem() {
 			paused = true;
 			// reset the game here---------------------------------------------------------
 			// initialize game
+			initPhysics();
 			std::unique_ptr<Game> g = std::make_unique<Game>(window, render, 4, e_manager, stereo, this, menuActive);
 			game_pointer = g.get();
 			e_manager.addEntity(std::move(g));
@@ -254,6 +255,7 @@ void UiGame::enterMenuItem() {
 			currentlyActiveMenu = 1;
 			game_pointer->deleteGame();
 			game_pointer = nullptr;
+			cleanupPhysics();
 		}
 	}
 	toggleGameUI();

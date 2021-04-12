@@ -28,7 +28,7 @@ int main(int argc, char* argv[]) {
 	auto past = std::chrono::high_resolution_clock::now();
 
 	// initialize physics
-	initPhysics();
+	//initPhysics();
 
 	// initialize audio
 	Audio::AudioEngine stereo = Audio::AudioEngine();
