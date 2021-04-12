@@ -219,14 +219,6 @@ class Game : public Entity {
 		}
 	}
 
-	void restartGame() {
-		lockAllBikes();
-		for (int i = 0; i < bikes.size(); i++) {
-			bikes[i]->completeReset();
-		}
-		unlockAllBikes();
-	}
-
 	void deleteGame() {
 		for (int i = 0; i < bikes.size(); i++) {
 			e_manager.removeEntity(bikes[i]);
