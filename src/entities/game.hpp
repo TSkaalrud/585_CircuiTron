@@ -41,6 +41,8 @@ class Game : public Entity {
 	std::vector<Bike*> order;
 	std::vector<Bike*> bikes;
 	int players;
+	Track* track_pointer;
+	Camera* camera_pointer;
 	// std::vector<Checkpoint> checkpoints;
 	// Checkpoint finish = new Checkpoint();
 
@@ -142,7 +144,9 @@ class Game : public Entity {
 		ambiance->playSound(stereo.buffer[Audio::SOUND_FILE_AMBIENCE_BGM]); // ambient environment sounds
 
 		// make the track
-		e_manager.addEntity(std::make_unique<Track>(render, track_model));
+		std::unique_ptr<Track> t = std::make_unique<Track>(render, track_model);
+		track_pointer = t.get();
+		e_manager.addEntity(std::move(t));
 
 		// make the player's bike
 		std::unique_ptr<Bike> b = std::make_unique<BikePlayer>(
@@ -166,7 +170,9 @@ class Game : public Entity {
 		}
 
 		// make the camera
-		e_manager.addEntity(std::make_unique<Camera>(window, render));
+		std::unique_ptr c = std::make_unique<Camera>(window, render);
+		camera_pointer = c.get();
+		e_manager.addEntity(std::move(c));
 	}
 
 	void update(float deltaTime) override {
@@ -211,6 +217,23 @@ class Game : public Entity {
 		} else {
 			game_UI->winner(-1);
 		}
+	}
+
+	void restartGame() {
+		lockAllBikes();
+		for (int i = 0; i < bikes.size(); i++) {
+			bikes[i]->completeReset();
+		}
+		unlockAllBikes();
+	}
+
+	void deleteGame() {
+		for (int i = 0; i < bikes.size(); i++) {
+			e_manager.removeEntity(bikes[i]);
+		}
+		e_manager.removeEntity(track_pointer);
+		e_manager.removeEntity(camera_pointer);
+		e_manager.removeEntity(this);
 	}
 
 	void lockAllBikes() {
