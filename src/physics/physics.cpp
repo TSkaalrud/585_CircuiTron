@@ -840,6 +840,9 @@ void clearCTData() {
 	inputDatas.clear();
 	isVehicleInAir.clear();
 	brokenWalls.clear();
+
+	spawnOffset = 0.0f;
+	physicsActive = false;
 }
 
 void cleanupPhysics() {
@@ -868,8 +871,6 @@ void cleanupPhysics() {
 	PX_RELEASE(gFoundation);
 
 	clearCTData();
-
-	physicsActive = false;
 
 	printf("Physics cleanup done.\n");
 }
