@@ -158,7 +158,7 @@ class BikePlayer : public Bike {
 			if (window.keyPressed(264)) { // charge WAD
 				WADCharge++;
 
-			} else if (WADCharge > 0 && window.keyReleased(264)) { // release charged WAD
+			} else if (WADCharge > 0 && !window.keyPressed(264)) { // release charged WAD
 				WADRelease = true;
 			}
 

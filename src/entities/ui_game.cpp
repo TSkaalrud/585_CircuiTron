@@ -214,7 +214,7 @@ void UiGame::enterMenuItem() {
 			currentlyActiveMenu = 2;
 		} else if (currentlySelectedMenuItem == 3) { // Exit
 			// close app--------------------------------------------------------------------
-			exit(1);
+			window.close();
 		}
 	} else if (currentlyActiveMenu == 2) { // Options
 		render.instance_set_material(Background, Background_png);

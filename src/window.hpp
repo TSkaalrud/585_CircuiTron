@@ -22,11 +22,12 @@ class Window {
 
 	bool shouldClose() { return glfwWindowShouldClose(window); }
 
+	void close() { glfwSetWindowShouldClose(window, true); }
+
 	void beginFrame();
 	void endFrame();
 
 	bool keyPressed(int key) { return glfwGetKey(window, key) == GLFW_PRESS; }
-	bool keyReleased(int key) { return glfwGetKey(window, key) == GLFW_RELEASE; }
 
 	bool mouseButton(int button) { return glfwGetMouseButton(window, button) == GLFW_PRESS; }
 	struct Cursor {
