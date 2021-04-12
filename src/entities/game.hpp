@@ -28,14 +28,6 @@
 
 #include <chrono>
 
-struct {
-	bool operator()(Bike* a, Bike* b) const {
-		if (a->getLap() != b->getLap())
-			return a->getLap() > b->getLap();
-		return a->getWaypoint() > b->getWaypoint();
-	}
-} place_sort;
-
 class Game : public Entity {
   private:
 	std::vector<Bike*> order;
@@ -182,9 +174,9 @@ class Game : public Entity {
 				updatePlaces();
 				checkWin();
 			}
-			//menuInput();
+			// menuInput();
 		}
-		//menuInput();
+		// menuInput();
 	}
 
 	void updatePlaces() {
@@ -192,7 +184,11 @@ class Game : public Entity {
 		// this will most likely be implemented by comparing cars by lap
 		// if lap is equal compare by checkpoint (divide the track up invisibly)
 		// finally if equal again compare by distance to next checkpoint
-		std::sort(order.begin(), order.end(), place_sort);
+		std::sort(order.begin(), order.end(), [](Bike* a, Bike* b) {
+			if (a->getLap() != b->getLap())
+				return a->getLap() > b->getLap();
+			return a->getWaypoint() > b->getWaypoint();
+		});
 		for (int i = 0; i < bikes.size(); i++) {
 			order[i]->setPlace(i + 1);
 			// std::cout << bikes[0]->getPlace() << std::endl;
@@ -222,7 +218,7 @@ class Game : public Entity {
 	void restartGame() {
 		lockAllBikes();
 		for (int i = 0; i < bikes.size(); i++) {
-			//bikes[i]->completeReset();
+			// bikes[i]->completeReset();
 		}
 		unlockAllBikes();
 	}
@@ -282,7 +278,7 @@ class Game : public Entity {
 	}
 
 	////this input can be checked while bikes are locked
-	//void menuInput() {
+	// void menuInput() {
 	//	if (window.keyPressed(256)) { // esc
 	//		game_UI->pause();
 	//	} // menu
