@@ -64,7 +64,7 @@ int main(int argc, char* argv[]) {
 			past = now;
 		}
 		if (!menuActive) {// pause physics while in menu
-			// simulate;
+			// simulate
 			stepPhysics(timestep);
 		}
 		time += timestep;

@@ -94,6 +94,8 @@ std::vector<PxVehicleDrive4WRawInputData> inputDatas;
 std::vector<bool> isVehicleInAir;
 std::vector<PxRigidStatic*> brokenWalls;
 
+bool physicsActive = false;
+
 float impulseBase = 3750;
 float forceBase = 3750;
 
@@ -715,6 +717,8 @@ physx::PxTriangleMesh* cookTrack() {
 	return gPhysics->createTriangleMesh(readBuffer);
 }
 
+bool getPhysicsActive() { return physicsActive; }
+
 void initPhysics() {
 	gFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, gAllocator, gErrorCallback);
 	gPvd = PxCreatePvd(*gFoundation);
@@ -782,6 +786,8 @@ void initPhysics() {
 
 	// Create vehicle that will drive on the plane. (This one is the player)
 	initVehicle();
+
+	physicsActive = true;
 }
 
 
@@ -862,6 +868,8 @@ void cleanupPhysics() {
 	PX_RELEASE(gFoundation);
 
 	clearCTData();
+
+	physicsActive = false;
 
 	printf("Physics cleanup done.\n");
 }

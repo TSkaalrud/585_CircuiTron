@@ -103,6 +103,8 @@ void resetBikePos(int i, physx::PxTransform position);
 
 physx::PxU32 getBikeGear(int bike);
 
+bool getPhysicsActive();
+
 void initPhysics();
 
 void stepPhysics(float timestep);
