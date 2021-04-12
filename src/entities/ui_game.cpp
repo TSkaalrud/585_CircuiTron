@@ -206,7 +206,9 @@ void UiGame::enterMenuItem() {
 			paused = true;
 			// reset the game here---------------------------------------------------------
 			// initialize game
-			e_manager.addEntity(std::make_unique<Game>(window, render, 4, e_manager, stereo, this, menuActive));
+			std::unique_ptr<Game> g = std::make_unique<Game>(window, render, 4, e_manager, stereo, this, menuActive);
+			game_pointer = g.get();
+			e_manager.addEntity(std::move(g));
 		} else if (currentlySelectedMenuItem == 2) { // Options
 			// go to options page
 			currentlyActiveMenu = 2;
@@ -250,6 +252,8 @@ void UiGame::enterMenuItem() {
 		} else if (currentlySelectedMenuItem == 3) {
 			// Main Menu
 			currentlyActiveMenu = 1;
+			game_pointer->deleteGame();
+			game_pointer = nullptr;
 		}
 	}
 	toggleGameUI();

@@ -9,6 +9,8 @@
 #include <chrono>
 #include <thread>
 
+class Game;
+
 class UiGame : public Entity {
 
 #pragma region Init
@@ -18,6 +20,8 @@ class UiGame : public Entity {
 	bool& menuActive;
 	EntityManager& e_manager;
 	Audio::AudioEngine& stereo;
+
+	Game* game_pointer;
 
 	bool paused;
 	int currentlySelectedMenuItem = 1; // of 3
