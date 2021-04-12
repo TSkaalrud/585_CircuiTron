@@ -61,6 +61,20 @@ class Bike : public GameObject {
 
 	};
 
+	~Bike() { 
+		engineAudio->~AudioInstance();
+		gearAudio->~AudioInstance();
+		engineAudio->~AudioInstance();
+		JumpAudio->~AudioInstance();
+		StrafeAudio->~AudioInstance();
+		WADAudio->~AudioInstance();
+		FRAGAudio->~AudioInstance();
+		FRAGImpactAudio->~AudioInstance();
+		chassisAudio->~AudioInstance();
+		SlipstreamingAudio->~AudioInstance();
+
+	}
+
 	int getId() { return id; }
 
 	virtual void update(float deltaTime) override {

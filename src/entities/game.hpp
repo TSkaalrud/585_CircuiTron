@@ -59,6 +59,8 @@ class Game : public Entity {
 	UiGame* game_UI;
 
 	Audio::AudioEngine& stereo;
+	AudioInstance* bgm;
+	AudioInstance* ambiance;
 
 	bool gameover = false;
 	bool& menuActive;
@@ -128,10 +130,10 @@ class Game : public Entity {
 
 		// Run the looping bgm and ambiance tracks
 		srand((unsigned int)time(NULL));
-		AudioInstance* bgm = new AudioInstance();
+		bgm = new AudioInstance();
 		bgm->gain = 0.0;
 		bgm->playSound(stereo.buffer[rand() % 7 + 101]); // Song
-		AudioInstance* ambiance = new AudioInstance();
+		ambiance = new AudioInstance();
 		ambiance->gain = 0.0;
 		ambiance->playSound(stereo.buffer[Audio::SOUND_FILE_AMBIENCE_BGM]); // ambient environment sounds
 
@@ -216,12 +218,16 @@ class Game : public Entity {
 	}
 
 	void deleteGame() {
+		bgm->~AudioInstance();
+		ambiance->~AudioInstance();
+
 		for (int i = 0; i < bikes.size(); i++) {
 			e_manager.removeEntity(bikes[i]);
 		}
 		e_manager.removeEntity(track_pointer);
 		e_manager.removeEntity(camera_pointer);
 		e_manager.removeEntity(this);
+		
 	}
 
 	void lockAllBikes() {
