@@ -47,14 +47,16 @@ class BikeAI : public Bike {
 	};
 
 	void update(float deltaTime) override {
-		Bike::update(deltaTime);
-		if (!getLocked()) {
-			if (buffer < 0) {
-				isCornering();
-				followWaypoint();
-				useAbilities();
-			} else {
-				buffer--;
+		if (getPhysicsActive()) {
+			Bike::update(deltaTime);
+			if (!getLocked()) {
+				if (buffer < 0) {
+					isCornering();
+					followWaypoint();
+					useAbilities();
+				} else {
+					buffer--;
+				}
 			}
 		}
 	}

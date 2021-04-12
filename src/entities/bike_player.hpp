@@ -28,16 +28,19 @@ class BikePlayer : public Bike {
 	};
 
 	void update(float deltaTime) override {
-		Bike::update(deltaTime);
+		if (getPhysicsActive()) {
+			Bike::update(deltaTime);
 
-		physx::PxTransform camera(0, 5, -20, physx::PxQuat(physx::PxPi, {0, 1, 0}) * physx::PxQuat(-0.2, {1, 0, 0}));
+			physx::PxTransform camera(
+				0, 5, -20, physx::PxQuat(physx::PxPi, {0, 1, 0}) * physx::PxQuat(-0.2, {1, 0, 0}));
 
-		if (!getLocked()) {
-			checkInput();
-			updateWaypoint();
+			if (!getLocked()) {
+				checkInput();
+				updateWaypoint();
+			}
+
+			render.camera_set_pos(convertTransform(getBikeTransform(getId()).transform(camera)));
 		}
-
-		render.camera_set_pos(convertTransform(getBikeTransform(getId()).transform(camera)));
 	}
 	
 	//functions use glfw keyboard #defines @https : // www.glfw.org/docs/3.3/group__keys.html
