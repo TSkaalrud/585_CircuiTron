@@ -34,13 +34,14 @@ class Camera : public Entity {
 	}  
 
 	void update(float deltaTime) override { 
-		
-		checkInput();
+		if (getPhysicsActive()) {
+			checkInput();
 
-		if (view_state == 0) {
-			behindBike(0, switched);
-		} else {
-			frontBike(0);
+			if (view_state == 0) {
+				behindBike(0, switched);
+			} else {
+				frontBike(0);
+			}
 		}
 	}
 

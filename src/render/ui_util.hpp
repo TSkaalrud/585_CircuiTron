@@ -6,7 +6,7 @@
 namespace Render {
 using namespace glm;
 
-mat4 ui_transform(
+inline mat4 ui_transform(
 	vec2 position, vec2 size, float depth = 0, float rotation = 0, vec2 global_scale = 2.0f / vec2{1920, -1080}) {
 	return scale(mat4(1.0f), {global_scale.x, global_scale.y, 1}) *
 		translate(mat4(1.0f), {position.x, position.y, depth}) * rotate(mat4(1.0f), rotation, vec3{0, 0, 1}) *
