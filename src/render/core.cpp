@@ -47,7 +47,17 @@ uint Core::create_mesh(MeshDef def) {
 
 	glVertexArrayElementBuffer(vao, index_buffer);
 
-	return registerMesh(Mesh{.vao = vao, .count = static_cast<uint>(def.indicies.size())});
+	return register_mesh(
+		Mesh{.vao = vao, .count = static_cast<uint>(def.indicies.size()), .buffers = {vertex_buffer, index_buffer}});
+}
+
+void Core::delete_mesh(MeshHandle handle) {
+	glDeleteVertexArrays(1, &(meshes[handle].vao));
+
+	glDeleteBuffers(meshes[handle].buffers.size(), meshes[handle].buffers.data());
+
+	meshes[handle].count = -1;
+	recycled_meshes.push_back(handle);
 }
 
 uint Core::create_texture(int width, int height, int channels, TextureFlags flags, void* data) {
@@ -111,6 +121,8 @@ void Core::renderScene(Shader::Type type, RenderOrder order) {
 
 				for (auto i : material.instances) {
 					auto& instance = instances[i];
+					if (meshes[instance.model].count == -1)
+						continue;
 					glBindVertexArray(meshes[instance.model].vao);
 
 					glUniformMatrix4fv(0, 1, false, value_ptr(instance.trans));
@@ -128,6 +140,8 @@ void Core::renderScene(Shader::Type type, RenderOrder order) {
 		}
 		for (auto& i : sorted_instances) {
 			if (i.mat == -1)
+				continue;
+			if (meshes[i.model].vao == -1)
 				continue;
 
 			glBindVertexArray(meshes[i.model].vao);

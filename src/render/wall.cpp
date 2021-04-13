@@ -65,7 +65,7 @@ void Wall::append_wall(mat4 bikeTransform, vec2 scale, bool commit) {
 
 		glVertexArrayElementBuffer(vao, index_buffer);
 
-		auto mesh = render.registerMesh({.vao = vao, .count = 0});
+		auto mesh = render.register_mesh({.vao = vao, .count = 0, .buffers = {vertex_buffer, index_buffer}});
 
 		auto instance = render.create_instance(mesh, mat);
 		wall_segements.push_back(MeshInstance{

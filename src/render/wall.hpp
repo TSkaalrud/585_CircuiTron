@@ -30,6 +30,7 @@ class Wall {
 	~Wall() {
 		for (auto& segment : wall_segements) {
 			render.delete_instance(segment.instance);
+			render.delete_mesh(segment.mesh);
 		}
 	}
 

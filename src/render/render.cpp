@@ -112,7 +112,7 @@ MeshHandle Render::ui_mesh() {
 
 		glVertexArrayElementBuffer(quadVertexArray, index_buffer);
 
-		handle = registerMesh(Mesh{.vao = quadVertexArray, .count = 6});
+		handle = register_mesh(Mesh{.vao = quadVertexArray, .count = 6, .buffers = {vertex_buffer, index_buffer}});
 	}
 
 	return handle;
@@ -156,7 +156,8 @@ Render::Render(void (*glGetProcAddr(const char*))()) : Core(glGetProcAddr) {
 
 		glVertexArrayElementBuffer(vao, index_buffer);
 
-		uint skyboxMesh = registerMesh(Mesh{.vao = vao, .count = static_cast<uint>(indicies.size())});
+		uint skyboxMesh = register_mesh(
+			Mesh{.vao = vao, .count = static_cast<uint>(indicies.size()), .buffers = {vertex_buffer, index_buffer}});
 		skybox = create_instance(skyboxMesh, skyboxMaterial);
 	}
 

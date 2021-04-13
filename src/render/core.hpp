@@ -70,8 +70,23 @@ class Core {
 	struct Mesh {
 		GLuint vao;
 		uint count;
+		std::vector<GLuint> buffers;
 	};
-	REGISTER(Mesh, meshes)
+	// REGISTER(Mesh, meshes)
+	std::vector<Mesh> meshes;
+	std::vector<uint> recycled_meshes;
+	MeshHandle register_mesh(Mesh item) {
+		MeshHandle handle;
+		if (recycled_meshes.empty()) {
+			handle = meshes.size();
+			meshes.push_back(item);
+		} else {
+			handle = recycled_meshes.back();
+			recycled_meshes.pop_back();
+			meshes[handle] = item;
+		}
+		return handle;
+	}
 
 	struct ShaderConfig {
 		uint shader;
@@ -128,6 +143,7 @@ class Core {
 	}
 
 	MeshHandle create_mesh(MeshDef);
+	void delete_mesh(MeshHandle handle);
 	InstanceHandle create_instance(MeshHandle mesh, MaterialHandle mat, mat4 trans = mat4(1.0f)) {
 		InstanceHandle instance;
 		if (recycled_instances.empty()) {
