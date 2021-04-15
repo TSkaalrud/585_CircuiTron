@@ -23,22 +23,23 @@ But don't worry, your bike is equipped with some tools to help along the way:
 Now don't go using all these at once.  Everytime you use an ability, it'll cost you some health.  A small price to pay.
 
 Falling behind?  Try driving beside the walls.  This risky slipstreaming maneuver will get you a bit of speed, and some health back too.
+
 Stuck?  Press R to reset your bike.  Although you will lose some time and health!
 
 ![bike gif 1](https://user-images.githubusercontent.com/38302804/114948150-b4cb8e00-9e0b-11eb-92aa-d2d98057591e.gif)
 
 ## Controls
 
-- ***WASD*** - driving controls
-- ***L-Shift*** - handbrake
-- ***Up Arrow (and hold)*** - jump BOB (booster)
-- ***Left & Right Arrows*** - strafe BOB
-- ***Down Arrow*** - WAD (wall)
-  - ***Hold Key*** - charge to increase size
-  - ***Release Key*** - deploy wall behind you
-- ***Space*** - Fire the FRAG (cannon)
-- ***R*** - reset the bike
-- ***V*** - rear view
+- **WASD** - Driving controls
+- **L-Shift** - Handbrake
+- **Up Arrow (and hold)** - Jump BOB (booster)
+- **Left & Right Arrows** - Strafe BOB
+- **Down Arrow** - WAD (wall)
+  - **Hold Key** - Charge to increase size
+  - **Release Key** - Deploy wall behind you
+- **Space** - Fire the FRAG (cannon)
+- **R** - Reset the bike
+- **V** - Rear view
 
 ![bike gif 2-min](https://user-images.githubusercontent.com/38302804/114948408-27d50480-9e0c-11eb-9381-37003531e2e2.gif)
 
