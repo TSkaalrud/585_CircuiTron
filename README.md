@@ -6,8 +6,6 @@
 
 Circuitron is a racing game created by Daniel, Taylor, Matt and Sebastien.  Inspired by games like Tron and F-Zero, prepare yourself for an exciting circuit race with a track that becomes more-and-more hectic as the game goes on.  You'll need to outmaneuver, outwit and outplay your oppenents to become the champion in this thrilling high-speed race.
 
-![bike1](https://user-images.githubusercontent.com/38302804/114916345-eb8cae80-9de1-11eb-8365-eebb55e01306.png)
-
 ## How to play:
 
 In order to win, you'll need to be the first complete 3 laps around the circuit.  You're competition is 3 AI.  Simple right?
@@ -61,5 +59,8 @@ This game was made for CPSC 585, the University of Calgary's Game Programming Co
 
 Special thanks to Stephen D, Ben, Nigel, Marcin, and Stephen M :)
 
+---
+
+![bike1](https://user-images.githubusercontent.com/38302804/114916345-eb8cae80-9de1-11eb-8365-eebb55e01306.png)
 ![bike2](https://user-images.githubusercontent.com/38302804/114948492-5652df80-9e0c-11eb-8580-ca8deb26e362.png)
 ![bike3](https://user-images.githubusercontent.com/38302804/114916352-ed567200-9de1-11eb-98c1-129f5b756840.png)
