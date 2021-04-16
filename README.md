@@ -20,7 +20,7 @@ But don't worry, your bike is equipped with some tools to help along the way:
 
 Now don't go using all these at once.  Everytime you use an ability, it'll cost you some health.  A small price to pay.
 
-Falling behind?  Try driving beside the walls.  This risky slipstreaming maneuver will get you a bit of speed, and some health back too.  The farther behind you are behind, the more you'll heal.  Diminishing returns!
+Falling behind?  Try driving beside the walls.  This risky slipstreaming maneuver will get you a bit of speed, and some Structural Integrity (health) back too.  Those at the back of the pack will receive extra healing giving them access to the tools to catch up in the race while those at the front will feel the pressure to perform perfectly.
 
 Stuck?  Press R to reset your bike.  Although you will lose some time and health!
 
