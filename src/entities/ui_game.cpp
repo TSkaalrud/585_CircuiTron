@@ -99,6 +99,8 @@ void UiGame::enter() {
 		auto transform = Render::ui_transform(position, scale, depth);
 
 		Menu_Item_2 = render.create_instance(render.ui_mesh(), Options_U_png, transform);
+		render.instance_set_material(Menu_Item_2, -1); //options menu not implemented
+
 	}
 	if (Menu_Item_3 == -1) {
 		auto position = glm::vec3{0, 1080, 0} / 3.0f;
@@ -146,13 +148,13 @@ void UiGame::loadGame() {
 
 void UiGame::selectMenuItem(int direction) {
 	if (direction == 1) { // switch downwards
-		if (currentlySelectedMenuItem == 3) {
+		if (currentlySelectedMenuItem == 2) {
 			currentlySelectedMenuItem = 1;
 		} else
 			currentlySelectedMenuItem++;
 	} else if (direction == -1) { // switch upwards
 		if (currentlySelectedMenuItem == 1) {
-			currentlySelectedMenuItem = 3;
+			currentlySelectedMenuItem = 2;
 		} else
 			currentlySelectedMenuItem--;
 	}
@@ -162,49 +164,54 @@ void UiGame::selectMenuItem(int direction) {
 		if (currentlySelectedMenuItem == 1) { // Play
 			render.instance_set_material(Menu_Item_1, Play_H_png);
 			render.instance_set_material(Menu_Item_2, Options_U_png);
+			render.instance_set_material(Menu_Item_2, -1);//options unimplemented
 			render.instance_set_material(Menu_Item_3, Exit_U_png);
 
-		} else if (currentlySelectedMenuItem == 2) { // Options
-			render.instance_set_material(Menu_Item_1, Play_U_png);
-			render.instance_set_material(Menu_Item_2, Options_H_png);
-			render.instance_set_material(Menu_Item_3, Exit_U_png);
+		//} else if (currentlySelectedMenuItem == 2) { // Options
+			//render.instance_set_material(Menu_Item_1, Play_U_png);
+			//render.instance_set_material(Menu_Item_2, Options_H_png);
+			//render.instance_set_material(Menu_Item_2, -1);
+			//render.instance_set_material(Menu_Item_2, -1); // options unimplemented
+			//render.instance_set_material(Menu_Item_3, Exit_U_png);
+			
 
-		} else if (currentlySelectedMenuItem == 3) { // Exit
+		} else if (currentlySelectedMenuItem == 2) { // Exit
 			render.instance_set_material(Menu_Item_1, Play_U_png);
 			render.instance_set_material(Menu_Item_2, Options_U_png);
+			render.instance_set_material(Menu_Item_2, -1); // options unimplemented
 			render.instance_set_material(Menu_Item_3, Exit_H_png);
 		}
-	} else if (currentlyActiveMenu == 2) { // Options (currently no options
-		if (currentlySelectedMenuItem == 1) {
-			render.instance_set_material(Menu_Item_1, -1);
-			render.instance_set_material(Menu_Item_2, -1);
-			render.instance_set_material(Menu_Item_3, Main_Menu_H_png);
+	//} else if (currentlyActiveMenu == 2) { // Options (currently no options
+	//	if (currentlySelectedMenuItem == 1) {
+	//		render.instance_set_material(Menu_Item_1, -1);
+	//		render.instance_set_material(Menu_Item_2, -1);
+	//		render.instance_set_material(Menu_Item_3, Main_Menu_H_png);
 
-		} else if (currentlySelectedMenuItem == 2) {
-			render.instance_set_material(Menu_Item_1, -1);
-			render.instance_set_material(Menu_Item_2, -1);
-			render.instance_set_material(Menu_Item_3, Main_Menu_H_png);
+	//	} else if (currentlySelectedMenuItem == 2) {
+	//		render.instance_set_material(Menu_Item_1, -1);
+	//		render.instance_set_material(Menu_Item_2, -1);
+	//		render.instance_set_material(Menu_Item_3, Main_Menu_H_png);
 
-		} else if (currentlySelectedMenuItem == 3) {
-			render.instance_set_material(Menu_Item_1, -1);
-			render.instance_set_material(Menu_Item_2, -1);
-			render.instance_set_material(Menu_Item_3, Main_Menu_H_png);
-		}
+	//	} else if (currentlySelectedMenuItem == 3) {
+	//		render.instance_set_material(Menu_Item_1, -1);
+	//		render.instance_set_material(Menu_Item_2, -1);
+	//		render.instance_set_material(Menu_Item_3, Main_Menu_H_png);
+	//	}
 	} else if (currentlyActiveMenu == 3) { // loading screen
 		render.instance_set_material(Menu_Item_1, Loading_png);
 		render.instance_set_material(Menu_Item_2, -1);
 		render.instance_set_material(Menu_Item_3, -1);
 
 	} else if (currentlyActiveMenu == 4) { // pause screen uses menu item 1 for pause text
+		//if (currentlySelectedMenuItem == 1) {
+		//	currentlySelectedMenuItem = 2;
+		//}
 		if (currentlySelectedMenuItem == 1) {
-			currentlySelectedMenuItem = 2;
-		}
-		if (currentlySelectedMenuItem == 2) {
 			render.instance_set_material(Menu_Item_1, Paused_png);
 			render.instance_set_material(Menu_Item_2, Play_H_png);
 			render.instance_set_material(Menu_Item_3, Main_Menu_U_png);
 
-		} else if (currentlySelectedMenuItem == 3) {
+		} else if (currentlySelectedMenuItem == 2) {
 			render.instance_set_material(Menu_Item_1, Paused_png);
 			render.instance_set_material(Menu_Item_2, Play_U_png);
 			render.instance_set_material(Menu_Item_3, Main_Menu_H_png);
@@ -230,11 +237,11 @@ void UiGame::enterMenuItem() {
 			// setting these to false will trigger loadGame() in update to build the game
 			physicsLoadingDone = false;
 			renderLoadingDone = false;
-		} else if (currentlySelectedMenuItem == 2) { // Options
-			// go to options page
-			currentlyActiveMenu = 2;
+		//} else if (currentlySelectedMenuItem == 2) { // Options
+		//	// go to options page
+		//	currentlyActiveMenu = 2;
 
-		} else if (currentlySelectedMenuItem == 3) { // Exit
+		} else if (currentlySelectedMenuItem == 2) { // Exit
 			window.close();
 		}
 	} else if (currentlyActiveMenu == 2) { // Options
@@ -262,16 +269,16 @@ void UiGame::enterMenuItem() {
 		render.instance_set_material(Background, -1);
 		render.instance_set_material(TitleCard, -1);
 
+		//if (currentlySelectedMenuItem == 1) {
+		//	currentlySelectedMenuItem = 2;
+		//}
 		if (currentlySelectedMenuItem == 1) {
-			currentlySelectedMenuItem = 2;
-		}
-		if (currentlySelectedMenuItem == 2) {
 			// Play
 			currentlyActiveMenu = 0;
 			menuActive = false;
 			paused = false;
 
-		} else if (currentlySelectedMenuItem == 3) {
+		} else if (currentlySelectedMenuItem == 2) {
 			// Main Menu
 			currentlyActiveMenu = 1;
 			game_pointer->deleteGame();
