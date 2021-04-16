@@ -43,7 +43,7 @@ Stuck?  Press R to reset your bike.  Although you will lose some time and health
 
 ## Project Details
 
-Created by Daniel Doran, Taylor Skaalrud, Matt Lee, Sebastien Wong
+Created by Daniel Doran, Taylor Skaalrud, Matt Low, Sebastien Wong
 
 This game was made without a game engine!
 Here's the technologies we used:
