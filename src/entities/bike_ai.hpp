@@ -16,11 +16,14 @@ class BikeAI : public Bike {
 	bool right = false;
 	int buffer = 60; // timer before AI bikes will start driving
 	std::vector<int>& waypointOptions;
-	float slow = 0.85;
-	float slowSlip = 0.9;
-	float fast = 0.95;
+	//float slowVery = 0.8;
+	float slow = 0.900;
+	float slowSlip = 0.950;
+	float fast = 0.975;
 	float fastSlip = 1.f;
+	float handbrakingStrength = 0.2f;
 	bool cornering = false;
+	bool corneringHard = false;
 	int lane;
 
   public:
@@ -41,8 +44,14 @@ class BikeAI : public Bike {
 		SlipstreamingAudio->changeGain(0.5);
 		
 		srand((unsigned int)time(NULL));
-		getNewLane(waypointOptions);
-		//waypoints = ai_waypoints[8];
+		//getNewLane(waypointOptions);
+		if (waypointOptions.size() > 0) {
+			int laneIndex = rand() % (waypointOptions.size()-5);
+			lane = waypointOptions[laneIndex];
+			waypoints = ai_waypoints[lane];
+			waypointOptions.erase(waypointOptions.begin() + laneIndex);
+		}
+		//waypoints = ai_waypoints[1];
 
 	};
 
@@ -51,7 +60,7 @@ class BikeAI : public Bike {
 			Bike::update(deltaTime);
 			if (!getLocked()) {
 				if (buffer < 0) {
-					isCornering();
+					//isCornering();
 					followWaypoint();
 					useAbilities();
 				} else {
@@ -78,8 +87,8 @@ class BikeAI : public Bike {
 				currentWaypoint = 0;
 				nextWaypoint = 1;
 				//std::cout << getLap() << std::endl;
-				//waypoints = ai_waypoints[4+getLap()];
-
+				//waypoints = ai_waypoints[5+getLap()];
+				//waypoints = ai_waypoints[0];
 				addLap();
 				resetWaypoint();
 				getNewLane(waypointOptions);
@@ -104,6 +113,9 @@ class BikeAI : public Bike {
 		float radiusRange = (1.0f - 0.0f);
 
 		float radius = (((angle - 0.0f) * radiusRange) / angleRange) - 0.0f;
+		//std::cout << radius << std::endl;
+		isCorneringAlt(radius);
+
 		//if angle to waypoint too high booster
 		if (BoostCD <= 0) {
 			if (angle > 0.45) {
@@ -125,14 +137,28 @@ class BikeAI : public Bike {
 				if (Slipstreaming) {
 					if (cornering) {
 						bikeAcceleratePrecise(getId(), slowSlip);
+						if (corneringHard && (getSpeed(getId()) > 25.f)) {
+							bikeHandbrake(getId(), handbrakingStrength);
+						} else {
+							bikeReleaseHandbrake(getId());
+						}
 					} else {
 						bikeAcceleratePrecise(getId(), fastSlip);
+						bikeReleaseHandbrake(getId());
+
 					}
 				} else {
 					if (cornering) { 
 						bikeAcceleratePrecise(getId(), slow);
+						if (corneringHard && (getSpeed(getId()) > 25.f)) {
+							bikeHandbrake(getId(), handbrakingStrength);
+						} else {
+							bikeReleaseHandbrake(getId());
+						}
 					} else {
 						bikeAcceleratePrecise(getId(), fast);
+						bikeReleaseHandbrake(getId());
+
 					}
 				}
 			} else if (d < 0) { //right
@@ -152,15 +178,18 @@ class BikeAI : public Bike {
 				}
 			}
 		} else {
-			bikeReleaseAll(getId());
+			//bikeReleaseAll(getId());
+			
+			//std::cout << "unneccessarily slow" << std::endl;
 		}
 	}
 
 	void getNewLane(std::vector<int>& waypointOptions) {
 		if (waypointOptions.size() > 0) {
-			lane = rand() % waypointOptions.size();
+			int laneIndex = rand() % waypointOptions.size();
+			lane = waypointOptions[laneIndex];
 			waypoints = ai_waypoints[lane];
-			waypointOptions.erase(waypointOptions.begin() + lane);
+			waypointOptions.erase(waypointOptions.begin() + laneIndex);
 		}
 	}
 
@@ -214,6 +243,15 @@ class BikeAI : public Bike {
 
 	// experimental estimates of where the curves are to slow down for (on The Coffin map)
 	void isCornering() {//~20-90 big curve 140-185 little curve? 20-76 and 130-180?
-		cornering = (currentWaypoint > 30 && currentWaypoint < 85) || (currentWaypoint > 135 && currentWaypoint < 190);
+		cornering = (currentWaypoint > 30 && currentWaypoint < 90) || (currentWaypoint > 135 && currentWaypoint < 195);
+	}
+
+	void isCorneringAlt(float radius) { 
+		cornering = (radius > 0.040);
+		corneringHard = (radius > 0.1);
+		//if (corneringHard) {
+		//	std::cout << radius << std::endl;
+		//}
+
 	}
 };

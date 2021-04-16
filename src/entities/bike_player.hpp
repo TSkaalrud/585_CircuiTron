@@ -38,7 +38,7 @@ class BikePlayer : public Bike {
 				checkInput();
 				updateWaypoint();
 			}
-
+			//std::cout << getSpeed(getId()) << std::endl;
 			render.camera_set_pos(convertTransform(getBikeTransform(getId()).transform(camera)));
 		}
 	}
@@ -91,7 +91,7 @@ class BikePlayer : public Bike {
 
 			// Handbrake
 			if (window.keyPressed(340)) { // left shift
-				bikeHandbrake(0);
+				bikeHandbrake(0, 0.15f);
 			} else {
 				bikeReleaseHandbrake(0);
 			}
@@ -120,7 +120,7 @@ class BikePlayer : public Bike {
 				JumpAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_BOOST_SFX]);
 			} else if (window.keyPressed(265) && BoostOn == true) {// held booster
 				bikeBoosterHold(0, 265);
-				modifyHealth(-0.5f);
+				modifyHealth(-0.75f);
 			} else {
 				BoostOn = false;
 			}
@@ -137,7 +137,7 @@ class BikePlayer : public Bike {
 			if (window.keyPressed(32)) {
 				if (FRAGCD < 1) {
 					FRAGCD += 30;
-					modifyHealth(-6);
+					modifyHealth(-10);
 					fragFire(getId()); // if true, a wall was hit! Plays fire or impact sound
 				}
 			}

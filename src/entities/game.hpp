@@ -49,7 +49,7 @@ class Game : public Entity {
 	Render::MaterialHandle p4_wall;
 
 	std::vector<std::vector<glm::vec3>> ai_waypoints; // a list of waypoints for each ai bike
-	std::vector<int> waypointOptions{1, 2, 3, 4, 5, 6, 7, 8, 9};
+	std::vector<int> waypointOptions{0, 1, 2, 3, 4, 5, 6, 7, 8};
 
 	Window& window;
 	Render::Render& render;

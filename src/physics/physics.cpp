@@ -488,7 +488,9 @@ void bikeReverse(int i) {
 void bikeBreak(int i) { inputDatas[i].setAnalogBrake(1.0f); }
 
 // handbrake function for input
-void bikeHandbrake(int i) { inputDatas[i].setAnalogHandbrake(0.5f); }
+void bikeHandbrake(int i, float n) { 
+	inputDatas[i].setAnalogHandbrake(n); 
+}
 
 // turn functions used for input
 void bikeTurnRight(int i) { inputDatas[i].setAnalogSteer(glm::max(inputDatas[i].getAnalogSteer() - 0.035f, -1.0f)); }
@@ -518,7 +520,7 @@ void bikeReleaseAll(int i) {
 // bikeBooster provides a powerful impulse either to jump up, or strafe to the left or right of the bike's heading
 void bikeBooster(int bike, int keyPressed) {
 	if (keyPressed == 265) { // up
-		physx::PxVec3 up = getBikeTransform(bike).q.getBasisVector1() * 0.75 * impulseBase;
+		physx::PxVec3 up = getBikeTransform(bike).q.getBasisVector1() * 0.875 * impulseBase;
 		CTbikes[bike]->getRigidDynamicActor()->addForce(up, PxForceMode::eIMPULSE);
 
 		physx::PxVec3 forward = getBikeTransform(bike).q.getBasisVector2() * 0.9f * impulseBase / 5;
@@ -527,7 +529,7 @@ void bikeBooster(int bike, int keyPressed) {
 	} else if (keyPressed == 263) { // left
 		physx::PxVec3 left;
 		if (isVehicleInAir[bike]) {
-			left = getBikeTransform(bike).q.getBasisVector0() * 1.f * impulseBase;
+			left = getBikeTransform(bike).q.getBasisVector0() * 0.875f * impulseBase;
 		} else {
 			left = getBikeTransform(bike).q.getBasisVector0() * 2.f * impulseBase;
 		}
@@ -535,7 +537,7 @@ void bikeBooster(int bike, int keyPressed) {
 	} else if (keyPressed == 262) { // right
 		physx::PxVec3 right;
 		if (isVehicleInAir[bike]) {
-			right = getBikeTransform(bike).q.getBasisVector0() * -1.f * impulseBase;
+			right = getBikeTransform(bike).q.getBasisVector0() * -0.75f * impulseBase;
 		} else {
 			right = getBikeTransform(bike).q.getBasisVector0() * -2.f * impulseBase;
 		}
@@ -646,7 +648,7 @@ void initVehicle() {
 	VehicleDesc vehicleDesc = initVehicleDesc();
 	gVehicle4W = createVehicle4W(vehicleDesc, gPhysics, gCooking);
 	PxTransform startTransform(
-		PxVec3(-150.0f - spawnOffset, (vehicleDesc.chassisDims.y * 1.f + vehicleDesc.wheelRadius + 3.0f), -75.0f - spawnOffset*1.5),
+		PxVec3(-150.0f - spawnOffset, (vehicleDesc.chassisDims.y * 1.f + vehicleDesc.wheelRadius + 3.0f), -65.0f - spawnOffset*2),
 		PxQuat(0.0f, 0.999f, 0.0f, -0.052f));
 
 	if (CTbikes.size() == 0) {

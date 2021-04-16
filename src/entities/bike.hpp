@@ -27,7 +27,7 @@ class Bike : public GameObject {
 	bool locked = false;
 
 	//Abilities
-	int BoostCD = 60, collisionCD = 45, FRAGCD = 30, resettingCD = 30, SlipstreamCD = 30, StrafeCD = 60;
+	int BoostCD = 60, collisionCD = 45, FRAGCD = 30, resettingCD = 150, SlipstreamCD = 30, StrafeCD = 60;
 	bool resetting = false, Slipstreaming = false, WADRelease = false;
 	int Slipstreams = 0, WADCharge = 0;
 	bool BoostOn = false, strafeOn = false;
@@ -124,7 +124,6 @@ class Bike : public GameObject {
 					}
 					// off track auto reset
 					if (getBikeTransform(getId()).p.y < 0) {
-						modifyHealth(-8); // tax for not resetting yourself upping total cost to 33
 						resetBike();
 					}
 					slipstreaming();
@@ -305,8 +304,11 @@ class Bike : public GameObject {
 		resetLocation.q.w = cos(temp);
 
 		resetBikePos(getId(), resetLocation);
-		modifyHealth(-25);
-		resettingCD += 60;
+		if (resettingCD <= 0) {
+
+			modifyHealth(-25);
+		}
+		resettingCD += 150;
 	}
 
 	//Hitscan bike cannon, the FRAG
@@ -348,7 +350,7 @@ class Bike : public GameObject {
 				SlipstreamCD--;
 				Slipstreaming = false;
 			} else {
-				modifyHealth(0.25 * Slipstreams);
+				modifyHealth(0.1 * place * Slipstreams);
 				Slipstreaming = true;
 				SlipstreamingAudio->playSound(stereo.buffer[Audio::SOUND_FILE_HEALING_SFX]);
 			}

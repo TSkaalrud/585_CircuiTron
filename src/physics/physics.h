@@ -71,7 +71,7 @@ void bikeAcceleratePrecise(int i, float n);
 
 void bikeReverse(int i);
 
-void bikeHandbrake(int i);
+void bikeHandbrake(int i, float n);
 
 void bikeBreak(int i);
 
