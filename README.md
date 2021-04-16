@@ -51,6 +51,10 @@ Stuck?  Press R to reset your bike.  Although you will lose some time and SI!
 
 ![bike gif 2-min](https://user-images.githubusercontent.com/38302804/114948408-27d50480-9e0c-11eb-9381-37003531e2e2.gif)
 
+## Installation
+
+From the "Code" tab of this github repository, under "Releases" on the sidebar, go to the "Final" tag. Download the circuiTron-windows-release-final.zip file from the assets, unzip and open the "circuitron.exe".
+
 ## Project Details
 
 Created by Daniel Doran, Taylor Skaalrud, Matt Low, Sebastien Wong
