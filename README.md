@@ -26,6 +26,12 @@ Stuck?  Press R to reset your bike.  Although you will lose some time and health
 
 ![bike gif 1](https://user-images.githubusercontent.com/38302804/114948150-b4cb8e00-9e0b-11eb-92aa-d2d98057591e.gif)
 
+## Menus
+
+- W/Up arrow and S/Down arrow to navigate
+- Enter to choose a selection
+- Esc to open the in-game pause menu
+
 ## Controls
 
 - **WASD** - Driving controls
