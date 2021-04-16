@@ -359,20 +359,21 @@ class Bike : public GameObject {
 
 	//Hitscan bike cannon, the FRAG
 	bool fragFire(int bike) {
-		auto wallPointer = fragRay(bike, 200);
+		float hitDistance;
+		auto wallPointer = fragRay(bike, 200, &hitDistance);
 
 		render.instance_set_material(fragIns, fragMat);
-		render.instance_set_trans(
-			fragIns, convertTransform(getBikeTransform(getId())) * glm::scale(glm::mat4(1.0f), {1, 1, 200}));
 		fragCounter = fragCount;
 
 		if (wallPointer != NULL) {
+		render.instance_set_trans(fragIns, convertTransform(getBikeTransform(getId())) * glm::scale(glm::mat4(1.0f), {1, 1, hitDistance}));
 			// Possibly put wall deletion here
 			markWallBroken(static_cast<wallUserData*>(wallPointer)->bikeNumber, static_cast<wallUserData*>(wallPointer)->wallIndex);
 
 			FRAGImpactAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_GUN_IMPACT2_SFX]);
 			return true;
 		} else {
+			render.instance_set_trans(fragIns, convertTransform(getBikeTransform(getId())) * glm::scale(glm::mat4(1.0f), {1, 1, 200}));
 			// play FRAG fired (but no hit) sound
 			FRAGAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_GUN_IMPACT_SFX]);
 			return false;
