@@ -228,9 +228,9 @@ class BikeAI : public Bike {
 		} 
 		if (health > 95 && WADCharge < 120) {
 			WADCharge++;
-			modifyHealth(-0.25);
 		} else if (WADCharge > 0 && WADRelease == false) {
 			WADRelease = true;
+			modifyHealth(-0.25*WADCharge);
 		}
 	}
 
