@@ -393,7 +393,7 @@ bool slipstreamRay(int bike, int dir, int range) {
 	return std::strcmp(name, "wall") == 0;
 }
 
-void * fragRay(int bike, int range, float* distance = nullptr) {
+void * fragRay(int bike, int range, float* distance) {
 	PxVehicleDrive4W* vehicle = CTbikes[bike];
 	auto origin = vehicle->getRigidDynamicActor()->getGlobalPose().p;
 	auto quat = vehicle->getRigidDynamicActor()->getGlobalPose().q;
