@@ -198,6 +198,8 @@ class BikeAI : public Bike {
 		auto wallPointer = fragRay(bike, range);
 
 		if (wallPointer != NULL) {
+			modifyHealth(-5);
+			FRAGCD += 150;
 			return fragFire(bike);
 		} else {
 			// AI doesn't fire if it won't hit
