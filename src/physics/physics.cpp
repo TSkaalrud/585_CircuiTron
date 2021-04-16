@@ -393,7 +393,7 @@ bool slipstreamRay(int bike, int dir, int range) {
 	return std::strcmp(name, "wall") == 0;
 }
 
-void * fragRay(int bike, int range) {
+void * fragRay(int bike, int range, float* distance) {
 	PxVehicleDrive4W* vehicle = CTbikes[bike];
 	auto origin = vehicle->getRigidDynamicActor()->getGlobalPose().p;
 	auto quat = vehicle->getRigidDynamicActor()->getGlobalPose().q;
@@ -414,6 +414,7 @@ void * fragRay(int bike, int range) {
 		//std::cout << "RAY CAST RESULTS ON OBJECT: " << buf.touches[i].actor->getName() << "\n";
 		const char* name = buf.touches[i].actor->getName();
 		if (std::strcmp(name, "wall") == 0) {
+			*distance = buf.touches[i].distance;
 			return buf.touches[i].actor->userData;
 			break;
 		}

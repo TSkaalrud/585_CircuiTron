@@ -45,7 +45,7 @@ physx::PxRaycastBuffer* castRay(int bike, int dir, int range);
 
 bool slipstreamRay(int bike, int dir, int range);
 
-void* fragRay(int bike, int range);
+void* fragRay(int bike, int range, float* distance);
 
 bool slipstreamRay(int bike, int dir, int range);
 
