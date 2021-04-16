@@ -90,9 +90,6 @@ class Game : public Entity {
 	}
 
 	void enter() override {
-		// set the skybox texture asset
-		render.set_skybox_rect_texture(importSkybox("assets/skyboxes/SPACE-1.hdr", render));
-
 		// Create and pushback the 4 playerWallMaterials
 		Render::MaterialPBR p1_wall_pbr = {
 			.albedoFactor = glm::vec4(0.f, 0.000520f, 0.266f, 1.f),
@@ -220,8 +217,7 @@ class Game : public Entity {
 		e_manager.removeEntity(track_pointer);
 		e_manager.removeEntity(camera_pointer);
 		e_manager.removeEntity(this);
-		
-	}
+		}
 
 	void lockAllBikes() {
 		for (int i = 0; i < bikes.size(); i++) {

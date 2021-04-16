@@ -28,26 +28,35 @@ int main(int argc, char* argv[]) {
 	auto past = std::chrono::high_resolution_clock::now();
 
 	// initialize physics
-	//initPhysics();
+	// initPhysics();
 
 	// initialize audio
 	Audio::AudioEngine stereo = Audio::AudioEngine();
 	stereo.initialize();
 
-
 	bool menuActive = true;
 
-	if (args.size() > 1) {//render test
+	if (args.size() > 1) { // render test
 		e_manager.addEntity(std::make_unique<ModelView>(render, args.at(1)));
 		e_manager.addEntity(std::make_unique<OrbitCam>(render, window));
 		e_manager.addEntity(std::make_unique<UiTest>(render, window));
-	} else {//game
-		//initialize UI
+	} else { // game
+		// initialize UI
 		std::unique_ptr<UiGame> UI = std::make_unique<UiGame>(render, window, menuActive, e_manager, stereo);
 		UiGame* game_UI = UI.get();
 		e_manager.addEntity(std::move(UI));
-		//initialize game
-		//e_manager.addEntity(std::make_unique<Game>(window, render, 4, e_manager, stereo, game_UI, menuActive));
+		// initialize game
+		// e_manager.addEntity(std::make_unique<Game>(window, render, 4, e_manager, stereo, game_UI, menuActive));
+
+		// Ideally do this when loading track
+		// Only one track so it doesn't make sense to destroy and recreate lights each time.
+		float pi = glm::pi<float>();
+		render.create_dir_light({pi, pi, pi}, {1, 1, 1});
+		render.create_dir_light({2, 2, 2}, {-1, 1, 1});
+		render.create_dir_light({1, 1, 1}, {0, 1, -1});
+
+		// set the skybox texture asset
+		render.set_skybox_rect_texture(importSkybox("assets/skyboxes/SPACE-1.hdr", render));
 	}
 
 	// Loop will continue until "X" on window is clicked.
@@ -63,7 +72,7 @@ int main(int argc, char* argv[]) {
 			timestep = std::chrono::duration_cast<std::chrono::duration<float>>(now - past).count();
 			past = now;
 		}
-		if (!menuActive) {// pause physics while in menu
+		if (!menuActive) { // pause physics while in menu
 			// simulate
 			stepPhysics(timestep);
 		}
