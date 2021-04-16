@@ -48,8 +48,7 @@ Created by Daniel Doran, Taylor Skaalrud, Matt Lee, Sebastien Wong
 This game was made without a game engine!
 Here's the technologies we used:
 - [Physx](https://developer.nvidia.com/physx-sdk) - The physics engine
-- [OpenGL](https://www.opengl.org//) - The graphi
-cs
+- [OpenGL](https://www.opengl.org//) - The graphics
 - [OpenAL](https://openal.org/) - The audio
 - [GLFW](https://www.glfw.org/) - The window
 - [GLM](https://github.com/g-truc/glm) - The math
