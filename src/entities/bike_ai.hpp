@@ -42,7 +42,7 @@ class BikeAI : public Bike {
 		FRAGImpactAudio->changeGain(0.10);
 		chassisAudio->changeGain(0.1);
 		SlipstreamingAudio->changeGain(0.5);
-		
+
 		srand((unsigned int)time(NULL));
 		//getNewLane(waypointOptions);
 		if (waypointOptions.size() > 0) {
@@ -179,7 +179,7 @@ class BikeAI : public Bike {
 			}
 		} else {
 			//bikeReleaseAll(getId());
-			
+
 			//std::cout << "unneccessarily slow" << std::endl;
 		}
 	}
@@ -198,16 +198,7 @@ class BikeAI : public Bike {
 		auto wallPointer = fragRay(bike, range);
 
 		if (wallPointer != NULL) {
-			// mark walls for deletion here
-			markWallBroken(
-				static_cast<wallUserData*>(wallPointer)->bikeNumber,
-				static_cast<wallUserData*>(wallPointer)->wallIndex);
-
-			FRAGImpactAudio->playSoundOverride(stereo.buffer[Audio::SOUND_FILE_GUN_IMPACT2_SFX]);
-			modifyHealth(-5);
-			FRAGCD += 150;
-
-			return true;
+			return fragFire(bike);
 		} else {
 			// AI doesn't fire if it won't hit
 			return false;

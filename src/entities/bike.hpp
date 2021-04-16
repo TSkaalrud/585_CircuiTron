@@ -34,6 +34,13 @@ class Bike : public GameObject {
 
 	WallSpawner wallSpawner;
 
+	const float fragSize = 0.1f;
+	int fragCount = 5;
+	int fragCounter = 0;
+	static Render::MeshHandle fragMesh;
+	Render::InstanceHandle fragIns;
+	Render::MaterialHandle fragMat;
+
   public:
 	Audio::AudioEngine& stereo;
 	AudioInstance* engineAudio = new AudioInstance();
@@ -50,7 +57,7 @@ class Bike : public GameObject {
 		Render::MaterialHandle wallMaterialHandle, UiGame* UI, bool& menuActive)
 		: window(window), GameObject(render, group), place(start_place), id(start_place - 1), stereo(audio),
 		  wallSpawner(render, wallMaterialHandle), UI(UI), menuActive(menuActive) {
-		
+
 		gearAudio->changeLoop(false);
 		FRAGAudio->changeLoop(false);
 		JumpAudio->changeLoop(false);
@@ -58,7 +65,42 @@ class Bike : public GameObject {
 		WADAudio->changeLoop(false);
 		FRAGImpactAudio->changeLoop(false);
 		chassisAudio->changeLoop(false);
+		{
+			fragMat = render.create_pbr_material({.albedoFactor = {0, 0, 0, 1}, .emissiveFactor = {1, 0.8, 0}});
 
+			if (fragMesh == -1) {
+
+				glm::vec3 points[] = {{-fragSize, -fragSize, 0.0}, {-fragSize, fragSize, 0.0},
+									  {fragSize, fragSize, 0.0},   {fragSize, -fragSize, 0.0},
+									  {-fragSize, -fragSize, 1.0}, {-fragSize, fragSize, 1.0},
+									  {fragSize, fragSize, 1.0},   {fragSize, -fragSize, 1.0}};
+				glm::vec3 normals[] = {{-1, 0, 0}, {0, 1, 0}, {1, 0, 0}, {0, -1, 0}};
+				fragMesh = render.create_mesh(Render::MeshDef{
+					.verticies = {{
+						{points[0], normals[0]},
+						{points[1], normals[0]},
+						{points[1], normals[1]},
+						{points[2], normals[1]},
+						{points[2], normals[2]},
+						{points[3], normals[2]},
+						{points[3], normals[3]},
+						{points[0], normals[3]},
+						{points[0 + 4], normals[0]},
+						{points[1 + 4], normals[0]},
+						{points[1 + 4], normals[1]},
+						{points[2 + 4], normals[1]},
+						{points[2 + 4], normals[2]},
+						{points[3 + 4], normals[2]},
+						{points[3 + 4], normals[3]},
+						{points[0 + 4], normals[3]},
+					}},
+					.indicies = {
+						0 + 0, 8 + 0, 1 + 0, 1 + 0, 8 + 0, 9 + 0, 0 + 2, 8 + 2, 1 + 2, 1 + 2, 8 + 2, 9 + 2,
+						0 + 4, 8 + 4, 1 + 4, 1 + 4, 8 + 4, 9 + 4, 0 + 6, 8 + 6, 1 + 6, 1 + 6, 8 + 6, 9 + 6,
+					}});
+			}
+			fragIns = render.create_instance(fragMesh, fragMat);
+		}
 	};
 
 	~Bike() { 
@@ -78,6 +120,10 @@ class Bike : public GameObject {
 	int getId() { return id; }
 
 	virtual void update(float deltaTime) override {
+		if (fragCounter-- == 0) {
+			render.instance_set_material(fragIns, -1);
+		}
+
 		if (getPhysicsActive()) {
 			model->setTransform(
 				convertTransform(getBikeTransform(getId())) * glm::scale(glm::mat4(1.0f), glm::vec3(2.0f)));
@@ -269,7 +315,7 @@ class Bike : public GameObject {
 		} else {
 			to = glm::normalize(waypoints[waypoint+1]);
 		}
-		
+
 		float angle = glm::atan(to.z - cur.z, to.x - cur.x);
 
 		const float pi = glm::pi<float>();
@@ -297,7 +343,7 @@ class Bike : public GameObject {
 				temp = 0.0f;
 			}
 		}
-		
+
 		resetLocation.q.x = 0;
 		resetLocation.q.y = sin(temp);
 		resetLocation.q.z = 0;
@@ -314,6 +360,11 @@ class Bike : public GameObject {
 	//Hitscan bike cannon, the FRAG
 	bool fragFire(int bike) {
 		auto wallPointer = fragRay(bike, 200);
+
+		render.instance_set_material(fragIns, fragMat);
+		render.instance_set_trans(
+			fragIns, convertTransform(getBikeTransform(getId())) * glm::scale(glm::mat4(1.0f), {1, 1, 200}));
+		fragCounter = fragCount;
 
 		if (wallPointer != NULL) {
 			// Possibly put wall deletion here
