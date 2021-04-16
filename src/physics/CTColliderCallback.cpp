@@ -19,28 +19,15 @@ void CTColliderCallback::onTrigger(PxTriggerPair* pairs, PxU32 count) {
 
 			wallUserData* w = (wallUserData*)pairs[i].triggerActor->userData;
 
-			if (w->collisions < 5) {	//bike triggers wall up to 4 times on bike creation so this is just to ignore that
-				w->collisions++;
-			} else {					//if wall is triggered otherwise, do this stuff
-				//std::cout << "bike #" << w->bikeNumber << " wall #" << w->wallIndex << " broken!"  << std::endl;
+			bikeUserData* bikeData = (bikeUserData*)pairs[i].otherActor->userData;
 
-				bikeUserData* bikeData = (bikeUserData*)pairs[i].otherActor->userData;
-
-				//if (bikeData->bikeNumber == 0) {
-					bikeData->collided = true;
-					//std::cout << bikeData->collided << std::endl;
-					auto b = getVehicle(bikeData->bikeNumber)->getRigidDynamicActor();
-					//b->getScene()->lockWrite();
-					b->setAngularVelocity(b->getAngularVelocity() * 0.5);
-					b->setLinearVelocity(b->getLinearVelocity() * 0.8);
-					//b->getScene()->unlockWrite();
-				//} else {
-					//bikeData->collided = false;
-					//std::cout << bikeData->collided << std::endl;
-
-				//}
-				markWallBroken(w->bikeNumber, w->wallIndex);
-			}
+			bikeData->collided = true;
+			auto b = getVehicle(bikeData->bikeNumber)->getRigidDynamicActor();
+			b->setAngularVelocity(b->getAngularVelocity() * 0.5);
+			b->setLinearVelocity(b->getLinearVelocity() * 0.8);
+				
+			markWallBroken(w->bikeNumber, w->wallIndex);
+			
 
 		}
 	}
