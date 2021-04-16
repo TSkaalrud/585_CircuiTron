@@ -18,11 +18,11 @@ But don't worry, your bike is equipped with some tools to help along the way:
 - Use the **Wall Application Device** (WAD) to create large walls behind you and make your opponents blunder.
 - Use the **Forward Ranged Aggression Gun** (FRAG) to destroy any walls that get in your way.
 
-Now don't go using all these at once.  Everytime you use an ability, it'll cost you some health.  A small price to pay.
+Now don't go using all these at once.  Everytime you use an ability, it'll cost you some of your Structural Integrity (SI).  A small price to pay.
 
-Falling behind?  Try driving beside the walls.  This risky slipstreaming maneuver will get you a bit of speed, and some Structural Integrity (health) back too.  Those at the back of the pack will receive extra healing giving them access to the tools to catch up in the race while those at the front will feel the pressure to perform perfectly.
+Falling behind?  Try driving beside the walls.  This risky slipstreaming maneuver will get you a bit of speed, and some SI back too.  Those at the back of the pack will receive extra healing giving them access to the tools to catch up in the race while those at the front will feel the pressure to perform perfectly.
 
-Stuck?  Press R to reset your bike.  Although you will lose some time and health!
+Stuck?  Press R to reset your bike.  Although you will lose some time and SI!
 
 ![bike gif 1](https://user-images.githubusercontent.com/38302804/114948150-b4cb8e00-9e0b-11eb-92aa-d2d98057591e.gif)
 
