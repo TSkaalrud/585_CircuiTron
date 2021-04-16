@@ -4,7 +4,7 @@
 
 ## About
 
-Circuitron is a racing game created by Daniel, Taylor, Matt and Sebastien.  Inspired by games like Tron and F-Zero, prepare yourself for an exciting circuit race with a track that becomes more-and-more hectic as the game goes on.  You'll need to outmaneuver, outwit, and outplay your oppenents to become the champion in this thrilling high-speed race.
+Circuitron is a racing game created by Daniel, Taylor, Matt and Sebastien.  Inspired by games like Tron and F-Zero, prepare yourself for an exciting circuit race with a track that becomes more-and-more hectic as the game goes on.  You'll need to outmaneuver, outwit, and outplay your opponents to become the champion in this thrilling high-speed race.
 
 ## The Story so Far...
 
