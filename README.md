@@ -55,6 +55,8 @@ cs
 - [GLM](https://github.com/g-truc/glm) - The math
 - [Blender](https://www.blender.org/) - The models
 
+The game works on both Windows and Linux.  Please make sure your graphics drivers are updated for the best experience.
+
 This game was made for CPSC 585, the University of Calgary's Game Programming Course.
 
 Special thanks to Stephen D, Ben, Nigel, Marcin, and Stephen M :)
