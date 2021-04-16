@@ -115,6 +115,7 @@ class Bike : public GameObject {
 		chassisAudio->~AudioInstance();
 		SlipstreamingAudio->~AudioInstance();
 
+		render.delete_instance(fragIns);
 	}
 
 	int getId() { return id; }
